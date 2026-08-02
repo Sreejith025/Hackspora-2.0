@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/registrations';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hackspora-2-0.onrender.com/api/registrations';
+
 
 // Local storage key for persistent mock fallback
 const LOCAL_STORAGE_KEY = 'hackspora_team_registrations';
