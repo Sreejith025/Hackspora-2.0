@@ -1,0 +1,15 @@
+export { default as Home } from './Home';
+export { default as About } from './About';
+export { default as Guidelines } from './Guidelines';
+export { default as ProblemStatements } from './ProblemStatements';
+export { default as Schedule } from './Schedule';
+export { default as FAQ } from './FAQ';
+export { default as Contact } from './Contact';
+export { default as Login } from './Login';
+export { default as Register } from './Register';
+export { default as SignUpPage } from './SignUpPage';
+export { default as VirtualRound } from './VirtualRound';
+export { default as Workspace } from './Workspace';
+export { default as AdminDashboard } from './AdminDashboard';
+export { default as ParticipantDashboard } from './ParticipantDashboard';
+export { default as NotFound } from './NotFound';
