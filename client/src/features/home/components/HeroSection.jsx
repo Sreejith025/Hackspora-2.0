@@ -198,7 +198,7 @@ export default function HeroSection() {
                   </span>
                 </div>
                 <div className="mt-2">
-                  <span className="block text-lg sm:text-2xl font-black text-white">₹5 Lakhs+</span>
+                  <span className="block text-lg sm:text-2xl font-black text-white">₹25,000+</span>
                   <span className="block text-[10px] text-slate-400 font-medium">Pool & Swag</span>
                 </div>
               </TiltCard>
@@ -222,7 +222,7 @@ export default function HeroSection() {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <span className="block text-lg sm:text-2xl font-black text-white">400+</span>
+                  <span className="block text-lg sm:text-2xl font-black text-white">250+</span>
                   <span className="block text-[10px] text-slate-400 font-medium">Teams</span>
                 </div>
               </TiltCard>
