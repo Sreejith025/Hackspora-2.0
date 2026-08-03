@@ -20,6 +20,12 @@ const teamRegistrationSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    clerkId: {
+      type: String,
+      default: '',
+      index: true,
+      trim: true,
+    },
     teamName: {
       type: String,
       required: true,
@@ -64,7 +70,15 @@ const teamRegistrationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    members: [memberSchema],
+    members: {
+      type: [memberSchema],
+      validate: {
+        validator: function (val) {
+          return Array.isArray(val) && val.length >= 2 && val.length <= 4;
+        },
+        message: 'A team must contain between 3 and 5 members in total (Leader + 2 to 4 additional members).',
+      },
+    },
     status: {
       type: String,
       default: 'Verified',

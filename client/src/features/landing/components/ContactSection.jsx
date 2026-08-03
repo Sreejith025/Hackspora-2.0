@@ -78,7 +78,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <span className="text-slate-500 block uppercase font-mono text-[10px]">Helpline</span>
-                    <span className="font-bold text-white">+91 98765 43210</span>
+                    <span className="font-bold text-white">+91 90438 69570</span>
                   </div>
                 </div>
 
@@ -88,7 +88,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <span className="text-slate-500 block uppercase font-mono text-[10px]">Venue Location</span>
-                    <span className="font-bold text-white">Main Tech Park Campus, Chennai, TN</span>
+                    <span className="font-bold text-white">KAHE, Coimbatore, TN</span>
                   </div>
                 </div>
               </div>
@@ -100,7 +100,7 @@ export default function ContactSection() {
                 <span>ORGANIZED BY</span>
               </div>
               <h4 className="text-base font-bold text-white">Hackspora 2.0 Organizing Committee</h4>
-              <p className="text-xs text-slate-400">Department of Computer Science & Engineering</p>
+              <p className="text-xs text-slate-400">Department of AI & DS, KAHE</p>
             </div>
           </div>
 

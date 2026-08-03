@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
@@ -23,6 +23,7 @@ import {
   HiCheck,
 } from 'react-icons/hi2';
 import AddMemberModal from './AddMemberModal';
+import AlreadyRegisteredModal from '../../../components/AlreadyRegisteredModal';
 import { registrationService } from '../../../services/registrationService';
 
 export default function TeamRegistrationWizard() {
@@ -58,6 +59,29 @@ export default function TeamRegistrationWizard() {
   const [registeredResult, setRegisteredResult] = useState(null);
   const [errors, setErrors] = useState({});
 
+  const [isAlreadyRegisteredModalOpen, setIsAlreadyRegisteredModalOpen] = useState(false);
+  const [alreadyRegisteredData, setAlreadyRegisteredData] = useState(null);
+
+  // Check if user is already registered upon page mount
+  useEffect(() => {
+    const verifyUserRegistration = async () => {
+      const clerkId = user?.id || '';
+      if (!clerkId && !userEmail) return;
+
+      try {
+        const res = await registrationService.checkRegistrationStatus(clerkId, userEmail);
+        if (res?.registered) {
+          setAlreadyRegisteredData(res.data || null);
+          setIsAlreadyRegisteredModalOpen(true);
+        }
+      } catch (err) {
+        console.error('Error verifying registration on mount:', err);
+      }
+    };
+
+    verifyUserRegistration();
+  }, [user?.id, userEmail]);
+
   // Handle Team Info Field Change
   const handleTeamInfoChange = (e) => {
     const { name, value } = e.target;
@@ -91,6 +115,19 @@ export default function TeamRegistrationWizard() {
         return;
       }
     }
+
+    if (currentStep === 2) {
+      const totalSquadSize = 1 + members.length;
+      if (totalSquadSize < 3) {
+        toast.error('A team must contain at least 3 members.');
+        return;
+      }
+      if (totalSquadSize > 5) {
+        toast.error('Maximum team size is 5 members.');
+        return;
+      }
+    }
+
     setCurrentStep((prev) => Math.min(prev + 1, 3));
   };
 
@@ -101,7 +138,7 @@ export default function TeamRegistrationWizard() {
   // Member Modal Handler
   const handleOpenAddModal = () => {
     if (members.length >= 4) {
-      toast.error('Maximum team size reached (5 members total including Leader)');
+      toast.error('Maximum team size is 5 members.');
       return;
     }
     setEditingIndex(null);
@@ -124,12 +161,20 @@ export default function TeamRegistrationWizard() {
       });
       toast.success('Member updated!');
     } else {
+      if (members.length >= 4) {
+        toast.error('Maximum team size is 5 members.');
+        return;
+      }
       setMembers((prev) => [...prev, memberData]);
       toast.success('Member added to team!');
     }
   };
 
   const handleRemoveMember = (index) => {
+    if (index < 2) {
+      toast.error('Member 2 and Member 3 are required to satisfy the minimum 3-member team rule.');
+      return;
+    }
     setMembers((prev) => prev.filter((_, idx) => idx !== index));
     toast.success('Member removed');
   };
@@ -141,9 +186,20 @@ export default function TeamRegistrationWizard() {
       return;
     }
 
+    const totalSquadSize = 1 + members.length;
+    if (totalSquadSize < 3) {
+      toast.error('A team must contain at least 3 members.');
+      return;
+    }
+    if (totalSquadSize > 5) {
+      toast.error('Maximum team size is 5 members.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const payload = {
+        clerkId: user?.id || '',
         ...teamInfo,
         members,
       };
@@ -161,7 +217,13 @@ export default function TeamRegistrationWizard() {
 
       toast.success('Registration Completed Successfully!');
     } catch (err) {
-      toast.error(err.message || 'Registration failed. Please try again.');
+      if (err.response?.data?.registered || err.response?.data?.data) {
+        setAlreadyRegisteredData(err.response.data.data || null);
+        setIsAlreadyRegisteredModalOpen(true);
+        toast.error('You are already registered for Hackspora 2.0.');
+      } else {
+        toast.error(err.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -377,8 +439,8 @@ export default function TeamRegistrationWizard() {
   // Render Step 2
   const renderStep2 = () => {
     const totalMembersCount = 1 + members.length;
-    const maxEmptySlots = 4;
-    const emptySlotsCount = maxEmptySlots - members.length;
+    const isMinSatisfied = totalMembersCount >= 3;
+    const isMaxReached = members.length >= 4;
 
     return (
       <motion.div
@@ -394,19 +456,27 @@ export default function TeamRegistrationWizard() {
               Step 2: Team Members
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Add up to 4 additional members to your squad (Max 5 total including Leader).
+              Add squad members. <strong className="text-cyan-300">Minimum 3 members</strong> required (Leader + Member 2 & 3), <strong className="text-purple-300">Maximum 5 members</strong>.
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold w-fit">
-            <HiCheckBadge className="w-4 h-4 text-cyan-400" />
-            <span>Members Added: {totalMembersCount} / 5</span>
+          <div className="flex items-center space-x-2">
+            <div
+              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-full border text-xs font-mono font-bold w-fit ${
+                isMinSatisfied
+                  ? 'bg-cyan-500/10 border-cyan-500/40 text-cyan-300'
+                  : 'bg-amber-500/10 border-amber-500/40 text-amber-300 animate-pulse'
+              }`}
+            >
+              <HiCheckBadge className="w-4 h-4 text-cyan-400" />
+              <span>Team Size: {totalMembersCount} / 5 {isMinSatisfied ? '✅' : '(Min 3)'}</span>
+            </div>
           </div>
         </div>
 
         {/* Member Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Team Leader Card (Already completed) */}
+          {/* Member 1: Team Leader Card (Required) */}
           <div className="relative p-5 rounded-2xl bg-gradient-to-br from-cyan-950/40 via-slate-900/90 to-indigo-950/30 border border-cyan-400/40 shadow-xl space-y-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
@@ -421,7 +491,7 @@ export default function TeamRegistrationWizard() {
                 </div>
               </div>
               <span className="px-2.5 py-1 rounded-full bg-cyan-400/20 border border-cyan-400/50 text-cyan-300 text-[10px] font-mono font-bold uppercase tracking-wider">
-                👑 Team Leader
+                👑 Member 1 (Leader) • Required
               </span>
             </div>
 
@@ -442,78 +512,108 @@ export default function TeamRegistrationWizard() {
           </div>
 
           {/* Added Members Cards */}
-          {members.map((member, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative p-5 rounded-2xl bg-slate-900/80 border border-slate-700/60 hover:border-cyan-500/50 shadow-xl space-y-3 transition-all group"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 text-cyan-300 flex items-center justify-center font-bold text-sm">
-                    {member.fullName.charAt(0).toUpperCase()}
+          {members.map((member, idx) => {
+            const isRequiredMember = idx < 2; // Member 2 & Member 3 are required
+
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative p-5 rounded-2xl bg-slate-900/80 border border-slate-700/60 hover:border-cyan-500/50 shadow-xl space-y-3 transition-all group"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 text-cyan-300 flex items-center justify-center font-bold text-sm">
+                      {member.fullName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="text-base font-bold text-white leading-tight">
+                        {member.fullName}
+                      </h4>
+                      <p className="text-xs text-slate-400 font-mono">{member.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    {isRequiredMember ? (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-bold">
+                        ⭐ Member {idx + 2} (Required)
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-[10px] font-mono">
+                        Member {idx + 2} (Optional)
+                      </span>
+                    )}
+
+                    <button
+                      onClick={() => handleOpenEditModal(idx)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-800 transition-all cursor-pointer"
+                      title="Edit Member"
+                    >
+                      <HiPencilSquare className="w-4 h-4" />
+                    </button>
+
+                    {!isRequiredMember && (
+                      <button
+                        onClick={() => handleRemoveMember(idx)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-all cursor-pointer"
+                        title="Remove Member 4/5"
+                      >
+                        <HiTrash className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-xs text-slate-300">
+                  <div>
+                    <span className="text-slate-500 block text-[10px] uppercase font-mono">College</span>
+                    <span className="font-semibold text-slate-200 truncate block">
+                      {member.collegeName}
+                    </span>
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-white leading-tight">
-                      {member.fullName}
-                    </h4>
-                    <p className="text-xs text-slate-400 font-mono">{member.email}</p>
+                    <span className="text-slate-500 block text-[10px] uppercase font-mono">Branch & Year</span>
+                    <span className="font-semibold text-slate-200 truncate block">
+                      {member.branch} ({member.year})
+                    </span>
                   </div>
                 </div>
+              </motion.div>
+            );
+          })}
 
-                <div className="flex items-center space-x-1">
-                  <button
-                    onClick={() => handleOpenEditModal(idx)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-800 transition-all"
-                    title="Edit Member"
-                  >
-                    <HiPencilSquare className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleRemoveMember(idx)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-all"
-                    title="Remove Member"
-                  >
-                    <HiTrash className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-xs text-slate-300">
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-mono">College</span>
-                  <span className="font-semibold text-slate-200 truncate block">
-                    {member.collegeName}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-mono">Branch & Year</span>
-                  <span className="font-semibold text-slate-200 truncate block">
-                    {member.branch} ({member.year})
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-
-          {/* Empty Add Member Slots */}
-          {Array.from({ length: emptySlotsCount }).map((_, idx) => (
+          {/* Add Member Slot Button */}
+          {!isMaxReached ? (
             <motion.button
-              key={`empty-${idx}`}
+              type="button"
               onClick={handleOpenAddModal}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              className="p-6 rounded-2xl border-2 border-dashed border-slate-800 hover:border-cyan-400/60 bg-slate-950/40 hover:bg-cyan-950/20 flex flex-col items-center justify-center space-y-2 text-slate-400 hover:text-cyan-300 transition-all cursor-pointer group min-h-[140px]"
+              className={`p-6 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center space-y-2 transition-all cursor-pointer group min-h-[140px] ${
+                members.length < 2
+                  ? 'border-cyan-500/60 bg-cyan-950/20 text-cyan-300 shadow-lg shadow-cyan-950/40'
+                  : 'border-slate-800 hover:border-cyan-400/60 bg-slate-950/40 hover:bg-cyan-950/20 text-slate-400 hover:text-cyan-300'
+              }`}
             >
-              <div className="p-3 rounded-2xl bg-slate-900 group-hover:bg-cyan-500/10 border border-slate-800 group-hover:border-cyan-500/30 text-slate-400 group-hover:text-cyan-400 transition-all">
+              <div className="p-3 rounded-2xl bg-slate-900 group-hover:bg-cyan-500/10 border border-slate-800 group-hover:border-cyan-500/30 text-cyan-400 transition-all">
                 <HiPlus className="w-6 h-6" />
               </div>
               <span className="text-xs font-bold font-mono tracking-wider uppercase">
-                + Add Member
+                {members.length < 2
+                  ? `+ Add Member ${members.length + 2} (Required for Min 3)`
+                  : `+ Add Member ${members.length + 2} (Optional - Max 5)`}
               </span>
             </motion.button>
-          ))}
+          ) : (
+            <div className="p-6 rounded-2xl border-2 border-slate-800 bg-slate-950/40 flex flex-col items-center justify-center space-y-2 text-slate-500 min-h-[140px]">
+              <HiLockClosed className="w-6 h-6 text-slate-600" />
+              <span className="text-xs font-bold font-mono tracking-wider uppercase text-slate-500">
+                Maximum Team Size Reached (5/5)
+              </span>
+            </div>
+          )}
         </div>
       </motion.div>
     );
@@ -880,6 +980,16 @@ export default function TeamRegistrationWizard() {
         onSave={handleSaveMember}
         initialData={editingData}
         memberIndex={editingIndex}
+      />
+
+      {/* Already Registered Modal */}
+      <AlreadyRegisteredModal
+        isOpen={isAlreadyRegisteredModalOpen}
+        onClose={() => {
+          setIsAlreadyRegisteredModalOpen(false);
+          navigate('/dashboard');
+        }}
+        teamData={alreadyRegisteredData}
       />
     </div>
   );

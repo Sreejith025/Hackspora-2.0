@@ -4,28 +4,28 @@ import { HiSparkles, HiChevronDown } from 'react-icons/hi2';
 
 const faqs = [
   {
-    q: 'Who is eligible to participate in Hackspora 2.0?',
-    a: 'Hackspora 2.0 is open to all undergraduate, diploma, and postgraduate students currently enrolled in any recognized institution or university across India.',
+    q: 'Who is organizing HackSpora 2.0 and who can participate?',
+    a: 'HackSpora 2.0 is organized by the Department of Artificial Intelligence and Data Science, Karpagam Academy of Higher Education (KAHE) in association with AI Qubit. It is open to all undergraduate, postgraduate, and diploma students across recognized institutions in India.',
   },
   {
-    q: 'Is there any registration fee?',
-    a: 'No! Registration for Hackspora 2.0 is 100% free of cost for all participants.',
+    q: 'When is the registration fee collected?',
+    a: 'Initial team registration is open. The registration fee of ₹250 per participant is collected ONLY after a team is shortlisted in the Round 1 Virtual Screening Round and confirms participation in the Offline Grand Finale.',
   },
   {
-    q: 'What is the maximum team size?',
-    a: 'Squads can have 1 to 5 members including the Team Leader. You can also participate as a solo hacker.',
+    q: 'What is the required team size?',
+    a: 'Teams must have a minimum of 3 members and a maximum of 5 members (Team Leader + 2 to 4 members). All team members must carry a valid College ID Card.',
   },
   {
-    q: 'How does the auto-verification work?',
-    a: 'Upon completing the 3-step registration wizard, your team is instantly verified and assigned a unique Team ID formatted as HS2026-XXX.',
+    q: 'What are the event rounds and dates?',
+    a: 'Round 1 (Virtual Screening) is on 23 August 2026 (7-hour hackathon, problem statements at 9:30 AM, submission 5:00-6:00 PM). Round 2 (Grand Finale) is a 24-hour offline hackathon on 18 & 19 September 2026 at KAHE, Coimbatore.',
   },
   {
-    q: 'When will problem statements be unlocked?',
-    a: 'Problem statements and track specifications will be officially released on the hackathon commencement date.',
+    q: 'Are problem statements the same for Virtual and Offline rounds?',
+    a: 'No! The problem statements for the Virtual Screening Round and the Offline Grand Finale will be completely different and released at the start of each respective round.',
   },
   {
-    q: 'Can members of a team be from different colleges or years?',
-    a: 'Yes, cross-college and interdisciplinary team members are fully allowed.',
+    q: 'What is the dress code and conduct requirement for the Grand Finale?',
+    a: 'Participants must attend the Offline Grand Finale in formal or smart professional attire, wear a valid College ID Card at all times, and maintain professional behavior throughout the event.',
   },
 ];
 
@@ -57,7 +57,7 @@ export default function FaqSection() {
           </h2>
 
           <p className="text-sm sm:text-base text-slate-300">
-            Find answers to common questions about registration, team formation, and hackathon logistics.
+            Find official details about registration, fee payment, team rules, and logistics.
           </p>
         </div>
 

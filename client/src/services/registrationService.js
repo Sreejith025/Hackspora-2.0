@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hackspora-2-0.onrender.com/api/registrations';
 
@@ -121,6 +122,48 @@ function saveLocalTeams(teams) {
 }
 
 export const registrationService = {
+  // Check if Clerk user or email is already registered
+  async checkRegistrationStatus(clerkId, email = '') {
+    if (!clerkId && !email) {
+      return { registered: false };
+    }
+
+    try {
+      const targetId = clerkId || 'unauthenticated';
+      const response = await axios.get(`${API_BASE_URL}/check/${targetId}`, {
+        params: { email },
+        timeout: 4000,
+      });
+      if (response.data && typeof response.data.registered === 'boolean') {
+        return response.data;
+      }
+    } catch (err) {
+      console.warn('Backend offline, checking registration locally', err?.message);
+    }
+
+    // Fallback local lookup
+    const local = getLocalTeams();
+    const formattedEmail = email ? email.toLowerCase().trim() : '';
+    const formattedClerkId = clerkId ? clerkId.trim() : '';
+
+    const found = local.find(
+      (t) =>
+        (formattedClerkId && t.clerkId === formattedClerkId) ||
+        (formattedEmail && t.leaderEmail?.toLowerCase() === formattedEmail) ||
+        (formattedEmail && t.members?.some((m) => m.email?.toLowerCase() === formattedEmail))
+    );
+
+    if (found) {
+      return {
+        registered: true,
+        message: 'Already Registered',
+        data: found,
+      };
+    }
+
+    return { registered: false };
+  },
+
   // Register team
   async registerTeam(teamData) {
     try {
@@ -267,4 +310,187 @@ export const registrationService = {
         : null,
     };
   },
+
+  // Update single team status
+  async updateStatus(id, status) {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/${id}/status`, { status });
+      if (response.data?.success) {
+        return response.data.data;
+      }
+    } catch (err) {
+      console.warn('Backend offline, updating status locally', err?.message);
+    }
+
+    // Local fallback
+    const local = getLocalTeams();
+    const targetIndex = local.findIndex((t) => t._id === id || t.teamId === id);
+    if (targetIndex !== -1) {
+      local[targetIndex].status = status;
+      saveLocalTeams(local);
+      return local[targetIndex];
+    }
+    throw new Error('Team not found');
+  },
+
+  // Update team registration details
+  async updateRegistration(id, updateData) {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/${id}`, updateData);
+      if (response.data?.success) {
+        return response.data.data;
+      }
+    } catch (err) {
+      console.warn('Backend offline, updating team details locally', err?.message);
+    }
+
+    // Local fallback
+    const local = getLocalTeams();
+    const targetIndex = local.findIndex((t) => t._id === id || t.teamId === id);
+    if (targetIndex !== -1) {
+      local[targetIndex] = { ...local[targetIndex], ...updateData };
+      saveLocalTeams(local);
+      return local[targetIndex];
+    }
+    throw new Error('Team not found');
+  },
+
+  // Delete team registration
+  async deleteRegistration(id) {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/${id}`);
+      if (response.data?.success) {
+        return response.data.data;
+      }
+    } catch (err) {
+      console.warn('Backend offline, deleting team locally', err?.message);
+    }
+
+    // Local fallback
+    const local = getLocalTeams();
+    const updated = local.filter((t) => t._id !== id && t.teamId !== id);
+    saveLocalTeams(updated);
+    return { success: true };
+  },
+
+  // Bulk update status
+  async bulkUpdateStatus(ids, status) {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/bulk-status`, { ids, status });
+      if (response.data?.success) {
+        return response.data;
+      }
+    } catch (err) {
+      console.warn('Backend offline, bulk updating status locally', err?.message);
+    }
+
+    // Local fallback
+    const local = getLocalTeams();
+    const idSet = new Set(ids);
+    local.forEach((t) => {
+      if (idSet.has(t._id) || idSet.has(t.teamId)) {
+        t.status = status;
+      }
+    });
+    saveLocalTeams(local);
+    return { success: true };
+  },
+
+  // Bulk delete registrations
+  async bulkDeleteRegistrations(ids) {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/bulk-delete`, { ids });
+      if (response.data?.success) {
+        return response.data;
+      }
+    } catch (err) {
+      console.warn('Backend offline, bulk deleting locally', err?.message);
+    }
+
+    // Local fallback
+    const local = getLocalTeams();
+    const idSet = new Set(ids);
+    const updated = local.filter((t) => !idSet.has(t._id) && !idSet.has(t.teamId));
+    saveLocalTeams(updated);
+    return { success: true };
+  },
+
+  // Export dataset to Real Excel (.xlsx) file using SheetJS
+  exportToExcel(teamsData, filename = 'Hackspora_2.0_Registrations.xlsx') {
+    const formattedData = teamsData.map((t) => {
+      const members = t.members || [];
+      const memberNames = members.map((m) => m.fullName).join(', ');
+      const memberEmails = members.map((m) => m.email).join(', ');
+      const memberPhones = members.map((m) => m.phone).join(', ');
+
+      return {
+        'Registration ID': t.teamId || '',
+        'Team Name': t.teamName || '',
+        'Status': t.status || 'Verified',
+        'Leader Name': t.leaderName || '',
+        'Leader Email': t.leaderEmail || '',
+        'Leader Phone': t.leaderPhone || '',
+        'College Name': t.collegeName || '',
+        'Course': t.course || '',
+        'Branch / Department': t.branch || '',
+        'Year': t.year || '',
+        'City': t.city || '',
+        'State': t.state || '',
+        'Total Team Members': 1 + members.length,
+        'Squad Member Names': memberNames || 'None',
+        'Squad Member Emails': memberEmails || 'None',
+        'Squad Member Phones': memberPhones || 'None',
+        'Registration Date': t.createdAt ? new Date(t.createdAt).toLocaleString() : '',
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+
+    // Auto-fit column widths
+    const columnWidths = Object.keys(formattedData[0] || {}).map((key) => ({
+      wch: Math.max(key.length + 4, 18),
+    }));
+    worksheet['!cols'] = columnWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
+
+    XLSX.writeFile(workbook, filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`);
+  },
+
+  // Export dataset to CSV (.csv) file
+  exportToCSV(teamsData, filename = 'Hackspora_2.0_Registrations.csv') {
+    const formattedData = teamsData.map((t) => {
+      const members = t.members || [];
+      return {
+        'Registration ID': t.teamId || '',
+        'Team Name': t.teamName || '',
+        'Status': t.status || 'Verified',
+        'Leader Name': t.leaderName || '',
+        'Leader Email': t.leaderEmail || '',
+        'Leader Phone': t.leaderPhone || '',
+        'College Name': t.collegeName || '',
+        'Department': t.branch || '',
+        'Year': t.year || '',
+        'City': t.city || '',
+        'State': t.state || '',
+        'Members Count': 1 + members.length,
+        'Member Details': members.map((m) => `${m.fullName} (${m.email})`).join('; '),
+        'Registration Date': t.createdAt ? new Date(t.createdAt).toLocaleString() : '',
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename.endsWith('.csv') ? filename : `${filename}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  },
 };
+

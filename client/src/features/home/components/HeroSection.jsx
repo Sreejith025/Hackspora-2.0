@@ -14,11 +14,14 @@ import {
   HiBuildingOffice2,
   HiCpuChip,
   HiSparkles,
+  HiCheckBadge,
 } from 'react-icons/hi2';
 
 import SpaceBackground from './SpaceBackground';
 import CountdownTimer from './CountdownTimer';
 import TiltCard from './TiltCard';
+import AlreadyRegisteredModal from '../../../components/AlreadyRegisteredModal';
+import { useRegisterFlow } from '../../../hooks';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -46,6 +49,14 @@ const itemVariants = {
 
 export default function HeroSection() {
   const containerRef = useRef(null);
+  const {
+    isChecking,
+    isRegistered,
+    registeredData,
+    isModalOpen,
+    handleRegisterNow,
+    closeModal,
+  } = useRegisterFlow();
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -62,6 +73,13 @@ export default function HeroSection() {
     >
       {/* Living Deep Space Background */}
       <SpaceBackground />
+
+      {/* Already Registered Modal */}
+      <AlreadyRegisteredModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        teamData={registeredData}
+      />
 
       <motion.div
         style={{ scale: heroScale, opacity: heroOpacity }}
@@ -80,7 +98,7 @@ export default function HeroSection() {
             <motion.div variants={itemVariants} className="inline-flex items-center w-full sm:w-auto">
               <div className="inline-flex items-center space-x-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-slate-950/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold tracking-wide shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:border-cyan-400/50 transition-colors max-w-full">
                 <HiRocketLaunch className="w-4 h-4 text-cyan-400 animate-pulse shrink-0" />
-                <span className="truncate">🚀 South India&apos;s Premier 24H Hackathon</span>
+                <span className="truncate">🚀 Tamil Nad&apos;s Premier 24H Hackathon</span>
               </div>
             </motion.div>
 
@@ -127,16 +145,41 @@ export default function HeroSection() {
             >
               {/* Primary Button */}
               <motion.div whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
-                <Link
-                  to="/register"
-                  className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 rounded-xl shadow-[0_0_25px_rgba(56,189,248,0.35)] hover:shadow-[0_0_40px_rgba(56,189,248,0.6)] transition-all duration-300 overflow-hidden w-full min-h-[48px]"
-                >
-                  <span className="relative z-10 flex items-center justify-center space-x-2">
-                    <span>Register Now</span>
-                    <HiArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
-                  </span>
-                  <div className="absolute inset-0 bg-white/25 opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
-                </Link>
+                {isRegistered ? (
+                  <Link
+                    to="/dashboard"
+                    className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 rounded-xl shadow-[0_0_25px_rgba(52,211,153,0.4)] hover:shadow-[0_0_40px_rgba(52,211,153,0.7)] transition-all duration-300 overflow-hidden w-full min-h-[48px] cursor-pointer"
+                  >
+                    <span className="relative z-10 flex items-center justify-center space-x-2">
+                      <HiCheckBadge className="w-5 h-5 text-slate-950" />
+                      <span>✅ Registered</span>
+                      <HiArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+                    </span>
+                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleRegisterNow}
+                    disabled={isChecking}
+                    className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 rounded-xl shadow-[0_0_25px_rgba(56,189,248,0.35)] hover:shadow-[0_0_40px_rgba(56,189,248,0.6)] transition-all duration-300 overflow-hidden w-full min-h-[48px] cursor-pointer"
+                  >
+                    <span className="relative z-10 flex items-center justify-center space-x-2">
+                      {isChecking ? (
+                        <>
+                          <HiSparkles className="w-5 h-5 animate-spin text-cyan-300" />
+                          <span>Checking Status...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Register Now</span>
+                          <HiArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+                        </>
+                      )}
+                    </span>
+                    <div className="absolute inset-0 bg-white/25 opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
+                  </button>
+                )}
               </motion.div>
 
               {/* Secondary Button */}
@@ -183,7 +226,7 @@ export default function HeroSection() {
           >
             {/* Live 2x2 Countdown Timer Card */}
             <TiltCard highlight={true} className="w-full">
-              <CountdownTimer targetDate="2026-10-24T09:00:00" />
+              <CountdownTimer targetDate="2026-08-23T09:30:00" />
             </TiltCard>
 
             {/* Grid of Mobile Glass Metric Widgets */}
@@ -248,8 +291,8 @@ export default function HeroSection() {
                     <HiCalendarDays className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="block text-[10px] font-semibold text-slate-400 uppercase">Event Date</span>
-                    <span className="block text-xs font-bold text-white">October 24–25, 2026</span>
+                    <span className="block text-[10px] font-semibold text-slate-400 uppercase">Event Dates</span>
+                    <span className="block text-xs font-bold text-white">Aug 23 & Sep 18–19, 2026</span>
                   </div>
                 </div>
 
@@ -261,7 +304,7 @@ export default function HeroSection() {
                   </div>
                   <div>
                     <span className="block text-[10px] font-semibold text-slate-400 uppercase">Venue</span>
-                    <span className="block text-xs font-bold text-white">Tech Park Hub & Hybrid</span>
+                    <span className="block text-xs font-bold text-white">KAHE, Coimbatore</span>
                   </div>
                 </div>
               </div>

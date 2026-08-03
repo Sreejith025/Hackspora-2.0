@@ -1,46 +1,54 @@
 import { motion } from 'framer-motion';
 import {
   HiSparkles,
-  HiClock,
   HiCheckCircle,
   HiRocketLaunch,
   HiCodeBracket,
   HiTrophy,
+  HiBuildingLibrary,
+  HiVideoCamera,
 } from 'react-icons/hi2';
 
 const timelinePhases = [
   {
-    time: 'Day 1 • 09:00 AM',
-    title: 'Registration & Opening Ceremony',
-    description: 'Check-in, keynote addresses, mentor introductions, and problem statements release.',
+    time: 'Round 1 • 23 August 2026 • 09:30 AM',
+    title: 'Virtual Round Begins & Problem Statements Release',
+    description: 'Problem statements unlocked at 9:30 AM. 7-hour virtual screening hackathon starts.',
     icon: HiRocketLaunch,
     status: 'Upcoming',
   },
   {
-    time: 'Day 1 • 11:00 AM',
-    title: 'Hacking Phase 1 Begins',
-    description: 'Teams begin prototyping, architecture design, and initial codebase setup.',
-    icon: HiCodeBracket,
+    time: 'Round 1 • 23 August 2026 • 05:00 PM – 06:00 PM',
+    title: 'Virtual Turn-in Window',
+    description: 'Teams submit GitHub repository link and demo video link for virtual evaluation.',
+    icon: HiVideoCamera,
     status: 'Upcoming',
   },
   {
-    time: 'Day 1 • 06:00 PM',
-    title: 'Mentorship & Progress Review',
-    description: '1-on-1 feedback sessions with domain mentors and technical architecture reviews.',
-    icon: HiClock,
-    status: 'Upcoming',
-  },
-  {
-    time: 'Day 2 • 09:00 AM',
-    title: 'Hacking Stop & Project Turn-in',
-    description: 'Final code commits, repository lock, video demo attachments, and turn-in submission.',
+    time: 'Shortlisting Notice',
+    title: 'Virtual Screening Results & Confirmation',
+    description: 'Shortlisted teams receive verification email and confirm participation with ₹250/participant fee.',
     icon: HiCheckCircle,
     status: 'Upcoming',
   },
   {
-    time: 'Day 2 • 11:00 AM',
-    title: 'Virtual Presentations & Evaluation',
-    description: 'Live presentation slots with judging panel and prototype demonstrations.',
+    time: 'Round 2 • 18 September 2026 • 07:00 AM – 09:00 AM',
+    title: 'Grand Finale Reporting & Inauguration',
+    description: 'Offline reporting at KAHE, Coimbatore. College ID verification, briefing, and inauguration.',
+    icon: HiBuildingLibrary,
+    status: 'Upcoming',
+  },
+  {
+    time: 'Round 2 • 18 Sep 10:00 AM – 19 Sep 12:00 PM',
+    title: '24-Hour Offline Hackathon',
+    description: 'Fresh offline problem statements released at 9:45 AM. 24-hour non-stop hackathon with meals & Wi-Fi.',
+    icon: HiCodeBracket,
+    status: 'Upcoming',
+  },
+  {
+    time: 'Round 2 • 19 September 2026 • 12:00 PM Onwards',
+    title: 'Final Judging & Grand Valedictory',
+    description: 'Final presentations to industry judges, winner declarations, and cash prize distribution.',
     icon: HiTrophy,
     status: 'Upcoming',
   },
@@ -60,15 +68,15 @@ export default function ScheduleSection() {
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-xs font-mono font-bold tracking-widest uppercase">
             <HiSparkles className="w-4 h-4 text-cyan-400" />
-            <span>EVENT TIMELINE</span>
+            <span>EVENT TIMELINE & SCHEDULE</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            24-Hour Event <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">Schedule</span>
+            HackSpora 2.0 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">Schedule</span>
           </h2>
 
           <p className="text-sm sm:text-base text-slate-300">
-            October 24 – 25, 2026 • Non-stop hackathon schedule, milestone reviews, and grand finale.
+            Aug 23 (Virtual Screening) & Sep 18–19 (24H Offline Grand Finale at KAHE, Coimbatore).
           </p>
         </div>
 

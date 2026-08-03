@@ -12,8 +12,6 @@ import {
   HiAcademicCap,
   HiCog6Tooth,
   HiArrowRightOnRectangle,
-  HiMagnifyingGlass,
-  HiCheckBadge,
   HiSparkles,
   HiBuildingLibrary,
   HiUser,
@@ -22,6 +20,7 @@ import {
 } from 'react-icons/hi2';
 import { registrationService } from '../services/registrationService';
 import { isAdminUser, ADMIN_EMAIL } from '../constants/authConfig';
+import AdminRegistrationManagement from '../features/admin/components/AdminRegistrationManagement';
 
 const adminSidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: HiSquares2X2 },
@@ -54,30 +53,12 @@ export default function AdminDashboard() {
     },
   });
 
-  const [teams, setTeams] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [collegeFilter, setCollegeFilter] = useState('All');
-  const [sortOrder, setSortOrder] = useState('newest');
-
   // Load Admin Data
   useEffect(() => {
     async function loadAdminData() {
       try {
-        const [statsData, teamsRes] = await Promise.all([
-          registrationService.getStats(),
-          registrationService.getAllRegistrations({
-            search: searchTerm,
-            college: collegeFilter,
-            sort: sortOrder,
-          }),
-        ]);
-
+        const statsData = await registrationService.getStats();
         if (statsData) setStats(statsData);
-        if (teamsRes?.data) {
-          setTeams(teamsRes.data);
-          setSelectedTeam((prev) => prev || (teamsRes.data.length > 0 ? teamsRes.data[0] : null));
-        }
       } catch (err) {
         console.error('Failed to load admin dashboard data', err);
       }
@@ -86,7 +67,7 @@ export default function AdminDashboard() {
     if (hasAccess) {
       loadAdminData();
     }
-  }, [hasAccess, searchTerm, collegeFilter, sortOrder]);
+  }, [hasAccess]);
 
   const handleLogout = () => {
     signOut(() => navigate('/'));
@@ -114,10 +95,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Calculate unique colleges list for filters
-  const uniqueColleges = ['All', ...new Set(teams.map((t) => t.collegeName).filter(Boolean))];
-
-  // Render Dashboard Overview Analytics
+// Render Dashboard Overview Analytics
   const renderDashboardAnalytics = () => (
     <div className="space-y-8">
       {/* Live Registration Progress Banner */}
@@ -226,231 +204,6 @@ export default function AdminDashboard() {
     </div>
   );
 
-  // Render Two-Panel Registration Management Page
-  const renderRegistrationsManagement = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
-      {/* LEFT PANEL: Scrollable Team List */}
-      <div className="lg:col-span-5 glass-card p-5 rounded-3xl border border-cyan-500/20 shadow-2xl flex flex-col max-h-[800px]">
-        {/* Search & Filter Header */}
-        <div className="space-y-4 pb-4 border-b border-slate-800/80">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-black text-white">Registered Teams</h3>
-            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
-              {teams.length} Teams
-            </span>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative">
-            <HiMagnifyingGlass className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by Team, Leader, College, ID..."
-              className="w-full bg-slate-900/90 border border-slate-800 focus:border-cyan-400 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
-            />
-          </div>
-
-          {/* Filters Row */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <select
-              value={collegeFilter}
-              onChange={(e) => setCollegeFilter(e.target.value)}
-              className="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 focus:outline-none"
-            >
-              <option value="All">All Colleges</option>
-              {uniqueColleges.filter((c) => c !== 'All').map((c, i) => (
-                <option key={i} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 focus:outline-none"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Scrollable Team List */}
-        <div className="overflow-y-auto flex-1 py-4 space-y-3 pr-1 custom-scrollbar">
-          {teams.length === 0 ? (
-            <p className="text-xs text-slate-400 italic text-center py-8">No teams found matching search criteria.</p>
-          ) : (
-            teams.map((team) => {
-              const isSelected = selectedTeam?._id === team._id || selectedTeam?.teamId === team.teamId;
-              return (
-                <div
-                  key={team._id || team.teamId}
-                  onClick={() => setSelectedTeam(team)}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 ${
-                    isSelected
-                      ? 'bg-cyan-950/40 border-cyan-400/60 shadow-lg shadow-cyan-950/50'
-                      : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-xs text-cyan-300">{team.teamId}</span>
-                    <span className="inline-flex items-center space-x-1 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
-                      <HiCheckBadge className="w-3 h-3" />
-                      <span>{team.status || 'Verified'}</span>
-                    </span>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-bold text-white">{team.teamName}</h4>
-                    <p className="text-xs text-slate-400 truncate">Leader: {team.leaderName}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-800/60">
-                    <span className="truncate max-w-[180px]">{team.collegeName}</span>
-                    <span className="font-mono">{new Date(team.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      {/* RIGHT PANEL: Selected Team Details View */}
-      <div className="lg:col-span-7 glass-card p-6 sm:p-8 rounded-3xl border border-cyan-500/30 shadow-2xl space-y-6">
-        {selectedTeam ? (
-          <>
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs font-mono font-bold text-cyan-300 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30">
-                    {selectedTeam.teamId}
-                  </span>
-                  <span className="text-xs font-mono text-emerald-400 flex items-center space-x-1">
-                    <HiCheckBadge className="w-4 h-4" />
-                    <span>Verified</span>
-                  </span>
-                </div>
-                <h2 className="text-2xl font-black text-white mt-2">{selectedTeam.teamName}</h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  College: <strong className="text-slate-200">{selectedTeam.collegeName}</strong>
-                </p>
-              </div>
-
-              <div className="text-right text-xs text-slate-400 font-mono">
-                <div>Total Members: <strong className="text-cyan-300">{1 + (selectedTeam.members ? selectedTeam.members.length : 0)}</strong></div>
-                <div>Registered: {new Date(selectedTeam.createdAt).toLocaleString()}</div>
-              </div>
-            </div>
-
-            {/* Team Leader Credentials Card */}
-            <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider">
-                  Team Leader Details
-                </span>
-                <span className="text-[10px] font-mono text-cyan-300">👑 Primary Contact</span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
-                <div>
-                  <span className="text-slate-500 block uppercase font-mono text-[10px]">Full Name</span>
-                  <span className="font-bold text-white">{selectedTeam.leaderName}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block uppercase font-mono text-[10px]">Email</span>
-                  <span className="font-mono text-slate-200">{selectedTeam.leaderEmail}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block uppercase font-mono text-[10px]">Phone</span>
-                  <span className="font-semibold text-slate-200">{selectedTeam.leaderPhone}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block uppercase font-mono text-[10px]">College</span>
-                  <span className="font-semibold text-slate-200">{selectedTeam.collegeName}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block uppercase font-mono text-[10px]">Course & Branch</span>
-                  <span className="font-semibold text-slate-200">
-                    {selectedTeam.course} - {selectedTeam.branch}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block uppercase font-mono text-[10px]">Year & City</span>
-                  <span className="font-semibold text-slate-200">
-                    {selectedTeam.year} ({selectedTeam.city}, {selectedTeam.state})
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Members Table */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-mono text-cyan-400 font-bold uppercase tracking-wider">
-                Squad Members ({selectedTeam.members ? selectedTeam.members.length : 0})
-              </h3>
-
-              {!selectedTeam.members || selectedTeam.members.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No additional team members added.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-800 text-slate-400 font-mono uppercase text-[10px]">
-                        <th className="py-2.5 px-3">Name</th>
-                        <th className="py-2.5 px-3">Email & Phone</th>
-                        <th className="py-2.5 px-3">College & Branch</th>
-                        <th className="py-2.5 px-3">Year & Location</th>
-                        <th className="py-2.5 px-3">GitHub</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/60">
-                      {selectedTeam.members.map((m, idx) => (
-                        <tr key={idx} className="hover:bg-slate-900/60 transition-colors">
-                          <td className="py-3 px-3 font-bold text-white">{m.fullName}</td>
-                          <td className="py-3 px-3">
-                            <div className="text-slate-200 font-mono">{m.email}</div>
-                            <div className="text-slate-400">{m.phone}</div>
-                          </td>
-                          <td className="py-3 px-3">
-                            <div className="text-slate-200 truncate max-w-[160px]">{m.collegeName}</div>
-                            <div className="text-slate-400">{m.branch}</div>
-                          </td>
-                          <td className="py-3 px-3 text-slate-300">
-                            <div>{m.year}</div>
-                            <div className="text-slate-400">{m.city}, {m.state}</div>
-                          </td>
-                          <td className="py-3 px-3">
-                            <a
-                              href={m.github || '#'}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-cyan-400 hover:underline font-mono text-[11px]"
-                            >
-                              {m.github ? 'Profile' : 'N/A'}
-                            </a>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-16 text-slate-400">
-            Select a team from the left panel to inspect detailed registration credentials.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-[#02040A] text-slate-100 pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
       <div className="flex flex-col lg:flex-row gap-8">
@@ -507,7 +260,7 @@ export default function AdminDashboard() {
         <main className="flex-1 min-w-0">
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' && renderDashboardAnalytics()}
-            {activeTab === 'registrations' && renderRegistrationsManagement()}
+            {activeTab === 'registrations' && <AdminRegistrationManagement />}
             {activeTab !== 'dashboard' && activeTab !== 'registrations' && (
               <div className="glass-card p-8 rounded-3xl border border-slate-800 text-center space-y-4">
                 <HiSparkles className="w-8 h-8 text-cyan-400 mx-auto animate-bounce" />

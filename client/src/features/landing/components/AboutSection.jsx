@@ -99,7 +99,7 @@ export default function AboutSection() {
             <span className="text-xs text-slate-400 font-medium">Non-Stop Coding</span>
           </div>
           <div>
-            <div className="text-3xl sm:text-4xl font-black text-indigo-300 font-mono">₹5 Lakhs+</div>
+            <div className="text-3xl sm:text-4xl font-black text-indigo-300 font-mono">₹25,000+</div>
             <span className="text-xs text-slate-400 font-medium">Prizes & Grants</span>
           </div>
           <div>

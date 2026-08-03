@@ -130,7 +130,11 @@ export default function AddMemberModal({ isOpen, onClose, onSave, initialData = 
                   {initialData !== null ? 'Edit Team Member' : 'Add Team Member'}
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Provide member personal & academic credentials
+                  {memberIndex !== null && memberIndex !== undefined
+                    ? memberIndex < 2
+                      ? `Member ${memberIndex + 2} (Required)`
+                      : `Member ${memberIndex + 2} (Optional)`
+                    : 'Provide member personal & academic credentials'}
                 </p>
               </div>
             </div>

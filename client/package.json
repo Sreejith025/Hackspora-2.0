@@ -26,7 +26,8 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.18.2",
     "tailwindcss": "^4.3.3",
-    "three": "^0.185.1"
+    "three": "^0.185.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

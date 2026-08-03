@@ -16,7 +16,7 @@ const initialProblems = [
     categoryName: 'Artificial Intelligence & ML',
     difficulty: 'Hard',
     status: 'Published',
-    releaseTime: '2026-10-24T09:00:00',
+    releaseTime: '2026-08-23T09:30:00',
     releaseType: 'Publish Immediately',
     lastUpdated: '2026-07-30T14:20:00',
     shortDescription: 'Build an autonomous AI agent leveraging LLMs to detect zero-day vulnerabilities in source code and generate automated pull requests with regression testing.',
