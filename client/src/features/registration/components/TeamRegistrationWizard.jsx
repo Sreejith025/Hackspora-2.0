@@ -82,6 +82,19 @@ export default function TeamRegistrationWizard() {
     verifyUserRegistration();
   }, [user?.id, userEmail]);
 
+  // Sync Clerk User Data into Form State when Clerk finishes loading
+  const [prevUserId, setPrevUserId] = useState(user?.id);
+  if (user?.id && user.id !== prevUserId) {
+    setPrevUserId(user.id);
+    if (!teamInfo.leaderName || !teamInfo.leaderEmail) {
+      setTeamInfo((prev) => ({
+        ...prev,
+        leaderName: prev.leaderName || user.fullName || '',
+        leaderEmail: prev.leaderEmail || user.primaryEmailAddress?.emailAddress || '',
+      }));
+    }
+  }
+
   // Handle Team Info Field Change
   const handleTeamInfoChange = (e) => {
     const { name, value } = e.target;
@@ -798,6 +811,7 @@ export default function TeamRegistrationWizard() {
           type="submit"
           disabled={isSubmitting}
           onClick={(e) => {
+            e.preventDefault();
             console.log("Button Clicked: Complete Registration Submit");
             handleSubmitRegistration(e);
           }}
