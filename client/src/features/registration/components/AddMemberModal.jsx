@@ -12,47 +12,57 @@ import {
   HiCheckCircle,
 } from 'react-icons/hi2';
 
-export default function AddMemberModal({
-  isOpen,
-  onClose,
-  onSave,
-  initialData = null,
-  memberIndex = null,
-  defaultCollege = '',
-  defaultBranch = '',
-  defaultCity = '',
-  defaultState = '',
-}) {
-  const [formData, setFormData] = useState(() => {
+export default function AddMemberModal({ isOpen, onClose, onSave, initialData = null, memberIndex = null }) {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    github: '',
+    collegeName: '',
+    course: 'B.Tech',
+    branch: '',
+    year: '3rd Year',
+    city: '',
+    state: '',
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  const [prevInitialData, setPrevInitialData] = useState(initialData);
+
+  if (isOpen !== prevIsOpen || initialData !== prevInitialData) {
+    setPrevIsOpen(isOpen);
+    setPrevInitialData(initialData);
     if (initialData) {
-      return {
+      setFormData({
         fullName: initialData.fullName || '',
         email: initialData.email || '',
         phone: initialData.phone || '',
         github: initialData.github || '',
-        collegeName: initialData.collegeName || defaultCollege || '',
+        collegeName: initialData.collegeName || '',
         course: initialData.course || 'B.Tech',
-        branch: initialData.branch || defaultBranch || '',
+        branch: initialData.branch || '',
         year: initialData.year || '3rd Year',
-        city: initialData.city || defaultCity || '',
-        state: initialData.state || defaultState || '',
-      };
+        city: initialData.city || '',
+        state: initialData.state || '',
+      });
+    } else {
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        github: '',
+        collegeName: '',
+        course: 'B.Tech',
+        branch: '',
+        year: '3rd Year',
+        city: '',
+        state: '',
+      });
     }
-    return {
-      fullName: '',
-      email: '',
-      phone: '',
-      github: '',
-      collegeName: defaultCollege || '',
-      course: 'B.Tech',
-      branch: defaultBranch || '',
-      year: '3rd Year',
-      city: defaultCity || '',
-      state: defaultState || '',
-    };
-  });
-
-  const [errors, setErrors] = useState({});
+    setErrors({});
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { io } from 'socket.io-client';
 import {
   HiUsers,
   HiUserGroup,
@@ -80,9 +79,9 @@ export default function AdminRegistrationManagement() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch Data Function (Supports silent background refetch)
-  const fetchData = async (isSilent = false) => {
-    if (!isSilent) setLoading(true);
+  // Fetch Data Function
+  const fetchData = async () => {
+    setLoading(true);
     try {
       const [statsRes, teamsRes] = await Promise.all([
         registrationService.getStats(),
@@ -92,10 +91,10 @@ export default function AdminRegistrationManagement() {
       if (statsRes) setStats(statsRes);
       if (teamsRes?.data) setTeams(teamsRes.data);
     } catch (err) {
-      console.error('Failed to load registrations from MongoDB:', err);
-      if (!isSilent) toast.error('Failed to load registration data from MongoDB.');
+      console.error('Failed to load registrations', err);
+      toast.error('Failed to load registration data.');
     } finally {
-      if (!isSilent) setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -111,51 +110,16 @@ export default function AdminRegistrationManagement() {
         if (teamsRes?.data) setTeams(teamsRes.data);
       })
       .catch((err) => {
-        console.error('Failed to load registrations from MongoDB:', err);
+        console.error('Failed to load registrations', err);
       })
       .finally(() => {
         if (isMounted) setLoading(false);
       });
 
-    // Socket.IO Real-time Synchronization
-    const rawApiUrl =
-      import.meta.env.VITE_API_URL ||
-      (import.meta.env.PROD ? 'https://hackspora-2-0.onrender.com/api/registrations' : '/api/registrations');
-    const backendUrl = rawApiUrl.startsWith('http')
-      ? rawApiUrl.replace(/\/api\/registrations\/?$/, '')
-      : window.location.origin;
-    const socket = io(backendUrl, {
-      transports: ['websocket', 'polling'],
-    });
-
-    socket.on('connect', () => {
-      console.log('[SOCKET.IO] Admin Dashboard connected for real-time registration sync.');
-    });
-
-    socket.on('new_registration', (newTeam) => {
-      toast.success(`⚡ New team registered: ${newTeam.teamName} (${newTeam.teamId})`);
-      fetchData(true);
-    });
-
-    socket.on('registration_updated', () => {
-      fetchData(true);
-    });
-
-    socket.on('registration_deleted', () => {
-      fetchData(true);
-    });
-
-    // 5-second automatic background polling refetch
-    const interval = setInterval(() => {
-      fetchData(true);
-    }, 5000);
-
     return () => {
-      socket.disconnect();
-      clearInterval(interval);
+      isMounted = false;
     };
   }, []);
-
 
   // Derived Filter Options
   const uniqueColleges = useMemo(() => {
@@ -383,19 +347,6 @@ export default function AdminRegistrationManagement() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => {
-              fetchData(false);
-              toast.success('Live registrations refreshed from MongoDB');
-            }}
-            disabled={loading}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl font-bold text-xs text-slate-200 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:text-white transition-all cursor-pointer min-h-[42px] active:scale-95"
-            title="Refresh registrations from MongoDB"
-          >
-            <HiArrowPath className={`w-4 h-4 text-cyan-400 ${loading ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </button>
-
-          <button
-            onClick={() => {
               setEditingTeamData(null);
               setIsAddEditModalOpen(true);
             }}
@@ -403,7 +354,6 @@ export default function AdminRegistrationManagement() {
           >
             <HiPlus className="w-4 h-4 stroke-[3]" />
             <span>+ Add Registration</span>
-
           </button>
 
           {/* Download All Data Dropdown */}
