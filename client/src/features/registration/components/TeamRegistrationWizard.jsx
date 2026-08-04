@@ -217,13 +217,9 @@ export default function TeamRegistrationWizard() {
 
       toast.success('Registration Completed Successfully!');
     } catch (err) {
-      if (err.response?.data?.registered || err.response?.data?.data) {
-        setAlreadyRegisteredData(err.response.data.data || null);
-        setIsAlreadyRegisteredModalOpen(true);
-        toast.error('You are already registered for Hackspora 2.0.');
-      } else {
-        toast.error(err.message || 'Registration failed. Please try again.');
-      }
+      console.error('Submission error:', err);
+      const errMsg = err.message || 'Registration failed. Please try again.';
+      toast.error(errMsg);
     } finally {
       setIsSubmitting(false);
     }
