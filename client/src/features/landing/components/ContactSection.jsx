@@ -68,7 +68,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <span className="text-slate-500 block uppercase font-mono text-[10px]">Email Support</span>
-                    <span className="font-bold text-white">support@hackspora.in</span>
+                    <span className="font-bold text-white">hackspora2.0@gmail.com</span>
                   </div>
                 </div>
 
