@@ -180,22 +180,30 @@ export default function TeamRegistrationWizard() {
   };
 
   // Submit Final Registration
-  const handleSubmitRegistration = async () => {
+  const handleSubmitRegistration = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    console.log("Button Clicked: Submit Registration");
+
     if (!isConfirmed) {
+      console.warn("Registration blocked: confirmation checkbox is false");
       toast.error('Please confirm that all provided information is correct.');
       return;
     }
 
     const totalSquadSize = 1 + members.length;
     if (totalSquadSize < 3) {
-      toast.error('A team must contain at least 3 members.');
+      console.warn(`Registration blocked: squad size is ${totalSquadSize} (< 3)`);
+      toast.error('A team must contain at least 3 members (Leader + at least 2 members).');
       return;
     }
     if (totalSquadSize > 5) {
+      console.warn(`Registration blocked: squad size is ${totalSquadSize} (> 5)`);
       toast.error('Maximum team size is 5 members.');
       return;
     }
 
+    console.log("Sending Registration Request...");
     setIsSubmitting(true);
     try {
       const payload = {
@@ -204,7 +212,10 @@ export default function TeamRegistrationWizard() {
         members,
       };
 
+      console.log("Payload sent to registration API:", payload);
       const result = await registrationService.registerTeam(payload);
+      console.log("Registration API Response Success:", result);
+
       setRegisteredResult(result);
 
       // Trigger Fireworks Confetti Effect
@@ -217,12 +228,15 @@ export default function TeamRegistrationWizard() {
 
       toast.success('Registration Completed Successfully!');
     } catch (err) {
+      console.error("Registration Error Caught:", err);
       if (err.response?.data?.registered || err.response?.data?.data) {
         setAlreadyRegisteredData(err.response.data.data || null);
         setIsAlreadyRegisteredModalOpen(true);
         toast.error('You are already registered for Hackspora 2.0.');
       } else {
-        toast.error(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
+        const errMsg = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+        toast.error(errMsg);
+        console.error("Toast error displayed:", errMsg);
       }
     } finally {
       setIsSubmitting(false);
@@ -773,25 +787,31 @@ export default function TeamRegistrationWizard() {
 
         {/* Large Glowing Submit Button */}
         <button
-          type="button"
+          type="submit"
           disabled={!isConfirmed || isSubmitting}
-          onClick={handleSubmitRegistration}
-          className={`w-full py-4 rounded-2xl font-extrabold text-base transition-all flex items-center justify-center space-x-2 shadow-2xl cursor-pointer ${
+          onClick={(e) => {
+            console.log("Button Clicked: Complete Registration Submit");
+            handleSubmitRegistration(e);
+          }}
+          onTouchEnd={() => {
+            console.log("Button Touched: Complete Registration on mobile device");
+          }}
+          className={`w-full py-4 rounded-2xl font-extrabold text-base transition-all flex items-center justify-center space-x-2 shadow-2xl cursor-pointer touch-manipulation relative z-20 ${
             isConfirmed && !isSubmitting
               ? 'bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300 text-slate-950 shadow-cyan-500/30 hover:scale-[1.02] active:scale-95'
               : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
           }`}
         >
           {isSubmitting ? (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 pointer-events-none">
               <HiSparkles className="w-5 h-5 animate-spin" />
               <span>Verifying & Completing Registration...</span>
             </div>
           ) : (
-            <>
+            <div className="flex items-center space-x-2 pointer-events-none">
               <HiShieldCheck className="w-6 h-6 text-slate-950" />
               <span>Complete Registration</span>
-            </>
+            </div>
           )}
         </button>
       </div>
@@ -937,7 +957,17 @@ export default function TeamRegistrationWizard() {
       </div>
 
       {/* Main Wizard Form Card */}
-      <div className="glass-card p-6 sm:p-8 rounded-3xl border border-cyan-500/30 shadow-2xl bg-gradient-to-b from-[#080d1e]/90 via-[#040711]/90 to-[#080d1e]/90">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (currentStep === 3) {
+            handleSubmitRegistration(e);
+          } else {
+            handleNextStep();
+          }
+        }}
+        className="glass-card p-6 sm:p-8 rounded-3xl border border-cyan-500/30 shadow-2xl bg-gradient-to-b from-[#080d1e]/90 via-[#040711]/90 to-[#080d1e]/90"
+      >
         <AnimatePresence mode="wait">
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep2()}
@@ -950,7 +980,7 @@ export default function TeamRegistrationWizard() {
             type="button"
             disabled={currentStep === 1}
             onClick={handlePrevStep}
-            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer touch-manipulation relative z-20 ${
               currentStep === 1
                 ? 'opacity-40 text-slate-600 cursor-not-allowed bg-slate-900'
                 : 'text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:text-white'
@@ -964,14 +994,14 @@ export default function TeamRegistrationWizard() {
             <button
               type="button"
               onClick={handleNextStep}
-              className="inline-flex items-center space-x-2 px-7 py-3 rounded-xl text-xs font-extrabold text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300 hover:scale-105 shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
+              className="inline-flex items-center space-x-2 px-7 py-3 rounded-xl text-xs font-extrabold text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300 hover:scale-105 shadow-md shadow-cyan-500/20 transition-all cursor-pointer touch-manipulation relative z-20"
             >
               <span>Next Step</span>
               <HiArrowRight className="w-4 h-4" />
             </button>
           )}
         </div>
-      </div>
+      </form>
 
       {/* Member Modal */}
       <AddMemberModal

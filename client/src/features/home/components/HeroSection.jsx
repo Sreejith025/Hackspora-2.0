@@ -14,7 +14,6 @@ import {
   HiBuildingOffice2,
   HiCpuChip,
   HiSparkles,
-  HiCheckBadge,
 } from 'react-icons/hi2';
 
 import SpaceBackground from './SpaceBackground';
@@ -98,7 +97,7 @@ export default function HeroSection() {
             <motion.div variants={itemVariants} className="inline-flex items-center w-full sm:w-auto">
               <div className="inline-flex items-center space-x-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-slate-950/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold tracking-wide shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:border-cyan-400/50 transition-colors max-w-full">
                 <HiRocketLaunch className="w-4 h-4 text-cyan-400 animate-pulse shrink-0" />
-                <span className="truncate">🚀 Tamil Nad&apos;s Premier 24H Hackathon</span>
+                <span className="truncate">🚀 Tamil Nadu&apos;s Premier 24H Hackathon</span>
               </div>
             </motion.div>
 
@@ -144,26 +143,32 @@ export default function HeroSection() {
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1 w-full sm:w-auto"
             >
               {/* Primary Button */}
-              <motion.div whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
+              <motion.div whileTap={{ scale: 0.97 }} className="w-full sm:w-auto relative z-20">
                 {isRegistered ? (
                   <Link
                     to="/dashboard"
-                    className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-white bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 rounded-xl shadow-[0_0_25px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_rgba(34,197,94,0.7)] hover:scale-[1.02] active:scale-95 transition-all duration-300 overflow-hidden w-full min-h-[48px] cursor-pointer"
+                    className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-white bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 rounded-xl shadow-[0_0_25px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_rgba(34,197,94,0.7)] hover:scale-[1.02] active:scale-95 transition-all duration-300 overflow-hidden w-full min-h-[48px] cursor-pointer touch-manipulation relative z-20"
                   >
-                    <span className="relative z-10 flex items-center justify-center space-x-2">
+                    <span className="relative z-10 flex items-center justify-center space-x-2 pointer-events-none">
                       <span>✅ Registered</span>
                       <HiArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
                     </span>
-                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
+                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer pointer-events-none" />
                   </Link>
                 ) : (
                   <button
                     type="button"
-                    onClick={handleRegisterNow}
+                    onClick={(e) => {
+                      console.log("Register Now Button Clicked");
+                      handleRegisterNow(e);
+                    }}
+                    onTouchEnd={() => {
+                      console.log("Register Now Button Touched on mobile device");
+                    }}
                     disabled={isChecking}
-                    className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 rounded-xl shadow-[0_0_25px_rgba(56,189,248,0.35)] hover:shadow-[0_0_40px_rgba(56,189,248,0.6)] transition-all duration-300 overflow-hidden w-full min-h-[48px] cursor-pointer"
+                    className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 rounded-xl shadow-[0_0_25px_rgba(56,189,248,0.35)] hover:shadow-[0_0_40px_rgba(56,189,248,0.6)] transition-all duration-300 overflow-hidden w-full min-h-[48px] cursor-pointer touch-manipulation relative z-20"
                   >
-                    <span className="relative z-10 flex items-center justify-center space-x-2">
+                    <span className="relative z-10 flex items-center justify-center space-x-2 pointer-events-none">
                       {isChecking ? (
                         <>
                           <HiSparkles className="w-5 h-5 animate-spin text-cyan-300" />
@@ -176,7 +181,7 @@ export default function HeroSection() {
                         </>
                       )}
                     </span>
-                    <div className="absolute inset-0 bg-white/25 opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
+                    <div className="absolute inset-0 bg-white/25 opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer pointer-events-none" />
                   </button>
                 )}
               </motion.div>

@@ -24,11 +24,19 @@ export const registrationService = {
 
   // Register team directly to MongoDB Atlas
   async registerTeam(teamData) {
-    const response = await axios.post(API_BASE_URL, teamData);
-    if (response.data?.success) {
-      return response.data.data;
+    console.log('[Axios] Sending Registration Request to:', API_BASE_URL);
+    console.log('[Axios] Registration Payload:', teamData);
+    try {
+      const response = await axios.post(API_BASE_URL, teamData);
+      console.log('[Axios] Registration Response Received:', response.status, response.data);
+      if (response.data?.success) {
+        return response.data.data;
+      }
+      throw new Error(response.data?.message || 'Registration failed');
+    } catch (error) {
+      console.error('[Axios] Registration POST Error:', error?.response?.data || error.message);
+      throw error;
     }
-    throw new Error(response.data?.message || 'Registration failed');
   },
 
   // Fetch all registered teams from MongoDB Atlas (for Admin)

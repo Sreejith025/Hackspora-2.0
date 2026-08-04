@@ -61,26 +61,33 @@ export function useRegisterFlow() {
   }, [isLoaded, isSignedIn, clerkId, userEmail]);
 
   // handleRegisterNow function for buttons
-  const handleRegisterNow = async () => {
-    // Step 1: Unauthenticated -> Redirect to Login Page
-    if (!isLoaded) return;
+  const handleRegisterNow = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    console.log("handleRegisterNow invoked on touch/click event");
+
+    if (!isLoaded) {
+      console.log("Clerk is still loading...");
+      return;
+    }
 
     if (!isSignedIn) {
+      console.log("User not signed in -> Redirecting to login with redirect_url=/register");
       toast('Please log in to proceed with hackathon registration.', { icon: '🔐' });
       navigate('/login?redirect_url=/register');
       return;
     }
 
-    // Step 2: Already known to be registered -> Show modal
     if (isRegistered) {
+      console.log("User already registered -> Opening AlreadyRegisteredModal");
       setIsModalOpen(true);
       return;
     }
 
-    // Step 3: Check registration via backend API
+    console.log("Checking registration status from backend for:", clerkId, userEmail);
     setIsChecking(true);
     try {
       const res = await registrationService.checkRegistrationStatus(clerkId, userEmail);
+      console.log("Registration Check Result:", res);
 
       if (res?.registered) {
         setIsRegistered(true);
@@ -88,6 +95,7 @@ export function useRegisterFlow() {
         setIsModalOpen(true);
       } else {
         setIsRegistered(false);
+        console.log("User not registered -> Navigating to /register");
         navigate('/register');
       }
     } catch (error) {
