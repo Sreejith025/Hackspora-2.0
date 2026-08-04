@@ -118,8 +118,12 @@ export default function AdminRegistrationManagement() {
       });
 
     // Socket.IO Real-time Synchronization
-    const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/registrations';
-    const backendUrl = rawApiUrl.replace(/\/api\/registrations\/?$/, '');
+    const rawApiUrl =
+      import.meta.env.VITE_API_URL ||
+      (import.meta.env.PROD ? 'https://hackspora-2-0.onrender.com/api/registrations' : '/api/registrations');
+    const backendUrl = rawApiUrl.startsWith('http')
+      ? rawApiUrl.replace(/\/api\/registrations\/?$/, '')
+      : window.location.origin;
     const socket = io(backendUrl, {
       transports: ['websocket', 'polling'],
     });

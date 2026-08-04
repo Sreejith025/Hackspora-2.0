@@ -153,6 +153,37 @@ export default function TeamRegistrationWizard() {
   };
 
   const handleSaveMember = (memberData, index) => {
+    const memberEmail = (memberData.email || '').toLowerCase().trim();
+    const memberPhone = (memberData.phone || '').trim();
+    const leaderEmail = (teamInfo.leaderEmail || '').toLowerCase().trim();
+    const leaderPhone = (teamInfo.leaderPhone || '').trim();
+
+    if (memberEmail && leaderEmail && memberEmail === leaderEmail) {
+      toast.error('Member email cannot be the same as the team leader email.');
+      return;
+    }
+
+    if (memberPhone && leaderPhone && memberPhone === leaderPhone) {
+      toast.error('Member phone number cannot be the same as the team leader phone number.');
+      return;
+    }
+
+    const isDuplicateEmail = members.some(
+      (m, idx) => idx !== index && (m.email || '').toLowerCase().trim() === memberEmail
+    );
+    if (isDuplicateEmail) {
+      toast.error('Another team member already has this email address.');
+      return;
+    }
+
+    const isDuplicatePhone = members.some(
+      (m, idx) => idx !== index && (m.phone || '').trim() === memberPhone
+    );
+    if (isDuplicatePhone) {
+      toast.error('Another team member already has this phone number.');
+      return;
+    }
+
     if (index !== null && index !== undefined) {
       setMembers((prev) => {
         const copy = [...prev];
@@ -183,6 +214,23 @@ export default function TeamRegistrationWizard() {
   const handleSubmitRegistration = async () => {
     if (!isConfirmed) {
       toast.error('Please confirm that all provided information is correct.');
+      return;
+    }
+
+    const leaderEmail = (teamInfo.leaderEmail || '').toLowerCase().trim();
+    const leaderPhone = (teamInfo.leaderPhone || '').trim();
+    const allEmails = [leaderEmail, ...members.map((m) => (m.email || '').toLowerCase().trim())];
+    const allPhones = [leaderPhone, ...members.map((m) => (m.phone || '').trim())];
+
+    const uniqueEmails = new Set(allEmails.filter(Boolean));
+    if (uniqueEmails.size < allEmails.length) {
+      toast.error('Team members cannot share duplicate email addresses. Each member must have a unique email.');
+      return;
+    }
+
+    const uniquePhones = new Set(allPhones.filter(Boolean));
+    if (uniquePhones.size < allPhones.length) {
+      toast.error('Team members cannot share duplicate phone numbers. Each member must have a unique phone number.');
       return;
     }
 

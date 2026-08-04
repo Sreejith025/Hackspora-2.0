@@ -1,7 +1,9 @@
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/registrations';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? 'https://hackspora-2-0.onrender.com/api/registrations' : '/api/registrations');
 
 export const registrationService = {
   // Check if Clerk user or email is already registered in MongoDB
