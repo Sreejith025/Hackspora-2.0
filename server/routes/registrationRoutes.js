@@ -91,10 +91,8 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Auto-generate Team ID
-    const count = await TeamRegistration.countDocuments();
-    const nextNum = (count + 1).toString().padStart(3, '0');
-    const teamId = `HS2026-${nextNum}`;
+    // Auto-generate Unique Team ID
+    const teamId = await TeamRegistration.generateUniqueTeamId();
 
     const newRegistration = new TeamRegistration({
       teamId,

@@ -116,9 +116,7 @@ const teamRegistrationSchema = new mongoose.Schema(
 // Auto-generate Team ID if not provided before saving
 teamRegistrationSchema.pre('validate', async function () {
   if (!this.teamId) {
-    const count = await mongoose.model('TeamRegistration').countDocuments();
-    const nextNum = (count + 1).toString().padStart(3, '0');
-    this.teamId = `HS2026-${nextNum}`;
+    this.teamId = await generateUniqueTeamId();
   }
 });
 
