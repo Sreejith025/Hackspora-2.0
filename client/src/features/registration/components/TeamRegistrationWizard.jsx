@@ -1019,11 +1019,16 @@ export default function TeamRegistrationWizard() {
 
       {/* Member Modal */}
       <AddMemberModal
+        key={isModalOpen ? `modal-${editingIndex ?? 'new'}` : 'closed'}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveMember}
         initialData={editingData}
         memberIndex={editingIndex}
+        defaultCollege={teamInfo.collegeName}
+        defaultBranch={teamInfo.branch}
+        defaultCity={teamInfo.city}
+        defaultState={teamInfo.state}
       />
 
       {/* Already Registered Modal */}
