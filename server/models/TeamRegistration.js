@@ -113,10 +113,37 @@ const teamRegistrationSchema = new mongoose.Schema(
   }
 );
 
+// Helper static method to generate next unique teamId (e.g. HS2026-015)
+teamRegistrationSchema.statics.generateUniqueTeamId = async function () {
+  const existingTeams = await this.find({ teamId: { $regex: /^HS2026-\d+$/ } }, { teamId: 1 }).lean();
+
+  let maxNum = 0;
+  existingTeams.forEach((t) => {
+    if (t.teamId) {
+      const match = t.teamId.match(/^HS2026-(\d+)$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    }
+  });
+
+  let nextNum = maxNum + 1;
+  let candidate = `HS2026-${nextNum.toString().padStart(3, '0')}`;
+
+  while (await this.exists({ teamId: candidate })) {
+    nextNum++;
+    candidate = `HS2026-${nextNum.toString().padStart(3, '0')}`;
+  }
+
+  return candidate;
+};
+
 // Auto-generate Team ID if not provided before saving
 teamRegistrationSchema.pre('validate', async function () {
   if (!this.teamId) {
-    this.teamId = await generateUniqueTeamId();
+    const TeamModel = this.constructor;
+    this.teamId = await TeamModel.generateUniqueTeamId();
   }
 });
 
