@@ -148,10 +148,9 @@ export default function HeroSection() {
                 {isRegistered ? (
                   <Link
                     to="/dashboard"
-                    className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 rounded-xl shadow-[0_0_25px_rgba(52,211,153,0.4)] hover:shadow-[0_0_40px_rgba(52,211,153,0.7)] transition-all duration-300 overflow-hidden w-full min-h-[48px] cursor-pointer"
+                    className="relative group inline-flex items-center justify-center px-7 py-3.5 sm:py-4 text-base font-extrabold text-white bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 rounded-xl shadow-[0_0_25px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_rgba(34,197,94,0.7)] hover:scale-[1.02] active:scale-95 transition-all duration-300 overflow-hidden w-full min-h-[48px] cursor-pointer"
                   >
                     <span className="relative z-10 flex items-center justify-center space-x-2">
-                      <HiCheckBadge className="w-5 h-5 text-slate-950" />
                       <span>✅ Registered</span>
                       <HiArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
                     </span>

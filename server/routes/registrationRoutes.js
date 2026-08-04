@@ -5,31 +5,65 @@ const TeamRegistration = require('../models/TeamRegistration');
 // @route   POST /api/registrations
 // @desc    Register a new team (Auto Verified, Unique HS2026-XXX Team ID)
 router.post('/', async (req, res) => {
+  console.log("Registration Request:", req.body);
+
   try {
     const {
+      clerkId,
       teamName,
       leaderName,
       leaderEmail,
       leaderPhone,
+      phone,
       collegeName,
+      college,
       course,
       branch,
+      department,
       year,
       city,
       state,
+      github,
+      videoLink,
+      paymentStatus,
+      status,
       members,
     } = req.body;
+
+    const finalLeaderPhone = leaderPhone || phone;
+    const finalCollegeName = collegeName || college;
+    const finalBranch = branch || department;
+
+    // Validate required fields
+    if (!teamName || !teamName.trim()) {
+      return res.status(400).json({ success: false, message: 'Team Name is required.' });
+    }
+    if (!leaderName || !leaderName.trim()) {
+      return res.status(400).json({ success: false, message: 'Leader Name is required.' });
+    }
+    if (!leaderEmail || !leaderEmail.trim()) {
+      return res.status(400).json({ success: false, message: 'Leader Email is required.' });
+    }
+    if (!finalLeaderPhone || !finalLeaderPhone.trim()) {
+      return res.status(400).json({ success: false, message: 'Leader Phone is required.' });
+    }
+    if (!finalCollegeName || !finalCollegeName.trim()) {
+      return res.status(400).json({ success: false, message: 'College Name is required.' });
+    }
+
+    const normalizedEmail = leaderEmail.toLowerCase().trim();
+    const normalizedTeamName = teamName.trim();
 
     // Check if leader email or team name already registered
     const existingRegistration = await TeamRegistration.findOne({
       $or: [
-        { leaderEmail: leaderEmail.toLowerCase().trim() },
-        { teamName: { $regex: new RegExp(`^${teamName.trim()}$`, 'i') } },
+        { leaderEmail: normalizedEmail },
+        { teamName: { $regex: new RegExp(`^${normalizedTeamName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } },
       ],
     });
 
     if (existingRegistration) {
-      if (existingRegistration.leaderEmail === leaderEmail.toLowerCase().trim()) {
+      if (existingRegistration.leaderEmail === normalizedEmail) {
         return res.status(400).json({
           success: false,
           message: 'This email is already registered as a team leader.',
@@ -43,14 +77,14 @@ router.post('/', async (req, res) => {
     }
 
     // Team size validation (Min 3 total: Leader + 2 members; Max 5 total: Leader + 4 members)
-    if (!members || !Array.isArray(members) || members.length < 2) {
+    const membersArray = Array.isArray(members) ? members : [];
+    if (membersArray.length < 2) {
       return res.status(400).json({
         success: false,
-        message: 'A team must contain at least 3 members.',
+        message: 'A team must contain at least 3 members (Leader + at least 2 members).',
       });
     }
-
-    if (members.length > 4) {
+    if (membersArray.length > 4) {
       return res.status(400).json({
         success: false,
         message: 'Maximum team size is 5 members.',
@@ -64,34 +98,82 @@ router.post('/', async (req, res) => {
 
     const newRegistration = new TeamRegistration({
       teamId,
-      teamName,
-      leaderName,
-      leaderEmail,
-      leaderPhone,
-      collegeName,
-      course,
-      branch,
-      year,
-      city,
-      state,
-      members: members || [],
-      status: 'Verified',
+      clerkId: clerkId || '',
+      teamName: normalizedTeamName,
+      leaderName: leaderName.trim(),
+      leaderEmail: normalizedEmail,
+      leaderPhone: finalLeaderPhone.trim(),
+      collegeName: finalCollegeName.trim(),
+      course: course || 'B.Tech',
+      branch: finalBranch || '',
+      department: finalBranch || '',
+      year: year || '',
+      city: city || '',
+      state: state || '',
+      github: github || '',
+      videoLink: videoLink || '',
+      paymentStatus: paymentStatus || 'Completed',
+      members: membersArray,
+      status: status || 'Verified',
     });
 
     const savedTeam = await newRegistration.save();
 
-    res.status(201).json({
+    console.log("Registration Saved");
+    console.log(savedTeam);
+    console.log(savedTeam._id);
+
+    return res.status(201).json({
       success: true,
       message: 'Team registered successfully.',
       data: savedTeam,
     });
   } catch (error) {
     console.error('Registration Error:', error);
-    res.status(500).json({
+    return res.status(400).json({
       success: false,
-      message: 'Server error during team registration.',
-      error: error.message,
+      message: error.message || 'Server error during team registration.',
     });
+  }
+});
+
+// @route   GET /api/registrations/check/:clerkId
+// @desc    Check if user is already registered
+router.get('/check/:clerkId', async (req, res) => {
+  try {
+    const { clerkId } = req.params;
+    const { email } = req.query;
+
+    const formattedEmail = email ? email.toLowerCase().trim() : '';
+    const formattedClerkId = clerkId && clerkId !== 'unauthenticated' ? clerkId.trim() : '';
+
+    let queryConditions = [];
+    if (formattedClerkId) {
+      queryConditions.push({ clerkId: formattedClerkId });
+    }
+    if (formattedEmail) {
+      queryConditions.push({ leaderEmail: formattedEmail });
+      queryConditions.push({ 'members.email': formattedEmail });
+    }
+
+    if (queryConditions.length === 0) {
+      return res.json({ registered: false });
+    }
+
+    const team = await TeamRegistration.findOne({ $or: queryConditions });
+
+    if (team) {
+      return res.json({
+        registered: true,
+        message: 'Already Registered',
+        data: team,
+      });
+    }
+
+    return res.json({ registered: false });
+  } catch (error) {
+    console.error('Check Registration Error:', error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 });
 

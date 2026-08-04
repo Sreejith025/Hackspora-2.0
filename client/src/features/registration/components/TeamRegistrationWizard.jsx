@@ -222,7 +222,7 @@ export default function TeamRegistrationWizard() {
         setIsAlreadyRegisteredModalOpen(true);
         toast.error('You are already registered for Hackspora 2.0.');
       } else {
-        toast.error(err.message || 'Registration failed. Please try again.');
+        toast.error(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
       }
     } finally {
       setIsSubmitting(false);

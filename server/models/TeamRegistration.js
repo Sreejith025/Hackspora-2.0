@@ -1,16 +1,17 @@
 const mongoose = require('mongoose');
 
 const memberSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  email: { type: String, required: true },
-  phone: { type: String, required: true },
+  fullName: { type: String, required: true, trim: true },
+  email: { type: String, required: true, trim: true, lowercase: true },
+  phone: { type: String, default: '' },
   github: { type: String, default: '' },
-  collegeName: { type: String, required: true },
-  course: { type: String, required: true },
-  branch: { type: String, required: true },
-  year: { type: String, required: true },
-  city: { type: String, required: true },
-  state: { type: String, required: true },
+  collegeName: { type: String, default: '' },
+  course: { type: String, default: '' },
+  branch: { type: String, default: '' },
+  department: { type: String, default: '' },
+  year: { type: String, default: '' },
+  city: { type: String, default: '' },
+  state: { type: String, default: '' },
 });
 
 const teamRegistrationSchema = new mongoose.Schema(
@@ -45,39 +46,61 @@ const teamRegistrationSchema = new mongoose.Schema(
     leaderPhone: {
       type: String,
       required: true,
+      trim: true,
     },
     collegeName: {
       type: String,
       required: true,
+      trim: true,
     },
     course: {
       type: String,
-      required: true,
+      default: 'B.Tech',
+      trim: true,
     },
     branch: {
       type: String,
-      required: true,
+      default: '',
+      trim: true,
+    },
+    department: {
+      type: String,
+      default: '',
+      trim: true,
     },
     year: {
       type: String,
-      required: true,
+      default: '',
+      trim: true,
     },
     city: {
       type: String,
-      required: true,
+      default: '',
+      trim: true,
     },
     state: {
       type: String,
-      required: true,
+      default: '',
+      trim: true,
+    },
+    github: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    videoLink: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    paymentStatus: {
+      type: String,
+      default: 'Completed',
+      trim: true,
     },
     members: {
       type: [memberSchema],
-      validate: {
-        validator: function (val) {
-          return Array.isArray(val) && val.length >= 2 && val.length <= 4;
-        },
-        message: 'A team must contain between 3 and 5 members in total (Leader + 2 to 4 additional members).',
-      },
+      default: [],
     },
     status: {
       type: String,
