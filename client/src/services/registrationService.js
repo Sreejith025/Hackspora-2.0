@@ -1,7 +1,26 @@
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/registrations';
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_URL.includes('localhost')) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01]))/.test(hostname)) {
+      return `http://${hostname}:5000/api/registrations`;
+    }
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return 'https://hackspora-2-0.onrender.com/api/registrations';
+    }
+  }
+
+  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api/registrations';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+console.log('[RegistrationService] Active API_BASE_URL:', API_BASE_URL);
 
 export const registrationService = {
   // Check if Clerk user or email is already registered in MongoDB Atlas

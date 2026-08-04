@@ -105,21 +105,24 @@ export default function TeamRegistrationWizard() {
     if (!teamInfo.state.trim()) errs.state = 'State is required';
 
     setErrors(errs);
-    return Object.keys(errs).length === 0;
+    if (Object.keys(errs).length > 0) {
+      const firstError = Object.values(errs)[0];
+      toast.error(firstError || 'Please fill in all required fields.');
+      window.scrollTo({ top: 120, behavior: 'smooth' });
+      return false;
+    }
+    return true;
   };
 
   const handleNextStep = () => {
     if (currentStep === 1) {
-      if (!validateStep1()) {
-        toast.error('Please fill in all required team information');
-        return;
-      }
+      if (!validateStep1()) return;
     }
 
     if (currentStep === 2) {
       const totalSquadSize = 1 + members.length;
       if (totalSquadSize < 3) {
-        toast.error('A team must contain at least 3 members.');
+        toast.error('A team must contain at least 3 members (Leader + at least 2 squad members).');
         return;
       }
       if (totalSquadSize > 5) {
@@ -129,6 +132,7 @@ export default function TeamRegistrationWizard() {
     }
 
     setCurrentStep((prev) => Math.min(prev + 1, 3));
+    window.scrollTo({ top: 100, behavior: 'smooth' });
   };
 
   const handlePrevStep = () => {
@@ -183,11 +187,15 @@ export default function TeamRegistrationWizard() {
   const handleSubmitRegistration = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
+    if (isSubmitting) return;
+
     console.log("Button Clicked: Submit Registration");
 
     if (!isConfirmed) {
       console.warn("Registration blocked: confirmation checkbox is false");
-      toast.error('Please confirm that all provided information is correct.');
+      toast.error('Please tap the confirmation checkbox below to complete registration.', { icon: '☑️' });
+      const checkEl = document.getElementById('confirmCheck');
+      if (checkEl) checkEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -778,9 +786,9 @@ export default function TeamRegistrationWizard() {
             id="confirmCheck"
             checked={isConfirmed}
             onChange={(e) => setIsConfirmed(e.target.checked)}
-            className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-400 focus:ring-offset-slate-950 cursor-pointer"
+            className="mt-1 w-5 h-5 min-w-[20px] min-h-[20px] rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-cyan-400 focus:ring-offset-slate-950 cursor-pointer"
           />
-          <label htmlFor="confirmCheck" className="text-xs text-slate-200 cursor-pointer leading-relaxed">
+          <label htmlFor="confirmCheck" className="text-xs sm:text-sm text-slate-200 cursor-pointer leading-relaxed select-none">
             I confirm that all information provided above is correct, accurate, and complete. I understand that registration verification is final.
           </label>
         </div>
@@ -788,18 +796,15 @@ export default function TeamRegistrationWizard() {
         {/* Large Glowing Submit Button */}
         <button
           type="submit"
-          disabled={!isConfirmed || isSubmitting}
+          disabled={isSubmitting}
           onClick={(e) => {
             console.log("Button Clicked: Complete Registration Submit");
             handleSubmitRegistration(e);
           }}
-          onTouchEnd={() => {
-            console.log("Button Touched: Complete Registration on mobile device");
-          }}
           className={`w-full py-4 rounded-2xl font-extrabold text-base transition-all flex items-center justify-center space-x-2 shadow-2xl cursor-pointer touch-manipulation relative z-20 ${
             isConfirmed && !isSubmitting
               ? 'bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300 text-slate-950 shadow-cyan-500/30 hover:scale-[1.02] active:scale-95'
-              : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+              : 'bg-gradient-to-r from-slate-800 to-slate-900 text-slate-400 hover:text-slate-200 border border-slate-700/60'
           }`}
         >
           {isSubmitting ? (
