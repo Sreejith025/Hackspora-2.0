@@ -5,6 +5,9 @@ import {
   HiCpuChip,
   HiGlobeAlt,
   HiShieldCheck,
+  HiArrowDownTray,
+  HiDocumentText,
+  HiEye,
 } from 'react-icons/hi2';
 
 const pillars = [
@@ -92,25 +95,78 @@ export default function AboutSection() {
           })}
         </div>
 
-        {/* Impact Numbers Banner */}
-        <div className="glass-card rounded-3xl p-8 border border-cyan-500/30 bg-gradient-to-r from-cyan-950/30 via-slate-900/90 to-purple-950/30 grid grid-cols-2 md:grid-cols-4 gap-6 text-center shadow-2xl">
-          <div>
-            <div className="text-3xl sm:text-4xl font-black text-cyan-300 font-mono">24 Hours</div>
-            <span className="text-xs text-slate-400 font-medium">Non-Stop Coding</span>
+        {/* Official Event Brochure Showcase */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.2 }}
+          transition={{ duration: 0.8 }}
+          className="glass-card rounded-3xl p-6 sm:p-10 border border-cyan-500/30 bg-gradient-to-b from-slate-900/90 via-slate-950/95 to-slate-900/90 shadow-2xl relative overflow-hidden"
+        >
+          {/* Ambient Background Glow */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Information & Download Action */}
+            <div className="lg:col-span-6 space-y-5 text-left">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-xs font-mono font-bold uppercase tracking-wider">
+                <HiDocumentText className="w-4 h-4 text-cyan-400" />
+                <span>OFFICIAL EVENT BROCHURE</span>
+              </div>
+
+              <h3 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Download the <span className="bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300 bg-clip-text text-transparent">Hackspora 2.0</span> Brochure
+              </h3>
+
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                Explore complete event information, problem tracks, venue guidelines, evaluation process, and registration details in our official brochure.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <a
+                  href="/broucher/bro1.jpg"
+                  download="Hackspora_2.0_Brochure.jpg"
+                  className="inline-flex items-center justify-center space-x-2.5 px-6 py-3.5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 hover:from-cyan-300 hover:to-indigo-300 shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:shadow-[0_0_35px_rgba(56,189,248,0.7)] hover:scale-[1.03] active:scale-95 transition-all duration-300 cursor-pointer"
+                >
+                  <HiArrowDownTray className="w-5 h-5 text-slate-950" />
+                  <span>Download Brochure</span>
+                </a>
+
+                <a
+                  href="/broucher/bro1.jpg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center space-x-2 px-5 py-3.5 rounded-xl font-bold text-sm text-slate-200 bg-slate-900/90 border border-slate-700/80 hover:border-cyan-400/50 hover:bg-slate-800 transition-all cursor-pointer"
+                >
+                  <HiEye className="w-4 h-4 text-cyan-400" />
+                  <span>View Full Image</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Right Column: Image Preview Card */}
+            <div className="lg:col-span-6 flex justify-center">
+              <div className="relative group/img max-w-md w-full rounded-2xl overflow-hidden border border-cyan-500/40 shadow-[0_0_30px_rgba(56,189,248,0.2)] bg-slate-950">
+                <img
+                  src="/broucher/bro1.jpg"
+                  alt="Hackspora 2.0 Official Brochure"
+                  className="w-full h-auto object-cover rounded-2xl group-hover/img:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                  <a
+                    href="/broucher/bro1.jpg"
+                    download="Hackspora_2.0_Brochure.jpg"
+                    className="px-4 py-2 rounded-lg bg-cyan-400 text-slate-950 text-xs font-bold flex items-center space-x-1.5 shadow-lg hover:bg-cyan-300 transition-colors"
+                  >
+                    <HiArrowDownTray className="w-4 h-4" />
+                    <span>Download High-Res Brochure</span>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-3xl sm:text-4xl font-black text-indigo-300 font-mono">₹25,000+</div>
-            <span className="text-xs text-slate-400 font-medium">Prizes & Grants</span>
-          </div>
-          <div>
-            <div className="text-3xl sm:text-4xl font-black text-purple-300 font-mono">1,500+</div>
-            <span className="text-xs text-slate-400 font-medium">Student Hackers</span>
-          </div>
-          <div>
-            <div className="text-3xl sm:text-4xl font-black text-emerald-300 font-mono">100%</div>
-            <span className="text-xs text-slate-400 font-medium">Free & Verified</span>
-          </div>
-        </div>
+        </motion.div>
       </motion.div>
     </section>
   );

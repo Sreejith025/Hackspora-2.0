@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { UserButton } from '@clerk/clerk-react';
-import { HiSparkles, HiBell, HiClock, HiSignal } from 'react-icons/hi2';
+import { HiBell, HiClock, HiSignal } from 'react-icons/hi2';
 
 export default function ParticipantTopNav({ serverTime, countdown, submission }) {
   return (
@@ -8,14 +8,24 @@ export default function ParticipantTopNav({ serverTime, countdown, submission })
       <div className="max-w-[1600px] mx-auto flex items-center justify-between">
         {/* Left: Brand Logo & Round Badge */}
         <div className="flex items-center space-x-3 sm:space-x-4">
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="p-1.5 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white shadow-md shadow-cyan-500/20">
-              <HiSparkles className="w-5 h-5" />
+          <Link to="/" className="flex items-center space-x-2.5 group">
+            <div className="p-1 rounded-xl bg-slate-900/90 border border-cyan-500/40 shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+              <img
+                src="/logos/hackspora.jpg"
+                alt="Hackspora 2.0 Logo"
+                className="h-7 sm:h-8 w-auto rounded-lg object-contain bg-white p-0.5"
+              />
             </div>
             <span className="text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
               Hackspora <span className="text-cyan-400 font-black">2.0</span>
             </span>
           </Link>
+
+          {/* KAHE & AIDS Logos */}
+          <div className="hidden lg:flex items-center space-x-2 border-l border-slate-800/80 pl-3">
+            <img src="/logos/kahe.jpg" alt="KAHE Logo" className="h-6 w-auto rounded object-contain bg-white p-0.5" />
+            <img src="/logos/aids.jpg" alt="AIDS Logo" className="h-6 w-auto rounded object-contain bg-white p-0.5" />
+          </div>
 
           <span className="hidden md:inline text-slate-700">•</span>
 

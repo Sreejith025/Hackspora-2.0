@@ -203,7 +203,7 @@ export default function GuidelinesSection() {
                     <span>IMPORTANT: Registration Fee Details</span>
                   </div>
                   <p className="leading-relaxed">
-                    The registration fee of <strong className="text-white">₹1250 per Team</strong> will be collected <strong>ONLY</strong> after a team is shortlisted in the Virtual Screening Round (Round 1) and confirms participation for the Offline Grand Finale (Round 2).
+                    The registration fee of <strong className="text-white">₹1250 Per Team</strong> will be collected <strong>ONLY</strong> after a team is shortlisted in the Virtual Screening Round (Round 1) and confirms participation for the Offline Grand Finale (Round 2).
                   </p>
                 </div>
               </motion.div>

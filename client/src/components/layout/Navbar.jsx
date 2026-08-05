@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser, UserButton } from '@clerk/clerk-react';
-import { HiBars3, HiXMark, HiSparkles } from 'react-icons/hi2';
+import { HiBars3, HiXMark } from 'react-icons/hi2';
 import { isAdminUser } from '../../constants/authConfig';
 
 const sectionLinks = [
@@ -124,19 +124,62 @@ export default function Navbar() {
       >
         <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link
-              to="/"
-              onClick={() => handleNavClick('home')}
-              className="flex items-center space-x-2.5 group"
-            >
-              <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
-                <HiSparkles className="w-5 h-5" />
+            {/* Header Brand & Institutional Logos */}
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              {/* Main Hackspora Logo */}
+              <Link
+                to="/"
+                onClick={() => handleNavClick('home')}
+                className="flex items-center space-x-2.5 group cursor-pointer"
+              >
+                <div className="relative p-1 rounded-xl bg-slate-900/90 border border-cyan-500/40 shadow-md shadow-cyan-500/20 group-hover:scale-105 group-hover:border-cyan-400 transition-all duration-300">
+                  <img
+                    src="/logos/hackspora.jpg"
+                    alt="Hackspora 2.0 Logo"
+                    className="h-8 sm:h-9 w-auto rounded-lg object-contain bg-white p-0.5"
+                  />
+                </div>
+                <span className="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
+                  Hackspora <span className="text-cyan-400 font-black">2.0</span>
+                </span>
+              </Link>
+
+              {/* Vertical Separator */}
+              <div className="h-6 w-px bg-slate-800 hidden sm:block" />
+
+              {/* Header Institutional Badges (KAHE & AIDS) */}
+              <div className="flex items-center space-x-2 sm:space-x-2.5">
+                {/* KAHE Logo */}
+                <div
+                  className="flex items-center space-x-1.5 px-2 py-1 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/40 transition-all shadow-sm group"
+                  title="Karpagam Academy of Higher Education (KAHE)"
+                >
+                  <img
+                    src="/logos/kahe.jpg"
+                    alt="KAHE Logo"
+                    className="h-6 sm:h-7 w-auto rounded object-contain bg-white p-0.5 group-hover:scale-105 transition-transform"
+                  />
+                  <span className="text-xs font-bold text-slate-300 hidden md:inline tracking-wide">
+                    KAHE
+                  </span>
+                </div>
+
+                {/* AIDS Logo */}
+                <div
+                  className="flex items-center space-x-1.5 px-2 py-1 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/40 transition-all shadow-sm group"
+                  title="Department of Artificial Intelligence & Data Science (AIDS)"
+                >
+                  <img
+                    src="/logos/aids.jpg"
+                    alt="AIDS Dept Logo"
+                    className="h-6 sm:h-7 w-auto rounded object-contain bg-white p-0.5 group-hover:scale-105 transition-transform"
+                  />
+                  <span className="text-xs font-bold text-slate-300 hidden md:inline tracking-wide">
+                    AI & DS
+                  </span>
+                </div>
               </div>
-              <span className="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
-                Hackspora <span className="text-cyan-400 font-black">2.0</span>
-              </span>
-            </Link>
+            </div>
 
             {/* Desktop Navigation Links (Scroll Spy) */}
             <nav className="hidden lg:flex items-center space-x-1">
@@ -255,12 +298,14 @@ export default function Navbar() {
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-slate-950/95 backdrop-blur-2xl border-l border-slate-800/80 p-6 flex flex-col justify-between shadow-2xl overflow-y-auto lg:hidden"
               >
-                <div className="flex items-center justify-between pb-6 border-b border-slate-800/80">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
-                      <HiSparkles className="w-4 h-4" />
-                    </div>
-                    <span className="font-extrabold text-lg text-white">Navigation</span>
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+                  <div className="flex items-center space-x-2.5">
+                    <img
+                      src="/logos/hackspora.jpg"
+                      alt="Hackspora 2.0 Logo"
+                      className="h-8 w-auto rounded-lg object-contain bg-white p-0.5 border border-cyan-500/40"
+                    />
+                    <span className="font-extrabold text-lg text-white">Hackspora 2.0</span>
                   </div>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
@@ -268,6 +313,19 @@ export default function Navbar() {
                   >
                     <HiXMark className="w-5 h-5 text-cyan-400" />
                   </button>
+                </div>
+
+                {/* Mobile Institutional Header Badges */}
+                <div className="flex items-center justify-around py-2.5 px-3 my-3 rounded-xl bg-slate-900/90 border border-slate-800/80">
+                  <div className="flex items-center space-x-2">
+                    <img src="/logos/kahe.jpg" alt="KAHE Logo" className="h-6 w-auto rounded object-contain bg-white p-0.5" />
+                    <span className="text-xs font-bold text-slate-300">KAHE</span>
+                  </div>
+                  <div className="h-4 w-px bg-slate-800" />
+                  <div className="flex items-center space-x-2">
+                    <img src="/logos/aids.jpg" alt="AIDS Logo" className="h-6 w-auto rounded object-contain bg-white p-0.5" />
+                    <span className="text-xs font-bold text-slate-300">AI & DS</span>
+                  </div>
                 </div>
 
                 <div className="flex flex-col space-y-2 py-6">

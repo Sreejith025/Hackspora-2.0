@@ -1,14 +1,13 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  HiSparkles,
   HiEnvelope,
   HiPhone,
-  HiMapPin,
   HiArrowUp,
-  HiBuildingLibrary,
   HiShieldCheck,
   HiDocumentText,
   HiHeart,
+  HiUserGroup,
+  HiCpuChip,
 } from 'react-icons/hi2';
 import { FaGithub, FaLinkedin, FaInstagram, FaXTwitter, FaDiscord } from 'react-icons/fa6';
 
@@ -81,19 +80,26 @@ export default function Footer() {
             <Link
               to="/"
               onClick={() => handleNavClick('home')}
-              className="inline-flex items-center space-x-2.5 group"
+              className="inline-flex items-center space-x-2.5 group cursor-pointer"
             >
-              <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
-                <HiSparkles className="w-5 h-5" />
+              <div className="p-1 rounded-xl bg-slate-900/90 border border-cyan-500/40 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
+                <img
+                  src="/logos/hackspora.jpg"
+                  alt="Hackspora 2.0 Logo"
+                  className="h-9 w-auto rounded-lg object-contain bg-white p-0.5"
+                />
               </div>
               <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-cyan-400 bg-clip-text text-transparent">
                 Hackspora <span className="text-cyan-400 font-black">2.0</span>
               </span>
             </Link>
 
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono font-medium">
-              <HiBuildingLibrary className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Dept. of AI & DS, KAHE</span>
+            <div className="flex items-center space-x-2.5">
+              <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-xs font-mono font-medium">
+                <img src="/logos/kahe.jpg" alt="KAHE Logo" className="h-4 w-auto rounded bg-white p-0.5" />
+                <img src="/logos/aids.jpg" alt="AIDS Logo" className="h-4 w-auto rounded bg-white p-0.5" />
+                <span className="ml-1">Dept. of AI & DS, KAHE</span>
+              </div>
             </div>
 
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
@@ -120,55 +126,113 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Quick Links (3 cols) */}
-          <div className="lg:col-span-3 space-y-4">
-            <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-cyan-400">
-              Quick Navigation
-            </h3>
-            <ul className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-              {quickLinks.map((link) => (
-                <li key={link.id}>
-                  <button
-                    onClick={() => handleNavClick(link.id)}
-                    className="text-slate-400 hover:text-cyan-300 transition-colors py-1 flex items-center space-x-1.5 cursor-pointer group"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-cyan-400 transition-colors" />
-                    <span>{link.name}</span>
-                  </button>
+          {/* Column 2: Mission Control & Tech Force (3 cols) */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Mission Control */}
+            <div className="space-y-2.5">
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center space-x-1.5">
+                <HiUserGroup className="w-4 h-4 text-cyan-400" />
+                <span>MISSION CONTROL</span>
+              </h3>
+              <ul className="space-y-1 text-xs sm:text-sm text-slate-300 pl-1">
+                <li className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                  <span>Ms. ANUSRI A</span>
                 </li>
-              ))}
-            </ul>
-          </div>
+                <li className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                  <span>Mr. PRASANNA S</span>
+                </li>
+              </ul>
+            </div>
 
-          {/* Column 3: Contact & Venue Info (3 cols) */}
-          <div className="lg:col-span-3 space-y-4">
-            <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-cyan-400">
-              Contact & Venue
-            </h3>
-            <div className="space-y-3 text-xs sm:text-sm text-slate-300">
-              <div className="flex items-start space-x-3">
-                <HiEnvelope className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <a href="mailto:hackspora2.0@gmail.com" className="hover:text-cyan-300 transition-colors">
-                  hackspora2.0@gmail.com
-                </a>
-              </div>
-              <div className="flex items-start space-x-3">
-                <HiPhone className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <a href="tel:+919043869570" className="hover:text-cyan-300 transition-colors">
-                  +91 90438 69570
-                </a>
-              </div>
-              <div className="flex items-start space-x-3">
-                <HiMapPin className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <span className="text-slate-400">
-                  KAHE Campus, Eachanari Post, Coimbatore, TN 641021
-                </span>
-              </div>
+            {/* Tech Force */}
+            <div className="space-y-2.5 pt-2 border-t border-slate-800/60">
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400 flex items-center space-x-1.5">
+                <HiCpuChip className="w-4 h-4 text-indigo-400" />
+                <span>TECH FORCE</span>
+              </h3>
+              <ul className="space-y-1 text-xs sm:text-sm text-slate-300 pl-1">
+                <li className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                  <span>Mr. SREEJITH M</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                  <span>Mr. PRABHU S</span>
+                </li>
+              </ul>
             </div>
           </div>
 
-          {/* Column 4: Back to Top & Badges (2 cols) */}
-          <div className="lg:col-span-2 space-y-4 flex flex-col justify-between items-start md:items-end">
+          {/* Column 3: Help Zone & Support Email (3 cols) */}
+          <div className="lg:col-span-3 space-y-5">
+            {/* Help Zone */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center space-x-1.5">
+                <HiPhone className="w-4 h-4 text-emerald-400" />
+                <span>HELP ZONE</span>
+              </h3>
+              <div className="space-y-2.5 text-xs sm:text-sm text-slate-300 pl-1">
+                <div>
+                  <div className="font-semibold text-white">Mr. SUYAMBU ANANDH J</div>
+                  <a
+                    href="tel:+917708118216"
+                    className="inline-flex items-center space-x-1.5 text-cyan-300 hover:text-cyan-200 transition-colors mt-0.5 text-xs font-mono font-medium"
+                  >
+                    <HiPhone className="w-3 h-3 text-cyan-400" />
+                    <span>+91 77081 18216</span>
+                  </a>
+                </div>
+
+                <div>
+                  <div className="font-semibold text-white">Mr. HARISH S</div>
+                  <a
+                    href="tel:+918056698240"
+                    className="inline-flex items-center space-x-1.5 text-cyan-300 hover:text-cyan-200 transition-colors mt-0.5 text-xs font-mono font-medium"
+                  >
+                    <HiPhone className="w-3 h-3 text-cyan-400" />
+                    <span>+91 80566 98240</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Support Email */}
+            <div className="pt-3 border-t border-slate-800/60 space-y-1.5">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+                SUPPORT EMAIL
+              </div>
+              <a
+                href="mailto:hackspora2.0@gmail.com"
+                className="inline-flex items-center space-x-2 text-xs sm:text-sm text-cyan-300 hover:text-cyan-200 transition-colors"
+              >
+                <HiEnvelope className="w-4 h-4 text-cyan-400 shrink-0" />
+                <span className="font-medium">hackspora2.0@gmail.com</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Column 4: Quick Navigation & Back to Top (2 cols) */}
+          <div className="lg:col-span-2 space-y-5 flex flex-col justify-between items-start md:items-end">
+            <div className="w-full space-y-3">
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 md:text-right">
+                Quick Navigation
+              </h3>
+              <ul className="space-y-1.5 text-xs text-slate-400 md:text-right">
+                {quickLinks.map((link) => (
+                  <li key={link.id}>
+                    <button
+                      onClick={() => handleNavClick(link.id)}
+                      className="hover:text-cyan-300 transition-colors cursor-pointer"
+                    >
+                      {link.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <button
               onClick={scrollToTop}
               className="px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white hover:border-cyan-400/50 hover:bg-slate-800 transition-all flex items-center space-x-2 text-xs font-semibold shadow-lg group cursor-pointer"
@@ -176,13 +240,6 @@ export default function Footer() {
               <span>Back to top</span>
               <HiArrowUp className="w-4 h-4 text-cyan-400 group-hover:-translate-y-0.5 transition-transform" />
             </button>
-
-            <div className="text-right space-y-1 hidden lg:block">
-              <div className="inline-flex items-center space-x-1.5 text-[11px] text-slate-400 font-mono">
-                <HiShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Verified Event Portal</span>
-              </div>
-            </div>
           </div>
 
         </div>

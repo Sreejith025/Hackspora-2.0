@@ -97,7 +97,7 @@ export default function HeroSection() {
             <motion.div variants={itemVariants} className="inline-flex items-center w-full sm:w-auto">
               <div className="inline-flex items-center space-x-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-slate-950/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold tracking-wide shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:border-cyan-400/50 transition-colors max-w-full">
                 <HiRocketLaunch className="w-4 h-4 text-cyan-400 animate-pulse shrink-0" />
-                <span className="truncate">🚀 Tamil Nadu&apos;s Premier 24H Hackathon</span>
+                <span className="truncate">🚀 National Level 24H Hackathon</span>
               </div>
             </motion.div>
 
