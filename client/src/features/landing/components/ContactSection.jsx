@@ -15,18 +15,12 @@ export default function ContactSection() {
   const [isSending, setIsSending] = useState(false);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
     if (!form.name || !form.email || !form.message) {
+      e.preventDefault();
       toast.error('Please fill in all contact fields.');
       return;
     }
-
     setIsSending(true);
-    setTimeout(() => {
-      setIsSending(false);
-      setForm({ name: '', email: '', message: '' });
-      toast.success('Your message has been sent to the Hackspora team!');
-    }, 1000);
   };
 
   return (
@@ -108,13 +102,26 @@ export default function ContactSection() {
           <div className="lg:col-span-7 glass-card p-6 sm:p-8 rounded-3xl border border-cyan-500/30 shadow-2xl space-y-4">
             <h3 className="text-xl font-black text-white">Send Us a Message</h3>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form
+              action="https://formsubmit.co/hackspora2.0@gmail.com"
+              method="POST"
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              {/* FormSubmit Configuration */}
+              <input type="hidden" name="_next" value="https://hackspora-2-0.vercel.app" />
+              <input type="hidden" name="_subject" value="New Contact Message - Hackspora 2.0" />
+              <input type="hidden" name="_template" value="table" />
+              <input type="hidden" name="_captcha" value="false" />
+
               <div>
                 <label className="block text-xs font-mono text-cyan-300 font-bold mb-1 uppercase tracking-wider">
                   Your Name *
                 </label>
                 <input
                   type="text"
+                  name="name"
+                  required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. Alex Johnson"
@@ -128,6 +135,8 @@ export default function ContactSection() {
                 </label>
                 <input
                   type="email"
+                  name="email"
+                  required
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="alex@college.edu"
@@ -141,6 +150,8 @@ export default function ContactSection() {
                 </label>
                 <textarea
                   rows="4"
+                  name="message"
+                  required
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   placeholder="Write your query or message..."

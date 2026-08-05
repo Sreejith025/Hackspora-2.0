@@ -148,8 +148,8 @@ export default function Footer() {
             <div className="space-y-3 text-xs sm:text-sm text-slate-300">
               <div className="flex items-start space-x-3">
                 <HiEnvelope className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <a href="mailto:support@hackspora.in" className="hover:text-cyan-300 transition-colors">
-                  support@hackspora.in
+                <a href="mailto:hackspora2.0@gmail.com" className="hover:text-cyan-300 transition-colors">
+                  hackspora2.0@gmail.com
                 </a>
               </div>
               <div className="flex items-start space-x-3">
