@@ -245,7 +245,7 @@ export default function HeroSection() {
                   </span>
                 </div>
                 <div className="mt-2">
-                  <span className="block text-lg sm:text-2xl font-black text-white">₹1,LacK+</span>
+                  <span className="block text-lg sm:text-2xl font-black text-white">₹1,LAKH+</span>
                   <span className="block text-[10px] text-slate-400 font-medium">Pool & Swag</span>
                 </div>
               </TiltCard>
