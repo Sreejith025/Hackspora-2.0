@@ -103,7 +103,7 @@ export default function ContactSection() {
             <h3 className="text-xl font-black text-white">Send Us a Message</h3>
 
             <form
-              action="https://formsubmit.co/hackspora2.0@gmail.com"
+              action="https://formsubmit.co/abisri024@gmail.com"
               method="POST"
               onSubmit={handleSubmit}
               className="space-y-4"
