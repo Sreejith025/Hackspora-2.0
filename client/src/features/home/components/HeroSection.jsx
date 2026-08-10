@@ -93,6 +93,29 @@ export default function HeroSection() {
             animate="visible"
             className="lg:col-span-8 flex flex-col items-start text-left space-y-5 sm:space-y-7"
           >
+            {/* Institutional Header Banner under Navbar */}
+            <motion.div
+              variants={itemVariants}
+              className="p-3.5 sm:p-4 rounded-2xl bg-slate-950/90 border border-slate-800/80 shadow-2xl backdrop-blur-xl flex flex-col sm:flex-row items-center sm:items-start space-y-2.5 sm:space-y-0 sm:space-x-3.5 max-w-2xl group hover:border-cyan-500/40 transition-all duration-300"
+            >
+              <div className="flex items-center shrink-0">
+                <img
+                  src="/logos/aids.jpg"
+                  alt="AIDS Logo"
+                  className="h-10 sm:h-11 w-auto rounded-xl object-contain bg-white p-1 border border-cyan-500/30 shadow-md group-hover:scale-105 transition-transform"
+                />
+              </div>
+
+              <div className="text-center sm:text-left space-y-1">
+                <h2 className="text-xs sm:text-sm font-black tracking-tight text-white uppercase bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent">
+                  KARPAGAM ACADEMY OF HIGHER EDUCATION
+                </h2>
+                <p className="text-[10px] sm:text-[11px] text-slate-300 leading-snug font-sans font-medium">
+                  (Deemed to be University) (Established Under Section 3 of UGC Act, 1956) Accredited with A+ Grade by NAAC in the Second cycle, Pollachi Main Road, Eachanari Post, Coimbatore-641021.ÍNDIA
+                </p>
+              </div>
+            </motion.div>
+
             {/* Small Badge */}
             <motion.div variants={itemVariants} className="inline-flex items-center w-full sm:w-auto">
               <div className="inline-flex items-center space-x-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-slate-950/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold tracking-wide shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:border-cyan-400/50 transition-colors max-w-full">
@@ -101,10 +124,10 @@ export default function HeroSection() {
               </div>
             </motion.div>
 
-            {/* Mobile-Optimized Hero Heading (Max 2 lines, Never Clipped) */}
+            {/* Single-Line Hero Heading */}
             <motion.div variants={itemVariants} className="space-y-2 sm:space-y-3 w-full relative">
               <div className="relative inline-block max-w-full">
-                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[9rem] font-black tracking-tight text-[#E2F7FF] text-glow-ice leading-[1.05] break-words">
+                <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black tracking-tight text-[#E2F7FF] text-glow-ice leading-[1.05] whitespace-nowrap">
                   <span className="bg-gradient-to-r from-white via-slate-100 to-[#DDF7FF] bg-clip-text text-transparent">
                     HACKSPORA
                   </span>{' '}
@@ -217,7 +240,7 @@ export default function HeroSection() {
                 <span>AI & CLOUD CIRCUIT</span>
               </div>
               <span className="hidden sm:inline">•</span>
-              <span className="text-slate-300 font-semibold">24H NON-STOP</span>
+              <span className="text-slate-300 font-semibold">24HOURS NON-STOP</span>
             </motion.div>
           </motion.div>
 

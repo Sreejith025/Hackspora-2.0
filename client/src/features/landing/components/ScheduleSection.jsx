@@ -159,7 +159,7 @@ export default function ScheduleSection() {
             </h2>
 
             <p className="text-sm sm:text-base text-slate-300">
-              Aug 23 (Virtual Screening) & Sep 18–19 (24H Offline Grand Finale at KAHE, Coimbatore).
+              Aug 23 (Virtual Screening) & Sep 18–19 (24HOURS Offline Grand Finale at KAHE, Coimbatore).
             </p>
           </div>
 

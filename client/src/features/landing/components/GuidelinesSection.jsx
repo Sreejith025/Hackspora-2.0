@@ -11,7 +11,6 @@ import {
   HiTrophy,
   HiBriefcase,
   HiLightBulb,
-  HiBuildingLibrary,
   HiShieldCheck,
   HiCodeBracket,
   HiScale,
@@ -114,18 +113,6 @@ export default function GuidelinesSection() {
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             HackSpora 2.0 – <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">National Level Hackathon</span>
           </h2>
-
-          <div className="pt-2 text-xs sm:text-sm text-slate-300 flex flex-wrap items-center justify-center gap-3 font-mono">
-            <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-cyan-300">
-              <HiBuildingLibrary className="w-4 h-4" />
-              <span>Dept of AI & DS, KAHE</span>
-            </span>
-            <span className="text-slate-500">•</span>
-            <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-purple-300">
-              <HiShieldCheck className="w-4 h-4" />
-              <span>In Association with AI Qubit</span>
-            </span>
-          </div>
         </div>
 
         {/* Navigation Tabs */}

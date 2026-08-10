@@ -56,6 +56,23 @@ export default function ParticipantSidebar({ activeTab, setActiveTab, submission
           );
         })}
       </nav>
+
+      {/* Institutional Details & AIDS Logo under Left Sidebar */}
+      <div className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800/80 space-y-2 pt-3">
+        <div className="flex items-center space-x-2">
+          <img
+            src="/logos/aids.jpg"
+            alt="AIDS Logo"
+            className="h-7 w-auto rounded object-contain bg-white p-0.5 border border-cyan-500/30 shrink-0"
+          />
+          <div className="text-[11px] font-bold text-white leading-tight">
+            KARPAGAM ACADEMY OF HIGHER EDUCATION
+          </div>
+        </div>
+        <p className="text-[9px] text-slate-400 leading-snug">
+          (Deemed to be University) (Established Under Section 3 of UGC Act, 1956) Accredited with A+ Grade by NAAC in the Second cycle, Pollachi Main Road, Eachanari Post, Coimbatore-641 021.INDIA
+        </p>
+      </div>
     </div>
   );
 }
