@@ -319,7 +319,7 @@ export default function HeroSection() {
                   </div>
                   <div>
                     <span className="block text-[10px] font-semibold text-slate-400 uppercase">Event Dates</span>
-                    <span className="block text-xs font-bold text-white">Aug 23 & Sep 18–19, 2026</span>
+                    <span className="block text-xs font-bold text-white">Aug 23 & Sep 19–20, 2026</span>
                   </div>
                 </div>
 

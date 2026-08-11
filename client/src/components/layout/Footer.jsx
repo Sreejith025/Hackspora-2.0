@@ -159,7 +159,7 @@ export default function Footer() {
                 </li>
                 <li className="flex items-center space-x-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
-                  <span>Mr. PRABHU S</span>
+                  <span>Mr. SAILESH T</span>
                 </li>
               </ul>
             </div>
@@ -186,13 +186,13 @@ export default function Footer() {
                 </div>
 
                 <div>
-                  <div className="font-semibold text-white">Mr. HARISH S</div>
+                  <div className="font-semibold text-white">Mr. DHAYANITHI N</div>
                   <a
                     href="tel:+918056698240"
                     className="inline-flex items-center space-x-1.5 text-cyan-300 hover:text-cyan-200 transition-colors mt-0.5 text-xs font-mono font-medium"
                   >
                     <HiPhone className="w-3 h-3 text-cyan-400" />
-                    <span>+91 80566 98240</span>
+                    <span>+91 73393 64267</span>
                   </a>
                 </div>
               </div>
