@@ -345,11 +345,9 @@ export default function HeroSection() {
                   <span>Sponsors</span>
                 </div>
                 <div className="flex items-center space-x-2 text-[10px] font-mono tracking-wider text-cyan-300/80">
-                  <span>DEVNET</span>
+                  <span>TECHNO VERSATILE</span>
                   <span>•</span>
-                  <span>NEXUS</span>
-                  <span>•</span>
-                  <span>CLOUD</span>
+                  <span>SYNVOLVE INTELLIS</span>
                 </div>
               </div>
             </TiltCard>
