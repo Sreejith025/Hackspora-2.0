@@ -5,9 +5,7 @@ import './index.css';
 import App from './App.jsx';
 
 const PUBLISHABLE_KEY =
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
-  import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-  'pk_test_Y2FwaXRhbC10aHJ1c2gtOS5jbGVyay5hY2NvdW50cy5kZXYk';
+import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 
 createRoot(document.getElementById('root')).render(

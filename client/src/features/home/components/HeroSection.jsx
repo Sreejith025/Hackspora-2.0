@@ -110,8 +110,8 @@ export default function HeroSection() {
                 <h2 className="text-xs sm:text-sm font-black tracking-tight text-white uppercase bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent">
                   KARPAGAM ACADEMY OF HIGHER EDUCATION
                 </h2>
-                <p className="text-[10px] sm:text-[11px] text-slate-300 leading-snug font-sans font-medium">
-                  (Deemed to be University) (Established Under Section 3 of UGC Act, 1956) Accredited with A+ Grade by NAAC in the Second cycle, Pollachi Main Road, Eachanari Post, Coimbatore-641021.ÍNDIA
+                <p className="text-[12px] sm:text-[14px] text-slate-300 leading-snug font-sans font-medium">
+                  (DEPARTMENT OF ARTIFICIAL INTELLIGENCE AND DATA SCIENCE) (IN ASSOCIATION WITH AIQUBIT) IN COLLABORATION WITH WITH SYNOVOLVE & TECHNOVERSE
                 </p>
               </div>
             </motion.div>
@@ -120,7 +120,7 @@ export default function HeroSection() {
             <motion.div variants={itemVariants} className="inline-flex items-center w-full sm:w-auto">
               <div className="inline-flex items-center space-x-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-slate-950/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold tracking-wide shadow-[0_0_20px_rgba(56,189,248,0.15)] hover:border-cyan-400/50 transition-colors max-w-full">
                 <HiRocketLaunch className="w-4 h-4 text-cyan-400 animate-pulse shrink-0" />
-                <span className="truncate">🚀 National Level 24H Hackathon</span>
+                <span className="truncate">🚀 National Level 24HOURS Hackathon</span>
               </div>
             </motion.div>
 
