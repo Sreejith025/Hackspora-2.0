@@ -9,6 +9,6 @@ export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'abisri024@gmail.
  * @returns {boolean}
  */
 export function isAdminUser(email) {
-  if (!email) return false;
-  return email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+ if (!email) return false;
+ return email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
 }
