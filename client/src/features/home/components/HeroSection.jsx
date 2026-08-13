@@ -94,9 +94,7 @@ export default function HeroSection() {
  style={{ scale: heroScale, opacity: heroOpacity }}
  className="relative z-10 max-w-[1600px] w-full mx-auto"
  >
-
  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center">
-
  {/* LEFT/CENTER: Hero Copy — Centered */}
  <motion.div
  variants={containerVariants}
@@ -225,7 +223,6 @@ export default function HeroSection() {
  </motion.div>
 
  </motion.div>
-
  </div>
  </motion.div>
  </section>
