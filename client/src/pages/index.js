@@ -13,3 +13,5 @@ export { default as Workspace } from './Workspace';
 export { default as AdminDashboard } from './AdminDashboard';
 export { default as ParticipantDashboard } from './ParticipantDashboard';
 export { default as NotFound } from './NotFound';
+export { default as TermsOfService } from './TermsOfService';
+export { default as PrivacyPolicy } from './PrivacyPolicy';

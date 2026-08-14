@@ -1,369 +1,450 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser, UserButton } from '@clerk/clerk-react';
 import { HiBars3, HiXMark } from 'react-icons/hi2';
 import { isAdminUser } from '../../constants/authConfig';
+import { useRegisterFlow } from '../../hooks';
 
 const sectionLinks = [
-  { name: 'Home', id: 'home' },
-  { name: 'About', id: 'about' },
-  { name: 'Guidelines', id: 'guidelines' },
-  { name: 'Problem Statements', id: 'problems' },
-  { name: 'Schedule', id: 'schedule' },
-  { name: 'FAQ', id: 'faq' },
-  { name: 'Contact', id: 'contact' },
+ { name: 'Home', id: 'home' },
+ { name: 'About', id: 'about' },
+ { name: 'Guidelines', id: 'guidelines' },
+ { name: 'Schedule', id: 'schedule' },
+ { name: 'FAQ', id: 'faq' },
+ { name: 'Contact', id: 'contact' },
 ];
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [activeSection, setActiveSection] = useState('home');
+ const [isScrolled, setIsScrolled] = useState(false);
+ const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+ const [activeSection, setActiveSection] = useState('home');
+ const scrollSpySuspendedRef = useRef(false);
 
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { isSignedIn, user } = useUser();
+ const location = useLocation();
+ const navigate = useNavigate();
+ const { isSignedIn, user } = useUser();
 
-  const userEmail = user?.primaryEmailAddress?.emailAddress;
-  const isAdmin = isSignedIn && isAdminUser(userEmail);
+ const userEmail = user?.primaryEmailAddress?.emailAddress;
+ const isAdmin = isSignedIn && isAdminUser(userEmail);
 
-  // Handle Scroll Progress, Navbar Blur, and Scroll Spy
-  useEffect(() => {
-    const handleScroll = () => {
-      // 1. Navbar Glassmorphism Blur state
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+ const { isRegistered } = useRegisterFlow();
 
-      // 2. Scroll Progress Percentage Bar
-      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
-      setScrollProgress(scrolled);
-    };
+ // Handle Navbar Blur and Scroll Spy
+ useEffect(() => {
+ const handleScroll = () => {
+ // Navbar Glassmorphism Blur state
+ if (window.scrollY > 20) {
+ setIsScrolled(true);
+ } else {
+ setIsScrolled(false);
+ }
+ };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+ window.addEventListener('scroll', handleScroll);
+ return () => window.removeEventListener('scroll', handleScroll);
+ }, []);
 
-  // Intersection Observer for Scroll Spy
-  useEffect(() => {
-    if (location.pathname !== '/') return;
+ // Intersection Observer for Scroll Spy
+ useEffect(() => {
+ if (location.pathname !== '/') return;
 
-    const sections = sectionLinks.map((s) => document.getElementById(s.id)).filter(Boolean);
+ const sectionIds = sectionLinks.map((s) => s.id);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      {
-        threshold: 0.25,
-        rootMargin: '-80px 0px -40% 0px',
-      }
-    );
+ const computeActive = () => {
+ const sections = sectionIds
+ .map((id) => document.getElementById(id))
+ .filter(Boolean);
+ if (!sections.length) return 'home';
 
-    sections.forEach((section) => observer.observe(section));
+ // Anchor to viewport-relative rect.top so this works for both native scroll
+ // and Lenis (which uses CSS transforms and makes window.scrollY unreliable).
+ const navOffset = 120; // navbar height + buffer
+ const referenceTop = -(window.innerHeight * 0.4); // active when section reaches ~40% from top
 
-    return () => {
-      sections.forEach((section) => observer.unobserve(section));
-    };
-  }, [location.pathname]);
+ // Walk the sections in DOM order. DOM order matches their vertical layout in this page,
+ // so as soon as we find one whose top is below the reference line, the previous section
+ // is the active one.
+ let lastActiveId = sections[0].id;
+ for (const section of sections) {
+ const top = section.getBoundingClientRect().top;
+ if (top <= navOffset) {
+ lastActiveId = section.id;
+ }
+ if (top > referenceTop) {
+ break;
+ }
+ }
+ return lastActiveId;
+ };
 
-  // Smooth Scroll Click Handler
-  const handleNavClick = (sectionId) => {
-    setMobileMenuOpen(false);
+ const handleScrollSpy = () => {
+ // Don't overwrite the click-set active section during a programmatic scroll animation.
+ if (scrollSpySuspendedRef.current) return;
+ const id = computeActive();
+ setActiveSection(id);
+ };
 
-    const targetScroll = () => {
-      if (window.lenis) {
-        window.lenis.scrollTo(`#${sectionId}`, { offset: -80, duration: 1.2 });
-      } else {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          const navHeight = 80;
-          const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
-          const offsetPosition = elementPosition - navHeight;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth',
-          });
-        }
-      }
-    };
+ handleScrollSpy();
 
-    if (location.pathname !== '/') {
-      navigate('/', { replace: false });
-      setTimeout(targetScroll, 120);
-    } else {
-      targetScroll();
-    }
-  };
+ // Hook into Lenis scroll if available (the project uses Lenis for smooth scroll,
+ // which suppresses native window scroll events on most browsers).
+ let rafId = null;
+ const onLenisScroll = () => {
+ if (rafId !== null) return;
+ rafId = window.requestAnimationFrame(() => {
+ rafId = null;
+ handleScrollSpy();
+ });
+ };
 
-  return (
-    <>
-      {/* Thin Glowing Cyan Scroll Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 z-[60] h-[3px] bg-slate-950">
-        <motion.div
-          className="h-full bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-500 shadow-[0_0_12px_rgba(56,189,248,0.8)]"
-          style={{ width: `${scrollProgress}%` }}
-        />
-      </div>
+ const attachLenis = () => {
+ if (window.lenis && typeof window.lenis.on === 'function') {
+ window.lenis.on('scroll', onLenisScroll);
+ return true;
+ }
+ return false;
+ };
 
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 py-2.5 shadow-xl shadow-cyan-950/30'
-            : 'bg-transparent border-b border-transparent py-4 sm:py-5'
-        }`}
-      >
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
-          <div className="flex items-center justify-between">
-            {/* Header Brand & Institutional Logos */}
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              {/* Main Hackspora Logo */}
-              <Link
-                to="/"
-                onClick={() => handleNavClick('home')}
-                className="flex items-center space-x-2.5 group cursor-pointer shrink-0"
-              >
-                <div className="relative p-1 rounded-xl bg-slate-900/90 border border-cyan-500/40 shadow-md shadow-cyan-500/20 group-hover:scale-105 group-hover:border-cyan-400 transition-all duration-300">
-                  <img
-                    src="/logos/hackspora.jpg"
-                    alt="Hackspora 2.0 Logo"
-                    className="h-8 sm:h-9 w-auto rounded-lg object-contain bg-white p-0.5"
-                  />
-                </div>
-                <span className="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
-                  Hackspora <span className="text-cyan-400 font-black">2.0</span>
-                </span>
-              </Link>
-            </div>
+ const lenisAttached = attachLenis();
 
-            {/* Desktop Navigation Links (Scroll Spy) */}
-            <nav className="hidden lg:flex items-center space-x-1">
-              {sectionLinks.map((link) => {
-                const isActive = location.pathname === '/' && activeSection === link.id;
-                return (
-                  <button
-                    key={link.id}
-                    onClick={() => handleNavClick(link.id)}
-                    className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer ${
-                      isActive ? 'text-cyan-400 font-semibold' : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    {link.name}
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeNavIndicator"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                  </button>
-                );
-              })}
+ window.addEventListener('scroll', handleScrollSpy, { passive: true });
+ window.addEventListener('resize', handleScrollSpy);
 
-              {/* Admin Route Link (Only for abisri024@gmail.com) */}
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer ${
-                    location.pathname.startsWith('/admin')
-                      ? 'text-cyan-400 font-semibold'
-                      : 'text-slate-300 hover:text-white'
-                  }`}
-                >
-                  Admin
-                  {location.pathname.startsWith('/admin') && (
-                    <motion.div
-                      layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              )}
-            </nav>
+ // Try again shortly after mount in case Lenis initializes after the navbar.
+ const retry = setTimeout(() => {
+ if (!lenisAttached) attachLenis();
+ handleScrollSpy();
+ }, 300);
 
-            {/* Desktop Action Buttons */}
-            <div className="hidden lg:flex items-center space-x-4">
-              {!isSignedIn ? (
-                <>
-                  <Link
-                    to="/login"
-                    className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200 hover:bg-slate-800/60 rounded-xl border border-slate-800/80 hover:border-slate-700/60 cursor-pointer"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-semibold rounded-xl group bg-gradient-to-br from-cyan-500 via-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/20 hover:shadow-cyan-500/30 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-                  >
-                    <span className="px-4 py-2 transition-all ease-in duration-75 rounded-[10px]">
-                      Sign Up
-                    </span>
-                  </Link>
-                </>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <UserButton
-                    afterSignOutUrl="/"
-                    appearance={{
-                      elements: {
-                        userButtonAvatarBox:
-                          'w-9 h-9 border-2 border-cyan-400/50 shadow-md shadow-cyan-500/20 hover:scale-105 transition-transform',
-                      },
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+ return () => {
+ clearTimeout(retry);
+ window.removeEventListener('scroll', handleScrollSpy);
+ window.removeEventListener('resize', handleScrollSpy);
+ if (rafId !== null) window.cancelAnimationFrame(rafId);
+ if (window.lenis && typeof window.lenis.off === 'function') {
+ window.lenis.off('scroll', onLenisScroll);
+ }
+ };
+ }, [location.pathname]);
 
-            {/* Mobile Animated Hamburger Button */}
-            <div className="flex lg:hidden items-center space-x-2">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                type="button"
-                className="p-2.5 rounded-xl text-slate-300 hover:text-white bg-slate-900/80 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 active:scale-95 transition-all"
-                aria-label="Toggle menu"
-              >
-                {mobileMenuOpen ? (
-                  <HiXMark className="w-6 h-6 text-cyan-400" />
-                ) : (
-                  <HiBars3 className="w-6 h-6" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+ // Smooth Scroll Click Handler
+ const handleNavClick = (sectionId) => {
+ setMobileMenuOpen(false);
 
-        {/* Mobile Navigation Drawer */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setMobileMenuOpen(false)}
-                className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-md lg:hidden"
-              />
+ // Suppress the scroll-spy for the duration of the smooth-scroll animation so it
+ // can't overwrite the section we just selected with an intermediate value.
+ scrollSpySuspendedRef.current = true;
 
-              <motion.div
-                initial={{ x: '100%', opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: '100%', opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-slate-950/95 backdrop-blur-2xl border-l border-slate-800/80 p-6 flex flex-col justify-between shadow-2xl overflow-y-auto lg:hidden"
-              >
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-                  <div className="flex items-center space-x-2.5">
-                    <img
-                      src="/logos/hackspora.jpg"
-                      alt="Hackspora 2.0 Logo"
-                      className="h-8 w-auto rounded-lg object-contain bg-white p-0.5 border border-cyan-500/40"
-                    />
-                    <span className="font-extrabold text-lg text-white">Hackspora 2.0</span>
-                  </div>
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-900 border border-slate-800"
-                  >
-                    <HiXMark className="w-5 h-5 text-cyan-400" />
-                  </button>
-                </div>
+ // Update the active section immediately so the navbar reflects the click
+ // even before (or without) any scroll event firing.
+ if (location.pathname === '/') setActiveSection(sectionId);
 
-                {/* Institutional Info & AIDS Logo */}
-                <div className="mt-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-1.5">
-                  <div className="flex items-center space-x-2">
-                    <img
-                      src="/logos/aids.jpg"
-                      alt="AIDS Logo"
-                      className="h-6 w-auto rounded object-contain bg-white p-0.5 border border-cyan-500/30 shrink-0"
-                    />
-                    <div className="text-xs font-bold text-white leading-tight">
-                      KARPAGAM ACADEMY OF HIGHER EDUCATION
-                    </div>
-                  </div>
-                  <p className="text-[9.5px] text-slate-400 leading-snug">
-                    (Deemed to be University) (Established Under Section 3 of UGC Act, 1956) Accredited with A+ Grade by NAAC in the Second cycle, Pollachi Main Road, Eachanari Post, Coimbatore-641 021.INDIA
-                  </p>
-                </div>
+ const targetScroll = () => {
+ if (window.lenis) {
+ window.lenis.scrollTo(`#${sectionId}`, { offset: -80, duration: 1.2, onComplete: () => {
+ scrollSpySuspendedRef.current = false;
+ setActiveSection(sectionId);
+ }});
+ } else {
+ const el = document.getElementById(sectionId);
+ if (el) {
+ const navHeight = 80;
+ const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+ const offsetPosition = elementPosition - navHeight;
+ window.scrollTo({
+ top: offsetPosition,
+ behavior: 'smooth',
+ });
+ // Re-enable the spy once native smooth-scroll completes.
+ setTimeout(() => {
+ scrollSpySuspendedRef.current = false;
+ setActiveSection(sectionId);
+ }, 700);
+ }
+ }
+ };
 
+ if (location.pathname !== '/') {
+ navigate('/', { replace: false });
+ setTimeout(targetScroll, 120);
+ } else {
+ targetScroll();
+ }
+ };
 
+ return (
+ <>
+ <header
+ className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+ isScrolled
+ ? 'bg-black/40 backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.25)]'
+ : 'bg-black/30 backdrop-blur-md border-b border-white/5 py-2.5 sm:py-4 lg:py-5 lg:bg-transparent lg:border-transparent'
+ }`}
+ style={{ paddingTop: 'max(0.625rem, env(safe-area-inset-top, 0))' }}
+ >
+ <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-12">
+ <div className="flex items-center justify-between gap-2">
+ {/* Header Brand & Institutional Logos */}
+ <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 min-w-0">
+ {/* Main Hackspora Logo */}
+ <Link
+ to="/"
+ onClick={() => handleNavClick('home')}
+ className="flex items-center space-x-2 sm:space-x-2.5 group cursor-pointer shrink-0"
+ >
+ <div className="relative p-1 rounded-xl bg-slate-900 transition-all duration-300">
+ <img
+ src="/logos/hackspora.jpg"
+ alt="Hackspora 2.0 Logo"
+ className="h-7 sm:h-9 w-auto rounded-lg object-contain"
+ />
+ </div>
+ <span className="text-lg xs:text-xl sm:text-xl lg:text-2xl font-medium tracking-tight text-white whitespace-nowrap">
+ <span className="hidden sm:inline" style={{ textShadow: '2px 2px 0px #111184, 3px 3px 0px #000000' }}>
+ Hackspora <span className="text-white font-medium">2.0</span>
+ </span>
+ <span className="sm:hidden">Hackspora <span className="text-white">2.0</span></span>
+ </span>
+ </Link>
+ </div>
 
-                <div className="flex flex-col space-y-2 py-6">
-                  {sectionLinks.map((link, idx) => {
-                    const isActive = location.pathname === '/' && activeSection === link.id;
-                    return (
-                      <motion.button
-                        key={link.id}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.04 + 0.1 }}
-                        onClick={() => handleNavClick(link.id)}
-                        className={`w-full text-left px-4 py-3.5 rounded-xl text-base font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? 'bg-cyan-500/15 text-cyan-300 border-l-4 border-cyan-400 shadow-md shadow-cyan-950/40'
-                            : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                        }`}
-                      >
-                        {link.name}
-                      </motion.button>
-                    );
-                  })}
+ {/* Desktop Navigation Links (Scroll Spy) */}
+ <nav className="hidden lg:flex items-center space-x-1 -ml-12">
+ {sectionLinks.map((link) => {
+ const isActive = location.pathname === '/' && activeSection === link.id;
+ return (
+ <button
+ key={link.id}
+ onClick={() => handleNavClick(link.id)}
+ className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer ${
+ isActive ? 'text-white font-semibold' : 'text-slate-400 hover:text-white'
+ }`}
+ >
+ {link.name}
+ </button>
+ );
+ })}
 
-                  {isAdmin && (
-                    <Link
-                      to="/admin"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`block px-4 py-3.5 rounded-xl text-base font-semibold transition-all ${
-                        location.pathname.startsWith('/admin')
-                          ? 'bg-cyan-500/15 text-cyan-300 border-l-4 border-cyan-400 shadow-md shadow-cyan-950/40'
-                          : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                      }`}
-                    >
-                      Admin
-                    </Link>
-                  )}
-                </div>
+ {/* Dashboard Link (only when user is registered) */}
+ {isRegistered && (
+ <Link
+ to="/dashboard"
+ className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer ${
+ location.pathname.startsWith('/dashboard')
+ ? 'text-white font-semibold'
+ : 'text-slate-400 hover:text-white'
+ }`}
+ >
+ Dashboard
+ </Link>
+ )}
 
-                <div className="pt-6 border-t border-slate-800/80 flex flex-col space-y-3">
-                  {!isSignedIn ? (
-                    <>
-                      <Link
-                        to="/login"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="w-full text-center py-3.5 rounded-xl text-slate-200 bg-slate-900 hover:bg-slate-800 text-sm font-semibold border border-slate-800 active:scale-95 transition-all min-h-[48px] flex items-center justify-center"
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        to="/signup"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="w-full text-center py-3.5 rounded-xl text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-sm font-bold shadow-lg shadow-indigo-500/25 active:scale-95 transition-all min-h-[48px] flex items-center justify-center"
-                      >
-                        Sign Up
-                      </Link>
-                    </>
-                  ) : (
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900 border border-slate-800 min-h-[48px]">
-                      <span className="text-sm font-semibold text-slate-300">Account</span>
-                      <UserButton afterSignOutUrl="/" />
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-      </header>
-    </>
-  );
+ {/* Admin Route Link (Only for abisri024@gmail.com) */}
+ {isAdmin && (
+ <Link
+ to="/admin"
+ className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer ${
+ location.pathname.startsWith('/admin')
+ ? 'text-white font-semibold'
+ : 'text-slate-400 hover:text-white'
+ }`}
+ >
+ Admin
+ </Link>
+ )}
+ </nav>
+
+ {/* Desktop Action Buttons */}
+ <div className="hidden lg:flex items-center space-x-4">
+ {!isSignedIn ? (
+ <>
+ <Link
+ to="/login"
+ className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200 cursor-pointer"
+ >
+ Login
+ </Link>
+ <Link
+ to="/signup"
+ className="relative inline-flex items-center justify-center text-sm font-semibold rounded-xl bg-[#4a5cd9] text-white hover:bg-[#5a6ce9] active:scale-95 transition-all duration-200 cursor-pointer shadow-md shadow-[#4a5cd9]/30 hover:shadow-lg hover:shadow-[#4a5cd9]/40"
+ >
+ <span className="px-4 py-2">
+ Sign Up
+ </span>
+ </Link>
+ </>
+ ) : (
+ <div className="flex items-center space-x-3">
+ <UserButton
+ afterSignOutUrl="/"
+ appearance={{
+ elements: {
+ userButtonAvatarBox:
+ 'w-9 h-9 hover:scale-105 transition-transform',
+ },
+ }}
+ />
+ </div>
+ )}
+ </div>
+
+ {/* Mobile Animated Hamburger Button */}
+ <div className="flex lg:hidden items-center space-x-2">
+ <button
+ onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+ type="button"
+ className="p-2.5 rounded-xl text-slate-300 hover:text-white bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 active:scale-95 transition-all"
+ aria-label="Toggle menu"
+ >
+ {mobileMenuOpen ? (
+ <HiXMark className="w-6 h-6 text-cyan-400" />
+ ) : (
+ <HiBars3 className="w-6 h-6" />
+ )}
+ </button>
+ </div>
+ </div>
+ </div>
+ </header>
+
+ {/* Mobile Navigation Drawer — must live OUTSIDE <header> because the header's
+ backdrop-filter creates a containing block that would otherwise clip the
+ drawer's `fixed` positioning to the navbar row instead of the viewport. */}
+ <AnimatePresence>
+ {mobileMenuOpen && (
+ <>
+ <motion.div
+ initial={{ opacity: 0 }}
+ animate={{ opacity: 1 }}
+ exit={{ opacity: 0 }}
+ onClick={() => setMobileMenuOpen(false)}
+ className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-md lg:hidden"
+ />
+
+ <motion.div
+ initial={{ x: '100%', opacity: 0 }}
+ animate={{ x: 0, opacity: 1 }}
+ exit={{ x: '100%', opacity: 0 }}
+ transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+ className="fixed top-0 right-0 bottom-0 z-50 w-full sm:max-w-sm bg-black border-l border-slate-800 flex flex-col overflow-y-auto lg:hidden safe-top"
+ style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0))', paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0))' }}
+ >
+ {/* Drawer Header */}
+ <div className="flex items-center justify-between px-4 sm:px-6 pb-3 border-b border-slate-800/80 shrink-0">
+ <div className="flex items-center space-x-2 min-w-0">
+ <img
+ src="/logos/hackspora.jpg"
+ alt="Hackspora 2.0 Logo"
+ className="h-7 w-auto rounded-lg object-contain shrink-0"
+ />
+ <span
+ className="font-medium text-sm text-white whitespace-nowrap"
+ style={{ textShadow: '2px 2px 0px #111184, 3px 3px 0px #000000' }}
+ >
+ Hackspora <span className="text-white font-medium">2.0</span>
+ </span>
+ </div>
+ <button
+ onClick={() => setMobileMenuOpen(false)}
+ className="p-2 rounded-xl text-slate-400 hover:text-white bg-transparent border-0 shrink-0"
+ aria-label="Close menu"
+ >
+ <HiXMark className="w-5 h-5 text-white" />
+ </button>
+ </div>
+
+ {/* Drawer Body — scrollable middle section */}
+ <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 space-y-4">
+ {/* Nav Links */}
+ <div className="flex flex-col space-y-1">
+ {sectionLinks.map((link, idx) => {
+ const isActive = location.pathname === '/' && activeSection === link.id;
+ return (
+ <motion.button
+ key={link.id}
+ initial={{ opacity: 0, x: 20 }}
+ animate={{ opacity: 1, x: 0 }}
+ transition={{ delay: idx * 0.04 + 0.1 }}
+ onClick={() => handleNavClick(link.id)}
+ className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+ isActive
+ ? 'bg-slate-900 text-white'
+ : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+ }`}
+ >
+ {link.name}
+ </motion.button>
+ );
+ })}
+
+ {/* Dashboard Link (only when user is registered) */}
+ {isRegistered && (
+ <motion.div
+ initial={{ opacity: 0, x: 20 }}
+ animate={{ opacity: 1, x: 0 }}
+ transition={{ delay: sectionLinks.length * 0.04 + 0.1 }}
+ >
+ <Link
+ to="/dashboard"
+ onClick={() => setMobileMenuOpen(false)}
+ className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+ location.pathname.startsWith('/dashboard')
+ ? 'bg-slate-900 text-white'
+ : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+ }`}
+ >
+ Dashboard
+ </Link>
+ </motion.div>
+ )}
+
+ {isAdmin && (
+ <Link
+ to="/admin"
+ onClick={() => setMobileMenuOpen(false)}
+ className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+ location.pathname.startsWith('/admin')
+ ? 'bg-slate-900 text-white'
+ : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+ }`}
+ >
+ Admin
+ </Link>
+ )}
+ </div>
+ </div>
+
+ {/* Drawer Footer — Login / Sign Up pinned at the bottom, always visible */}
+ <div className="px-4 sm:px-6 pt-3 border-t border-slate-800/80 flex flex-col space-y-2.5 shrink-0">
+ {!isSignedIn ? (
+ <>
+ <Link
+ to="/login"
+ onClick={() => setMobileMenuOpen(false)}
+ className="w-full text-center py-3 rounded-xl text-white bg-transparent border border-slate-700 hover:border-slate-500 hover:bg-slate-900 text-sm font-semibold active:scale-95 transition-all min-h-[44px] flex items-center justify-center"
+ >
+ Login
+ </Link>
+ <Link
+ to="/signup"
+ onClick={() => setMobileMenuOpen(false)}
+ className="w-full text-center py-3 rounded-xl text-white bg-[#4a5cd9] hover:bg-[#5a6ce9] text-sm font-bold active:scale-95 transition-all min-h-[44px] flex items-center justify-center shadow-md shadow-[#4a5cd9]/30"
+ >
+ Sign Up
+ </Link>
+ </>
+ ) : (
+ <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 min-h-[44px]">
+ <span className="text-sm font-semibold text-slate-300">Account</span>
+ <UserButton afterSignOutUrl="/" />
+ </div>
+ )}
+ </div>
+ </motion.div>
+ </>
+ )}
+ </AnimatePresence>
+ </>
+ );
 }

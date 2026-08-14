@@ -4,7 +4,9 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import './index.css';
 import App from './App.jsx';
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const PUBLISHABLE_KEY =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
+  import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
   throw new Error(
@@ -14,9 +16,9 @@ if (!PUBLISHABLE_KEY) {
 
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <App />
-    </ClerkProvider>
-  </StrictMode>,
+ <StrictMode>
+ <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+ <App />
+ </ClerkProvider>
+ </StrictMode>,
 );

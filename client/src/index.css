@@ -1,9 +1,26 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
 @layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 90px;
+    scroll-padding-top: 72px;
+    /* Prevent iOS Safari from auto-zooming on inputs */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  @media (min-width: 640px) {
+    html {
+      scroll-padding-top: 90px;
+    }
   }
 
   html.lenis, html.lenis body {
@@ -23,182 +40,113 @@
   }
 
   body {
-    background-color: #02040A;
-    color: #f3f4f6;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #000000;
+    color: #e5e7eb;
+    font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     overflow-x: hidden;
+    /* Account for iOS safe areas */
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
   }
 
   #root {
     width: 100%;
     min-height: 100vh;
   }
+
+  /* Prevent iOS auto-zoom on form inputs by ensuring 16px minimum */
+  input, select, textarea {
+    font-size: 16px;
+  }
+
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: inherit;
+    }
+  }
 }
 
 /* Animations */
-@keyframes aurora {
-  0% {
-    transform: translate(0px, 0px) scale(1) rotate(0deg);
-    opacity: 0.18;
-  }
-  33% {
-    transform: translate(40px, -40px) scale(1.1) rotate(120deg);
-    opacity: 0.32;
-  }
-  66% {
-    transform: translate(-30px, 30px) scale(0.95) rotate(240deg);
-    opacity: 0.22;
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1) rotate(360deg);
-    opacity: 0.18;
-  }
-}
-
-@keyframes shootingStar {
-  0% {
-    transform: translateX(0) translateY(0) rotate(-35deg) scale(0);
-    opacity: 0.6;
-  }
-  70% {
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateX(-650px) translateY(650px) rotate(-35deg) scale(1);
-    opacity: 0;
-  }
-}
-
-@keyframes scanline {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(1000%);
-  }
-}
-
-@keyframes orbitRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes floatSlow {
   0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px) rotate(1.5deg);
+    transform: translateY(-8px);
   }
-}
-
-@keyframes titleShimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
-}
-
-@keyframes sparkleTwinkle {
-  0%, 100% {
-    opacity: 0.2;
-    transform: scale(0.6) rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.25) rotate(90deg);
-  }
-}
-
-@keyframes pulseWave {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 0.12;
-  }
-  100% {
-    transform: scale(1.9);
-    opacity: 0;
-  }
-}
-
-.animate-aurora {
-  animation: aurora 25s ease-in-out infinite alternate;
-}
-
-.animate-shooting-star {
-  animation: shootingStar 5.5s linear infinite;
-}
-
-.animate-scanline {
-  animation: scanline 10s linear infinite;
-}
-
-.animate-orbit {
-  animation: orbitRotate 35s linear infinite;
-}
-
-.animate-orbit-reverse {
-  animation: orbitRotate 50s linear infinite reverse;
 }
 
 .animate-float-slow {
   animation: floatSlow 7s ease-in-out infinite;
 }
 
-.animate-title-shimmer {
-  background-size: 200% auto;
-  animation: titleShimmer 4.5s linear infinite;
+@keyframes sponsorMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 0.5rem));
+  }
 }
 
-.animate-sparkle {
-  animation: sparkleTwinkle 3.5s ease-in-out infinite;
+.animate-sponsor-marquee {
+  animation: sponsorMarquee 24s linear infinite;
 }
 
-.animate-pulse-wave {
-  animation: pulseWave 8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
-}
-
-/* Background Grids & Utilities */
-.bg-cyber-grid {
-  background-size: 60px 60px;
-  background-image: 
-    linear-gradient(to right, rgba(56, 189, 248, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(56, 189, 248, 0.02) 1px, transparent 1px);
-}
-
-.bg-circuit-dots {
-  background-size: 30px 30px;
-  background-image: radial-gradient(circle, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
-}
-
-/* Reduced 50% Soft Frosted Ice Glow */
-.text-glow-ice {
-  text-shadow: 0 0 8px rgba(56, 189, 248, 0.25), 0 0 16px rgba(56, 189, 248, 0.1);
-}
-
-/* Glassmorphism Styles */
-.glass-card {
-  background: rgba(10, 16, 31, 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(56, 189, 248, 0.14);
-  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.08);
-}
-
+/* Perspective utilities retained for any inline transforms */
 .perspective-1000 {
   perspective: 1000px;
 }
 
 .transform-style-3d {
   transform-style: preserve-3d;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE UTILITIES
+   Use for one-off fixes (overflow, scrollbars,
+   fixed-height mismatch on small screens, etc.)
+   ============================================ */
+
+/* Improve scrollbar appearance on mobile/small screens */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Mobile-friendly horizontal scroll containers */
+.scrollx-snap {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.scrollx-snap > * {
+  scroll-snap-align: start;
+}
+
+/* Hide on small screens, keep on larger */
+@media (max-width: 639px) {
+  .hide-below-sm {
+    display: none !important;
+  }
+}
+
+/* Safe area padding for fixed navbars/drawers */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }

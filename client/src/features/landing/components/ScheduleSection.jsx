@@ -1,469 +1,483 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  HiSparkles,
-  HiCheckCircle,
-  HiRocketLaunch,
-  HiCodeBracket,
-  HiTrophy,
-  HiBuildingLibrary,
-  HiVideoCamera,
-  HiAcademicCap,
-  HiUserGroup,
-  HiArrowRight,
-  HiPhoto,
-  HiXMark,
-  HiMagnifyingGlassPlus,
+ HiCheckCircle,
+ HiRocketLaunch,
+ HiCodeBracket,
+ HiTrophy,
+ HiBuildingLibrary,
+ HiVideoCamera,
+ HiAcademicCap,
+ HiUserGroup,
+ HiArrowRight,
+ HiChevronLeft,
+ HiChevronRight,
+ HiPhoto,
+ HiXMark,
+ HiMagnifyingGlassPlus,
 } from 'react-icons/hi2';
 
 const timelinePhases = [
-  {
-    time: 'Round 1 • 23 August 2026 • 09:30 AM',
-    title: 'Virtual Round Begins & Problem Statements Release',
-    description: 'Problem statements unlocked at 9:30 AM. 7-hour virtual screening hackathon starts.',
-    icon: HiRocketLaunch,
-    status: 'Upcoming',
-  },
-  {
-    time: 'Round 1 • 23 August 2026 • 05:00 PM – 06:00 PM',
-    title: 'Virtual Turn-in Window',
-    description: 'Teams submit GitHub repository link and demo video link for virtual evaluation.',
-    icon: HiVideoCamera,
-    status: 'Upcoming',
-  },
-  {
-    time: 'Shortlisting Notice',
-    title: 'Virtual Screening Results & Confirmation',
-    description: 'Shortlisted teams receive verification email and confirm participation with ₹250/participant fee.',
-    icon: HiCheckCircle,
-    status: 'Upcoming',
-  },
-  {
-    time: 'Round 2 • 18 September 2026 • 07:00 AM – 09:00 AM',
-    title: 'Grand Finale Reporting & Inauguration',
-    description: 'Offline reporting at KAHE, Coimbatore. College ID verification, briefing, and inauguration.',
-    icon: HiBuildingLibrary,
-    status: 'Upcoming',
-  },
-  {
-    time: 'Round 2 • 18 Sep 10:00 AM – 19 Sep 12:00 PM',
-    title: '24-Hour Offline Hackathon',
-    description: 'Fresh offline problem statements released at 9:45 AM. 24-hour non-stop hackathon with meals & Wi-Fi.',
-    icon: HiCodeBracket,
-    status: 'Upcoming',
-  },
-  {
-    time: 'Round 2 • 19 September 2026 • 12:00 PM Onwards',
-    title: 'Final Judging & Grand Valedictory',
-    description: 'Final presentations to industry judges, winner declarations, and cash prize distribution.',
-    icon: HiTrophy,
-    status: 'Upcoming',
-  },
+ {
+ time: 'Round 1 • 23 August 2026 • 09:30 AM',
+ title: 'Virtual Round Begins & Problem Statements Release',
+ description: 'Problem statements unlocked at 9:30 AM. 7-hour virtual screening hackathon starts.',
+ icon: HiRocketLaunch,
+ status: 'Upcoming',
+ },
+ {
+ time: 'Round 1 • 23 August 2026 • 05:00 PM – 06:00 PM',
+ title: 'Virtual Turn-in Window',
+ description: 'Teams submit GitHub repository link and demo video link for virtual evaluation.',
+ icon: HiVideoCamera,
+ status: 'Upcoming',
+ },
+ {
+ time: 'Shortlisting Notice',
+ title: 'Virtual Screening Results & Confirmation',
+ description: 'Shortlisted teams receive verification email and confirm participation with ₹250/participant fee.',
+ icon: HiCheckCircle,
+ status: 'Upcoming',
+ },
+ {
+ time: 'Round 2 • 18 September 2026 • 07:00 AM – 09:00 AM',
+ title: 'Grand Finale Reporting & Inauguration',
+ description: 'Offline reporting at KAHE, Coimbatore. College ID verification, briefing, and inauguration.',
+ icon: HiBuildingLibrary,
+ status: 'Upcoming',
+ },
+ {
+ time: 'Round 2 • 18 Sep 10:00 AM – 19 Sep 12:00 PM',
+ title: '24-Hour Offline Hackathon',
+ description: 'Fresh offline problem statements released at 9:45 AM. 24-hour non-stop hackathon with meals & Wi-Fi.',
+ icon: HiCodeBracket,
+ status: 'Upcoming',
+ },
+ {
+ time: 'Round 2 • 19 September 2026 • 12:00 PM Onwards',
+ title: 'Final Judging & Grand Valedictory',
+ description: 'Final presentations to industry judges, winner declarations, and cash prize distribution.',
+ icon: HiTrophy,
+ status: 'Upcoming',
+ },
 ];
 
 const lastYearMetrics = [
-  {
-    icon: HiUserGroup,
-    stat: '1,200+',
-    label: 'Hackers Participated',
-    subtext: 'From 80+ colleges pan-India',
-    color: 'from-cyan-500/20 to-blue-500/20',
-    borderColor: 'border-cyan-500/30',
-    iconColor: 'text-cyan-400',
-  },
-  {
-    icon: HiCodeBracket,
-    stat: '180+',
-    label: 'Projects Built',
-    subtext: 'Across AI, Web3 & Cloud tracks',
-    color: 'from-indigo-500/20 to-purple-500/20',
-    borderColor: 'border-indigo-500/30',
-    iconColor: 'text-indigo-400',
-  },
-  {
-    icon: HiTrophy,
-    stat: '₹1,00,000+',
-    label: 'Prize Pool Distributed',
-    subtext: 'Cash rewards & tech grants',
-    color: 'from-amber-500/20 to-yellow-500/20',
-    borderColor: 'border-amber-500/30',
-    iconColor: 'text-amber-400',
-  },
-  {
-    icon: HiAcademicCap,
-    stat: '25+',
-    label: 'Industry Mentors',
-    subtext: 'Engineers & researchers',
-    color: 'from-emerald-500/20 to-teal-500/20',
-    borderColor: 'border-emerald-500/30',
-    iconColor: 'text-emerald-400',
-  },
+ {
+ icon: HiUserGroup,
+ stat: '1,200+',
+ label: 'Hackers Participated',
+ subtext: 'From 80+ colleges pan-India',
+ body: 'Students from across India registered as 240+ teams, representing premier engineering institutes and Tier-2 colleges. The diversity of regions and skill levels made the hackathon floor one of the most energetic in HackSpora history.',
+ },
+ {
+ icon: HiCodeBracket,
+ stat: '180+',
+ label: 'Projects Built',
+ subtext: 'Across AI, Web3 & Cloud tracks',
+ body: 'Working prototypes spanned autonomous agents, zero-knowledge demos, serverless DevOps tools, and DeFi dashboards. Judges evaluated each build on impact, originality, and shipping-readiness within the 24-hour window.',
+ },
+ {
+ icon: HiTrophy,
+ stat: '₹1,00,000+',
+ label: 'Prize Pool Distributed',
+ subtext: 'Cash rewards & tech grants',
+ body: 'Beyond the top three cash prizes, partner sponsors contributed cloud credits, API grants, and internship fast-tracks. Winners also received direct interview slots with judging companies for summer 2025 roles.',
+ },
+ {
+ icon: HiAcademicCap,
+ stat: '25+',
+ label: 'Industry Mentors',
+ subtext: 'Engineers & researchers',
+ body: 'Mentors from product, platform, and research backgrounds ran rotating office hours across the 24-hour finale. Each team received at least two focused sessions on architecture, demo prep, and pitching strategy.',
+ },
 ];
 
 const lastYearAchievementsGallery = [
-  {
-    id: 1,
-    src: '/last year achievements/achievement1.jpg',
-    title: 'Grand Finale Inauguration & Official Address',
-    category: 'Inauguration',
-  },
-  {
-    id: 2,
-    src: '/last year achievements/achievement2.jpg',
-    title: '24-Hour Non-Stop Hackathon Arena',
-    category: 'Hackathon',
-  },
-  {
-    id: 3,
-    src: '/last year achievements/achievement3.jpg',
-    title: 'Interactive Project Evaluation & Pitching',
-    category: 'Evaluation',
-  },
-  {
-    id: 4,
-    src: '/last year achievements/achievement4.jpg',
-    title: 'Judges Feedback & Mentorship Session',
-    category: 'Mentorship',
-  },
-  {
-    id: 5,
-    src: '/last year achievements/achievement5.jpg',
-    title: 'Grand Winner Award Ceremony & Celebrations',
-    category: 'Valedictory',
-  },
+ {
+ id: 1,
+ src: '/last year achievements/achievement1.jpg',
+ title: 'Grand Finale Inauguration & Official Address',
+ category: 'Inauguration',
+ },
+ {
+ id: 2,
+ src: '/last year achievements/achievement2.jpg',
+ title: '24-Hour Non-Stop Hackathon Arena',
+ category: 'Hackathon',
+ },
+ {
+ id: 3,
+ src: '/last year achievements/achievement3.jpg',
+ title: 'Interactive Project Evaluation & Pitching',
+ category: 'Evaluation',
+ },
+ {
+ id: 4,
+ src: '/last year achievements/achievement4.jpg',
+ title: 'Judges Feedback & Mentorship Session',
+ category: 'Mentorship',
+ },
+ {
+ id: 5,
+ src: '/last year achievements/achievement5.jpg',
+ title: 'Grand Winner Award Ceremony & Celebrations',
+ category: 'Valedictory',
+ },
 ];
 
 export default function ScheduleSection() {
-  const [activeImage, setActiveImage] = useState(null);
+ const [activeImage, setActiveImage] = useState(null);
+ const [activeMetric, setActiveMetric] = useState(0);
 
-  return (
-    <section id="schedule" className="scroll-mt-28 relative py-24 px-4 sm:px-8 lg:px-12 max-w-[1600px] mx-auto overflow-hidden">
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: false, amount: 0.15 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="space-y-24"
-      >
-        {/* ================= EVENT TIMELINE & SCHEDULE ================= */}
-        <div className="space-y-16">
-          {/* Header */}
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-xs font-mono font-bold tracking-widest uppercase">
-              <HiSparkles className="w-4 h-4 text-cyan-400" />
-              <span>EVENT TIMELINE & SCHEDULE</span>
-            </div>
+ const goPrevMetric = () => {
+ setActiveMetric((idx) => (idx - 1 + lastYearMetrics.length) % lastYearMetrics.length);
+ };
 
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-              HackSpora 2.0 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">Schedule</span>
-            </h2>
+ const goNextMetric = () => {
+ setActiveMetric((idx) => (idx + 1) % lastYearMetrics.length);
+ };
 
-            <p className="text-sm sm:text-base text-slate-300">
-              Aug 23 (Virtual Screening) & Sep 18–19 (24HOURS Offline Grand Finale at KAHE, Coimbatore).
-            </p>
-          </div>
+ return (
+ <section id="schedule" className="scroll-mt-20 sm:scroll-mt-28 relative py-16 sm:py-24 px-4 sm:px-8 lg:px-12 max-w-[1600px] mx-auto overflow-hidden">
+ <motion.div
+ initial={{ opacity: 0, y: 50 }}
+ whileInView={{ opacity: 1, y: 0 }}
+ viewport={{ once: false, amount: 0.15 }}
+ transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+ className="space-y-16 sm:space-y-24"
+ >
+ {/* ================= EVENT TIMELINE & SCHEDULE ================= */}
+ <div className="space-y-10 sm:space-y-16">
+ {/* Header */}
+ <div className="text-center space-y-4 max-w-3xl mx-auto">
+ <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/[0.06] border border-white/25 backdrop-blur-2xl text-[#4a5cd9] text-[10px] sm:text-xs font-bold tracking-widest uppercase shadow-lg shadow-black/20">
+ <span>EVENT TIMELINE & SCHEDULE</span>
+ </div>
 
-          {/* Timeline Component */}
-          <div className="max-w-4xl mx-auto relative space-y-6">
-            {/* Central Vertical Connector Line */}
-            <div className="absolute top-0 bottom-0 left-6 sm:left-1/2 w-0.5 bg-gradient-to-b from-cyan-400 via-indigo-500 to-purple-600 -translate-x-1/2 hidden sm:block" />
+ <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+ HackSpora 2.0 <span className="text-[#4a5cd9]">Schedule</span>
+ </h2>
 
-            {timelinePhases.map((phase, idx) => {
-              const Icon = phase.icon;
-              const isEven = idx % 2 === 0;
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false, amount: 0.2 }}
-                  transition={{ duration: 0.6, delay: idx * 0.1 }}
-                  className={`relative flex flex-col sm:flex-row items-center ${
-                    isEven ? 'sm:flex-row-reverse' : ''
-                  } gap-6`}
-                >
-                  {/* Content Box */}
-                  <div className="w-full sm:w-1/2 glass-card p-6 rounded-3xl border border-slate-800 hover:border-cyan-500/40 space-y-2 transition-all">
-                    <span className="text-xs font-mono text-cyan-400 font-bold block">{phase.time}</span>
-                    <h3 className="text-lg font-bold text-white">{phase.title}</h3>
-                    <p className="text-xs text-slate-300 leading-relaxed">{phase.description}</p>
-                  </div>
+ <p className="text-xs sm:text-base text-slate-300">
+ Aug 23 (Virtual Screening) & Sep 18–19 (24HOURS Offline Grand Finale at KAHE, Coimbatore).
+ </p>
+ </div>
 
-                  {/* Node Icon Circle */}
-                  <div className="w-12 h-12 rounded-full bg-slate-950 border-2 border-cyan-400 text-cyan-300 flex items-center justify-center font-bold shadow-lg shadow-cyan-500/30 z-10 shrink-0">
-                    <Icon className="w-5 h-5" />
-                  </div>
+ {/* Timeline Component */}
+ <div className="max-w-4xl mx-auto relative space-y-4 sm:space-y-6">
+ {/* Central Vertical Connector Line */}
+ <div className="absolute top-0 bottom-0 left-6 sm:left-1/2 w-0.5 bg-white -translate-x-1/2 hidden sm:block" />
 
-                  {/* Spacer for symmetry */}
-                  <div className="hidden sm:block w-1/2" />
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
+ {timelinePhases.map((phase, idx) => {
+ const Icon = phase.icon;
+ const isEven = idx % 2 === 0;
+ return (
+ <motion.div
+ key={idx}
+ initial={{ opacity: 0, y: 30 }}
+ whileInView={{ opacity: 1, y: 0 }}
+ viewport={{ once: false, amount: 0.2 }}
+ transition={{ duration: 0.6, delay: idx * 0.1 }}
+ className={`relative flex flex-row sm:flex-row items-center ${
+ isEven ? 'sm:flex-row-reverse' : ''
+ } gap-4 sm:gap-6`}
+ >
+ {/* Content Box */}
+ <div className="flex-1 min-w-0 p-4 sm:p-7 lg:p-8 rounded-2xl sm:rounded-3xl border border-white/25 bg-white/[0.12] backdrop-blur-2xl shadow-2xl shadow-black/25 hover:border-white/40 hover:bg-white/[0.16] space-y-2 sm:space-y-3 transition-all duration-300">
+ <span className="text-xs sm:text-sm text-[#4a5cd9] font-bold block tracking-wide break-words">{phase.time}</span>
+ <h3 className="text-base sm:text-xl lg:text-2xl font-extrabold text-white leading-snug">{phase.title}</h3>
+ <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{phase.description}</p>
+ </div>
 
-        {/* Divider with Ambient Glow */}
-        <div className="relative py-4">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
-          <div className="absolute inset-x-1/4 top-1/2 -translate-y-1/2 h-12 bg-cyan-500/10 blur-2xl pointer-events-none" />
-        </div>
+ {/* Node Icon Circle */}
+ <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-black border-2 border-white text-white flex items-center justify-center font-bold z-10 shrink-0">
+ <Icon className="w-5 h-5 sm:w-7 sm:h-7" />
+ </div>
 
-        {/* ================= LAST YEAR ACHIEVEMENTS SECTION ================= */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.15 }}
-          transition={{ duration: 0.8 }}
-          className="space-y-14"
-        >
-          {/* Header */}
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/40 text-amber-300 text-xs font-mono font-bold tracking-widest uppercase">
-              <HiTrophy className="w-4 h-4 text-amber-400" />
-              <span>HACKSPORA 1.0 ACHIEVEMENTS</span>
-            </div>
+ {/* Spacer for symmetry (only on desktop) */}
+ <div className="hidden sm:block sm:w-1/2" />
+ </motion.div>
+ );
+ })}
+ </div>
+ </div>
 
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-              Last Year&apos;s <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-200 to-yellow-400">Impact & Memories</span>
-            </h2>
+ {/* ================= LAST YEAR ACHIEVEMENTS SECTION ================= */}
+ <motion.div
+ initial={{ opacity: 0, y: 40 }}
+ whileInView={{ opacity: 1, y: 0 }}
+ viewport={{ once: false, amount: 0.15 }}
+ transition={{ duration: 0.8 }}
+ className="space-y-10 sm:space-y-14"
+ >
+ {/* Header */}
+ <div className="text-center space-y-4 max-w-3xl mx-auto">
+ <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full bg-slate-900 border border-amber-500 text-amber-400 text-[10px] sm:text-xs font-bold tracking-widest uppercase">
+ <HiTrophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+ <span>HACKSPORA 1.0 ACHIEVEMENTS</span>
+ </div>
 
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              A look back at the landmark milestones, high-energy moments, and memorable achievements from HackSpora 1.0.
-            </p>
-          </div>
+ <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+ Last Year&apos;s <span className="text-[#4a5cd9]">Impact & Memories</span>
+ </h2>
 
-          {/* Key Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {lastYearMetrics.map((metric, idx) => {
-              const Icon = metric.icon;
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 25 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false, amount: 0.2 }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  whileHover={{ y: -4, scale: 1.02 }}
-                  className={`glass-card p-6 rounded-3xl border ${metric.borderColor} bg-gradient-to-b ${metric.color} space-y-4 transition-all duration-300 group`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-2xl bg-slate-950/80 border border-slate-800 ${metric.iconColor} group-hover:scale-110 transition-transform`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <span className="text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase bg-slate-950/60 px-2 py-1 rounded-md border border-slate-800">
-                      HS 1.0
-                    </span>
-                  </div>
+ <p className="text-xs sm:text-base text-slate-300 leading-relaxed">
+ A look back at the landmark milestones, high-energy moments, and memorable achievements from HackSpora 1.0.
+ </p>
+ </div>
 
-                  <div>
-                    <span className="block text-3xl font-black text-white tracking-tight">{metric.stat}</span>
-                    <span className="block text-sm font-bold text-slate-200 mt-1">{metric.label}</span>
-                    <span className="block text-xs text-slate-400 mt-0.5">{metric.subtext}</span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+ {/* Key Metrics Carousel */}
+ <div className="relative max-w-3xl mx-auto px-10 sm:px-16">
+ {/* Card Stage */}
+ <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl min-h-[340px] sm:min-h-[340px]">
+ <motion.div
+ className="flex h-full"
+ style={{ width: `${lastYearMetrics.length * 100}%` }}
+ animate={{ x: `-${activeMetric * (100 / lastYearMetrics.length)}%` }}
+ transition={{ type: 'tween', duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+ >
+ {lastYearMetrics.map((m, idx) => {
+ const Icon = m.icon;
+ return (
+ <div
+ key={idx}
+ className="h-full p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/25 bg-white/[0.12] backdrop-blur-2xl shadow-2xl shadow-black/25 space-y-4 sm:space-y-5 group flex flex-col"
+ style={{ width: `${100 / lastYearMetrics.length}%` }}
+ >
+ <div className="flex items-center justify-between flex-wrap gap-2">
+ <div className="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-white/15 border border-white/25 text-cyan-400 shadow-lg shadow-black/20 backdrop-blur-xl group-hover:border-cyan-300/50 group-hover:text-cyan-200 transition-colors">
+ <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+ </div>
+ <span className="text-[9px] sm:text-[10px] font-bold tracking-widest text-slate-300 uppercase bg-white/[0.16] border border-white/25 backdrop-blur-xl px-2 py-1 rounded-md">
+ HS 1.0 • {String(idx + 1).padStart(2, '0')} / {String(lastYearMetrics.length).padStart(2, '0')}
+ </span>
+ </div>
 
-          {/* Last Year Achievements Photo Gallery */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center space-x-2">
-                <HiPhoto className="w-6 h-6 text-cyan-400" />
-                <span>Achievement Gallery (HackSpora 1.0)</span>
-              </h3>
-              <span className="text-xs font-mono text-cyan-400 hidden sm:inline-block">
-                Click any image to expand
-              </span>
-            </div>
+ <div>
+ <span className="block text-2xl sm:text-4xl font-black text-white tracking-tight">{m.stat}</span>
+ <span className="block text-xs sm:text-sm font-bold text-slate-200 mt-1">{m.label}</span>
+ <span className="block text-[10px] sm:text-xs text-slate-400 mt-0.5">{m.subtext}</span>
+ </div>
 
-            {/* Asymmetric / Responsive Gallery Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-              {/* Main Featured Image 1 */}
-              <motion.div
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.2 }}
-                transition={{ duration: 0.6 }}
-                onClick={() => setActiveImage(lastYearAchievementsGallery[0])}
-                className="md:col-span-7 group relative rounded-3xl overflow-hidden border border-cyan-500/30 hover:border-cyan-400 bg-slate-950 shadow-[0_0_30px_rgba(56,189,248,0.15)] hover:shadow-[0_0_40px_rgba(56,189,248,0.3)] transition-all duration-500 cursor-pointer min-h-[300px] sm:min-h-[380px] flex flex-col justify-end"
-              >
-                <img
-                  src={lastYearAchievementsGallery[0].src}
-                  alt={lastYearAchievementsGallery[0].title}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-90 group-hover:opacity-80 transition-opacity duration-300" />
-                
-                <div className="relative z-10 p-6 sm:p-8 space-y-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 inline-block">
-                    {lastYearAchievementsGallery[0].category}
-                  </span>
-                  <h4 className="text-xl sm:text-2xl font-extrabold text-white group-hover:text-cyan-300 transition-colors">
-                    {lastYearAchievementsGallery[0].title}
-                  </h4>
-                  <div className="flex items-center space-x-1.5 text-xs text-cyan-400 font-semibold pt-1">
-                    <HiMagnifyingGlassPlus className="w-4 h-4" />
-                    <span>View Fullscreen</span>
-                  </div>
-                </div>
-              </motion.div>
+ <p className="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-white/15 pt-3 sm:pt-4">
+ {m.body}
+ </p>
 
-              {/* Image 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                onClick={() => setActiveImage(lastYearAchievementsGallery[1])}
-                className="md:col-span-5 group relative rounded-3xl overflow-hidden border border-cyan-500/30 hover:border-cyan-400 bg-slate-950 shadow-lg hover:shadow-[0_0_30px_rgba(56,189,248,0.25)] transition-all duration-500 cursor-pointer min-h-[250px] sm:min-h-[380px] flex flex-col justify-end"
-              >
-                <img
-                  src={lastYearAchievementsGallery[1].src}
-                  alt={lastYearAchievementsGallery[1].title}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-90 group-hover:opacity-80 transition-opacity duration-300" />
-                
-                <div className="relative z-10 p-6 space-y-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 inline-block">
-                    {lastYearAchievementsGallery[1].category}
-                  </span>
-                  <h4 className="text-lg font-extrabold text-white group-hover:text-cyan-300 transition-colors">
-                    {lastYearAchievementsGallery[1].title}
-                  </h4>
-                  <div className="flex items-center space-x-1.5 text-xs text-cyan-400 font-semibold pt-1">
-                    <HiMagnifyingGlassPlus className="w-4 h-4" />
-                    <span>View Fullscreen</span>
-                  </div>
-                </div>
-              </motion.div>
+ {/* Inline progress dots */}
+ <div className="mt-auto flex items-center justify-center gap-2 pt-2">
+ {lastYearMetrics.map((_, dotIdx) => (
+ <button
+ key={dotIdx}
+ type="button"
+ onClick={() => {
+ setActiveMetric(dotIdx);
+ }}
+ aria-label={`Show stat ${dotIdx + 1}`}
+ className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer touch-manipulation ${
+ dotIdx === activeMetric ? 'w-8 bg-white' : 'w-2 bg-white/30 hover:bg-white/60'
+ }`}
+ />
+ ))}
+ </div>
+ </div>
+ );
+ })}
+ </motion.div>
+ </div>
 
-              {/* Bottom Row: Images 3, 4, 5 */}
-              {lastYearAchievementsGallery.slice(2).map((item, idx) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 25 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false, amount: 0.2 }}
-                  transition={{ duration: 0.6, delay: (idx + 2) * 0.1 }}
-                  onClick={() => setActiveImage(item)}
-                  className="md:col-span-4 group relative rounded-3xl overflow-hidden border border-slate-800 hover:border-cyan-400 bg-slate-950 shadow-lg hover:shadow-[0_0_30px_rgba(56,189,248,0.25)] transition-all duration-500 cursor-pointer min-h-[240px] flex flex-col justify-end"
-                >
-                  <img
-                    src={item.src}
-                    alt={item.title}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-90 group-hover:opacity-80 transition-opacity duration-300" />
-                  
-                  <div className="relative z-10 p-5 space-y-1.5">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 inline-block">
-                      {item.category}
-                    </span>
-                    <h4 className="text-base font-extrabold text-white group-hover:text-cyan-300 transition-colors line-clamp-1">
-                      {item.title}
-                    </h4>
-                    <div className="flex items-center space-x-1.5 text-xs text-cyan-400 font-semibold pt-0.5">
-                      <HiMagnifyingGlassPlus className="w-3.5 h-3.5" />
-                      <span>Expand</span>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+ {/* Prev / Next Arrows */}
+ <button
+ type="button"
+ onClick={goPrevMetric}
+ aria-label="Previous stat"
+ className="absolute top-1/2 -translate-y-1/2 left-0 sm:left-1 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/15 border border-white/30 backdrop-blur-2xl text-white hover:bg-white hover:text-black hover:border-white active:scale-95 transition-all duration-200 flex items-center justify-center cursor-pointer shadow-lg shadow-black/40 touch-manipulation"
+ >
+ <HiChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+ </button>
+ <button
+ type="button"
+ onClick={goNextMetric}
+ aria-label="Next stat"
+ className="absolute top-1/2 -translate-y-1/2 right-0 sm:right-1 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/15 border border-white/30 backdrop-blur-2xl text-white hover:bg-white hover:text-black hover:border-white active:scale-95 transition-all duration-200 flex items-center justify-center cursor-pointer shadow-lg shadow-black/40 touch-manipulation"
+ >
+ <HiChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+ </button>
+ </div>
 
-          {/* Call-to-action banner for HackSpora 2.0 */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.6 }}
-            className="glass-card rounded-3xl p-6 sm:p-8 border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-indigo-950/40 to-slate-950/80 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden"
-          >
-            <div className="space-y-2 text-center sm:text-left">
-              <div className="inline-flex items-center space-x-2 text-xs font-mono font-bold text-cyan-300 uppercase">
-                <HiRocketLaunch className="w-4 h-4 text-cyan-400" />
-                <span>WRITE THE NEXT CHAPTER IN 2026</span>
-              </div>
-              <h4 className="text-xl sm:text-2xl font-extrabold text-white">
-                Ready to etch your team into the HackSpora legacy?
-              </h4>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-                Compete in HackSpora 2.0 with bigger rewards, higher stakes, and pan-India recognition.
-              </p>
-            </div>
+ {/* Last Year Achievements Photo Gallery */}
+ <div className="space-y-4 sm:space-y-6">
+ <div className="flex items-center justify-between">
+ <h3 className="pt-8 pb-8 sm:pt-12 sm:pb-12 text-xl sm:text-2xl lg:text-4xl font-extrabold text-white flex items-center space-x-2">
+ <HiPhoto className="w-6 h-6 sm:w-8 sm:h-8 text-[#4a5cd9] shrink-0" />
+ <span>
+ Highlights from <span className="text-[#4a5cd9]">HackSpora 1.0</span>
+ </span>
+ </h3>
+ </div>
 
-            <a
-              href="#home"
-              className="inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-xl font-extrabold text-sm text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 hover:from-cyan-300 hover:to-indigo-300 shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:scale-[1.03] active:scale-95 transition-all duration-300 shrink-0"
-            >
-              <span>Register for 2.0</span>
-              <HiArrowRight className="w-4 h-4" />
-            </a>
-          </motion.div>
-        </motion.div>
-      </motion.div>
+ <style>{`
+ @keyframes hs-marquee {
+ 0% { transform: translateX(0); }
+ 100% { transform: translateX(-50%); }
+ }
+ .hs-marquee-track {
+ animation: hs-marquee 12s linear infinite;
+ will-change: transform;
+ }
+ .hs-marquee-wrap:hover .hs-marquee-track,
+ .hs-marquee-wrap:focus-within .hs-marquee-track {
+ animation-play-state: paused;
+ }
+ `}</style>
 
-      {/* Lightbox Preview Modal */}
-      <AnimatePresence>
-        {activeImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setActiveImage(null)}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative max-w-5xl w-full glass-card border border-cyan-500/40 rounded-3xl overflow-hidden shadow-2xl bg-slate-950"
-            >
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={() => setActiveImage(null)}
-                className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-slate-950/80 border border-slate-700 text-slate-300 hover:text-white hover:border-cyan-400 transition-all cursor-pointer"
-              >
-                <HiXMark className="w-6 h-6" />
-              </button>
+ {/* Infinite Marquee Strip */}
+ <div className="hs-marquee-wrap relative overflow-hidden rounded-3xl border border-white/15 bg-black/40 group/marquee">
+ {/* Edge fades for soft edges */}
+ <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-20 bg-gradient-to-r from-black/80 to-transparent z-10" />
+ <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-20 bg-gradient-to-l from-black/80 to-transparent z-10" />
 
-              {/* Expanded Image */}
-              <div className="relative max-h-[75vh] flex items-center justify-center bg-black">
-                <img
-                  src={activeImage.src}
-                  alt={activeImage.title}
-                  className="w-full h-auto max-h-[75vh] object-contain"
-                />
-              </div>
+ <div className="hs-marquee-track flex gap-5 px-4">
+ {/* Duplicate the gallery array so the loop is seamless */}
+ {[...lastYearAchievementsGallery, ...lastYearAchievementsGallery].map((item, idx) => (
+ <button
+ key={`${item.id}-${idx}`}
+ type="button"
+ onClick={() => setActiveImage(item)}
+ className="relative shrink-0 w-72 sm:w-[30rem] lg:w-[36rem] h-56 sm:h-80 lg:h-96 rounded-2xl overflow-hidden border border-white/20 hover:border-white/60 bg-black transition-all duration-300 cursor-pointer group/tile focus:outline-none focus:ring-2 focus:ring-white/60"
+ aria-label={`Expand ${item.title}`}
+ >
+ <img
+ src={item.src}
+ alt={item.title}
+ loading="lazy"
+ draggable={false}
+ className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/tile:scale-105"
+ />
+ <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-90 group-hover/tile:opacity-100 transition-opacity duration-300" />
 
-              {/* Caption Footer */}
-              <div className="p-6 bg-slate-900/90 border-t border-slate-800 flex items-center justify-between flex-wrap gap-4">
-                <div>
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 inline-block mb-1">
-                    {activeImage.category}
-                  </span>
-                  <h3 className="text-lg font-bold text-white">{activeImage.title}</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveImage(null)}
-                  className="px-5 py-2.5 rounded-xl font-bold text-xs text-slate-950 bg-gradient-to-r from-cyan-400 to-indigo-400 hover:from-cyan-300 hover:to-indigo-300 transition-all cursor-pointer"
-                >
-                  Close Preview
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
-  );
+ <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 space-y-1 text-left">
+ <span className="px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold tracking-wider bg-slate-900 text-amber-300 border border-amber-500 inline-block">
+ {item.category}
+ </span>
+ <h4 className="text-xs sm:text-base font-extrabold text-white line-clamp-2">
+ {item.title}
+ </h4>
+ </div>
+
+ <div className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 border border-white/20 text-white opacity-0 group-hover/tile:opacity-100 transition-opacity duration-200">
+ <HiMagnifyingGlassPlus className="w-4 h-4" />
+ </div>
+ </button>
+ ))}
+ </div>
+ </div>
+ </div>
+
+ {/* Call-to-action banner for HackSpora 2.0 */}
+ <motion.div
+ initial={{ opacity: 0, y: 30 }}
+ whileInView={{ opacity: 1, y: 0 }}
+ viewport={{ once: false, amount: 0.2 }}
+ transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+ className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/20 bg-gradient-to-br from-[#3645bf]/30 via-slate-900/60 to-black p-6 sm:p-12 lg:p-16 text-center shadow-2xl shadow-black/50 mt-16 sm:mt-32 lg:mt-40"
+ >
+ {/* Decorative ambient glows */}
+ <div className="pointer-events-none absolute -top-20 -left-20 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl" />
+ <div className="pointer-events-none absolute -bottom-24 -right-16 w-80 h-80 bg-[#3645bf]/30 rounded-full blur-3xl" />
+ <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_55%)]" />
+
+ {/* Content */}
+ <div className="relative max-w-3xl mx-auto flex flex-col items-center space-y-5 sm:space-y-6">
+ <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/[0.16] border border-white/25 backdrop-blur-2xl text-cyan-300 text-[10px] sm:text-xs font-bold tracking-widest uppercase shadow-lg shadow-black/20">
+ <span>Write the Next Chapter in 2026</span>
+ </div>
+
+ <h4 className="text-2xl sm:text-3xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+ Ready to etch your team into the
+ <br className="hidden sm:block" />
+ {' '}
+ <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+ HackSpora Legacy?
+ </span>
+ </h4>
+
+ <p className="text-xs sm:text-base text-slate-300 max-w-2xl leading-relaxed">
+ Compete in HackSpora 2.0 with bigger rewards, higher stakes, and pan-India recognition.
+ Bring your boldest idea — we&apos;ll bring the arena, the mentors, and 24 hours of pure momentum.
+ </p>
+
+ {/* Centered Register Button */}
+ <div className="pt-2 w-full sm:w-auto">
+ <a
+ href="#home"
+ className="group/cta relative inline-flex items-center justify-center space-x-2.5 px-6 sm:px-10 py-3.5 sm:py-4 rounded-2xl font-extrabold text-sm sm:text-base text-white bg-[#3645bf] hover:bg-[#4a5cd9] active:scale-95 transition-all duration-300 cursor-pointer shadow-xl shadow-[#3645bf]/40 hover:shadow-2xl hover:shadow-[#3645bf]/60 overflow-hidden touch-manipulation w-full sm:w-auto"
+ >
+ {/* Shimmer sweep */}
+ <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+ <span className="relative">Register for HackSpora 2.0</span>
+ <span className="relative inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/15 group-hover/cta:bg-white/25 transition-colors">
+ <HiArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/cta:translate-x-0.5" />
+ </span>
+ </a>
+ </div>
+
+ {/* Trust line */}
+ <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 pt-3 text-[10px] sm:text-xs text-slate-400 font-medium">
+ <span className="inline-flex items-center space-x-1.5">
+ <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+ <span>Registrations Open</span>
+ </span>
+ <span className="hidden sm:inline w-px h-3 bg-white/15" />
+ <span>Free to participate</span>
+ <span className="hidden sm:inline w-px h-3 bg-white/15" />
+ <span>Pan-India teams welcome</span>
+ </div>
+ </div>
+ </motion.div>
+ </motion.div>
+ </motion.div>
+
+ {/* Lightbox Preview Modal */}
+ <AnimatePresence>
+ {activeImage && (
+ <motion.div
+ initial={{ opacity: 0 }}
+ animate={{ opacity: 1 }}
+ exit={{ opacity: 0 }}
+ onClick={() => setActiveImage(null)}
+ className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90"
+ >
+ <motion.div
+ initial={{ scale: 0.9, opacity: 0 }}
+ animate={{ scale: 1, opacity: 1 }}
+ exit={{ scale: 0.9, opacity: 0 }}
+ transition={{ duration: 0.3 }}
+ onClick={(e) => e.stopPropagation()}
+ className="relative max-w-5xl w-full rounded-2xl sm:rounded-3xl overflow-hidden bg-black"
+ >
+ {/* Close Button */}
+ <button
+ type="button"
+ onClick={() => setActiveImage(null)}
+ className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 p-2 sm:p-2.5 rounded-full bg-black border border-slate-700 text-slate-300 hover:text-white hover:border-white transition-colors cursor-pointer touch-manipulation"
+ >
+ <HiXMark className="w-5 h-5 sm:w-6 sm:h-6" />
+ </button>
+
+ {/* Expanded Image */}
+ <div className="relative max-h-[80vh] sm:max-h-[75vh] flex items-center justify-center bg-black">
+ <img
+ src={activeImage.src}
+ alt={activeImage.title}
+ className="w-full h-auto max-h-[80vh] sm:max-h-[75vh] object-contain"
+ />
+ </div>
+ </motion.div>
+ </motion.div>
+ )}
+ </AnimatePresence>
+ </section>
+ );
 }
-
-
