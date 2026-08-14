@@ -6,7 +6,6 @@ import {
  HiArrowPath,
 } from 'react-icons/hi2';
 
-import TiltCard from './TiltCard';
 import AlreadyRegisteredModal from '../../../components/AlreadyRegisteredModal';
 import ColorBends from './ColorBends';
 import { useRegisterFlow } from '../../../hooks';

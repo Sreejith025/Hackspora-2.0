@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import {
  HiLockClosed,
  HiCpuChip,
  HiGlobeAlt,
  HiShieldCheck,
  HiCloud,
- HiArrowRight,
  HiKey,
 } from 'react-icons/hi2';
 

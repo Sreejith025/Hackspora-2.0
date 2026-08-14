@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
  HiSquares2X2,
@@ -12,13 +11,11 @@ import {
  HiCog6Tooth,
  HiCheckCircle,
  HiLockClosed,
- HiArrowRight,
  HiCheck,
  HiClock,
  HiCalendarDays,
 } from 'react-icons/hi2';
 import { registrationService } from '../services/registrationService';
-import { useVirtualRoundControl } from '../hooks/useVirtualRoundControl';
 
 const sidebarItems = [
  { id: 'dashboard', label: 'Dashboard', icon: HiSquares2X2 },
@@ -45,21 +42,7 @@ function GlassCard({ className = '', children, hoverable = true }) {
 
 }
 
-// Hero "Register Now" button — white text, #4a5cd9 fill, shine sweep.
-function PrimaryButton({ children, className = '', onClick, type = 'button' }) {
- return (
- <motion.button
- type={type}
- whileTap={{ scale: 0.97 }}
- onClick={onClick}
- className={`group/cta relative inline-flex items-center justify-center space-x-2.5 px-6 py-3.5 rounded-2xl font-bold text-sm text-white bg-[#4a5cd9] hover:bg-[#5a6ce9] active:scale-95 transition-all duration-300 cursor-pointer shadow-xl shadow-[#4a5cd9]/40 hover:shadow-2xl hover:shadow-[#4a5cd9]/60 overflow-hidden ${className}`}
- >
- <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />
- <span className="relative flex items-center justify-center space-x-2.5">{children}</span>
- </motion.button>
- );
-
-}
+const PROBLEM_UNLOCK_TARGET = new Date('2026-08-23T09:30:00');
 
 // Small accent pill (replaces the previous cyan-500/10 chips).
 function AccentPill({ children, className = '' }) {
@@ -74,7 +57,6 @@ function AccentPill({ children, className = '' }) {
 
 export default function ParticipantDashboard() {
  const { user } = useUser();
- const navigate = useNavigate();
 
  const userEmail = user?.primaryEmailAddress?.emailAddress || 'abisri024@gmail.com';
  const userName = user?.fullName || 'Participant';
@@ -138,47 +120,35 @@ export default function ParticipantDashboard() {
 
  const totalMembersCount = 1 + (displayTeam.members ? displayTeam.members.length : 0);
 
- // Countdown to problem-statement release — kept at component scope so it
- // obeys the Rules of Hooks (no hooks inside the tab-render functions).
- const problemUnlockTarget = new Date('2026-08-23T09:30:00');
+ // Countdown to problem-statement release.
  const [problemUnlockLeft, setProblemUnlockLeft] = useState(() => {
- const diff = problemUnlockTarget - new Date();
- if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
- return {
- days: Math.floor(diff / (1000 * 60 * 60 * 24)),
- hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
- minutes: Math.floor((diff / 1000 / 60) % 60),
- seconds: Math.floor((diff / 1000) % 60),
- };
+   const diff = PROBLEM_UNLOCK_TARGET - new Date();
+   if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+   return {
+     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+     hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+     minutes: Math.floor((diff / 1000 / 60) % 60),
+     seconds: Math.floor((diff / 1000) % 60),
+   };
  });
 
  useEffect(() => {
- const tick = () => {
- const diff = problemUnlockTarget - new Date();
- if (diff <= 0) {
- setProblemUnlockLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
- return;
- }
- setProblemUnlockLeft({
- days: Math.floor(diff / (1000 * 60 * 60 * 24)),
- hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
- minutes: Math.floor((diff / 1000 / 60) % 60),
- seconds: Math.floor((diff / 1000) % 60),
- });
- };
- const id = setInterval(tick, 1000);
- return () => clearInterval(id);
+   const tick = () => {
+     const diff = PROBLEM_UNLOCK_TARGET - new Date();
+     if (diff <= 0) {
+       setProblemUnlockLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+       return;
+     }
+     setProblemUnlockLeft({
+       days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+       hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+       minutes: Math.floor((diff / 1000 / 60) % 60),
+       seconds: Math.floor((diff / 1000) % 60),
+     });
+   };
+   const id = setInterval(tick, 1000);
+   return () => clearInterval(id);
  }, []);
-
- // Virtual Round live data (countdown to submission deadline, metrics, status).
- const {
- config: roundConfig,
- status: roundStatus,
- isLocked: submissionsLocked,
- metrics: roundMetrics,
- timeRemaining: roundTimeRemaining,
- submissionProgress,
- } = useVirtualRoundControl();
 
  // Timeline events definition
  const timelineEvents = [

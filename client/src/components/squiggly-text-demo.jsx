@@ -1,4 +1,3 @@
-import React from 'react';
 import { SquigglyText } from './ui/squiggly-text';
 
 export default function SquigglyTextDemo() {
