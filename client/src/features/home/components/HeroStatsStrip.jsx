@@ -86,7 +86,7 @@ export default function HeroStatsStrip() {
  </div>
  <div className="relative min-w-0">
  <span className="block text-[10px] font-semibold text-white/65 uppercase tracking-wider">Event Dates</span>
- <span className="block text-xs sm:text-sm font-bold text-white truncate">Aug 23 & Sep 18–20, 2026</span>
+ <span className="block text-xs sm:text-sm font-bold text-white truncate">Aug 23 & Sep 19–20, 2026</span>
  </div>
  </div>
 
@@ -108,11 +108,9 @@ export default function HeroStatsStrip() {
  <span className="text-xs uppercase tracking-wider">Sponsors</span>
  </div>
  <div className="relative flex items-center space-x-2 text-[10px] sm:text-[11px] tracking-wider text-cyan-100">
- <span>DEVNET</span>
+ <span>TECHNO VERSATILE</span>
  <span>•</span>
- <span>NEXUS</span>
- <span>•</span>
- <span>CLOUD</span>
+ <span>SYNVOLVE INTELLIS</span>
  </div>
  </div>
  </div>
