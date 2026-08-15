@@ -6,6 +6,7 @@ import App from './App.jsx';
 
 const PUBLISHABLE_KEY =
  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+ import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
  if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Clerk Publishable Key in environment variables');
