@@ -2,12 +2,10 @@
 // once available. All tiles use a black/white monochrome palette so they read as a
 // unified set; swap the entire <SponsorLogo> body for an <img> when adding real assets.
 const sponsors = [
- { name: 'Google Cloud', short: 'GC' },
- { name: 'Microsoft', short: 'MS' },
- { name: 'GitHub', short: 'GH' },
- { name: 'AWS', short: 'AWS' },
- { name: 'Figma', short: 'Fg' },
- { name: 'Devfolio', short: 'Df' },
+ { name: 'TECHNO VERSATILE', short: 'TV' },
+ { name: 'SYNVOLVE INTELLIS', short: 'SI' },
+ { name: 'NEXTSTEP LEARNING', short: 'NL' },
+ { name: 'LITZ TECH', short: 'LT' },
 ];
 
 function SponsorLogo({ name, short }) {
