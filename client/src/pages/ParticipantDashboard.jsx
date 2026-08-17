@@ -254,7 +254,7 @@ export default function ParticipantDashboard() {
  <HiClock className="w-5 h-5 text-white" />
  <span>Upcoming</span>
  </div>
- <p className="text-xs text-white/70 mt-1">24-Hour online coding round</p>
+ <p className="text-xs text-white/70 mt-1">7-Hour online coding round</p>
  </div>
  </GlassCard>
 
