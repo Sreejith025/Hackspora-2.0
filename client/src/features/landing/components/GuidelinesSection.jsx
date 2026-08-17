@@ -34,7 +34,7 @@ const timelineRounds = [
  {
  round: 'Round 2 – Grand Finale (24-Hour Offline Hackathon)',
  badge: 'Offline • 24 Hours',
- date: '18 & 19 September 2026',
+ date: '19 & 20 September 2026',
  details: [
  'Reporting Time: 7:00 AM – 9:00 AM',
  'Inauguration & Briefing: 9:00 AM',
