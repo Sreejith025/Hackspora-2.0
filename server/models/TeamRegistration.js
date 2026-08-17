@@ -107,6 +107,20 @@ const teamRegistrationSchema = new mongoose.Schema(
       default: 'Verified',
       enum: ['Verified', 'Pending', 'Rejected'],
     },
+    evaluatorName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    evaluatorAssignedAt: {
+      type: Date,
+      default: null,
+    },
+    evaluatorAssignedBy: {
+      type: String,
+      default: '',
+      trim: true,
+    },
   },
   {
     timestamps: true,

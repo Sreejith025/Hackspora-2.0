@@ -226,6 +226,18 @@ export default function Navbar() {
  );
  })}
 
+  {/* Virtual Round Link */}
+  <Link
+    to="/virtual-round"
+    className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer ${
+      location.pathname.startsWith('/virtual-round')
+        ? 'text-white font-semibold'
+        : 'text-slate-400 hover:text-white'
+    }`}
+  >
+    Virtual Round
+  </Link>
+
  {/* Dashboard Link (only when user is registered) */}
  {isRegistered && (
  <Link
@@ -377,6 +389,19 @@ export default function Navbar() {
  </motion.button>
  );
  })}
+
+  {/* Virtual Round Mobile Link */}
+  <Link
+  to="/virtual-round"
+  onClick={() => setMobileMenuOpen(false)}
+  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+  location.pathname.startsWith('/virtual-round')
+  ? 'bg-slate-900 text-white font-semibold'
+  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+  }`}
+  >
+  Virtual Round
+  </Link>
 
  {/* Dashboard Link (only when user is registered) */}
  {isRegistered && (
