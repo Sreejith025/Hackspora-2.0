@@ -35,7 +35,7 @@ const timelinePhases = [
  {
  time: 'Shortlisting Notice',
  title: 'Virtual Screening Results & Confirmation',
- description: 'Shortlisted teams receive verification email and confirm participation with ₹250/participant fee.',
+ description: 'Shortlisted teams receive verification email and confirm participation with ₹1250/Per Team.',
  icon: HiCheckCircle,
  status: 'Upcoming',
  },
