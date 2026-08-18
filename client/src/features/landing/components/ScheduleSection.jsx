@@ -35,7 +35,7 @@ const timelinePhases = [
  {
  time: 'Shortlisting Notice',
  title: 'Virtual Screening Results & Confirmation',
- description: 'Shortlisted teams receive verification email and confirm participation with ₹250/participant fee.',
+ description: 'Shortlisted teams receive verification email and confirm participation with ₹1250/Per Team.',
  icon: HiCheckCircle,
  status: 'Upcoming',
  },
@@ -160,7 +160,7 @@ export default function ScheduleSection() {
  </h2>
 
  <p className="text-xs sm:text-base text-slate-300">
- Aug 23 (Virtual Screening) & Sep 18–19 (24HOURS Offline Grand Finale at KAHE, Coimbatore).
+ Aug 23 (Virtual Screening) & Sep 19–20 (24HOURS Offline Grand Finale at KAHE, Coimbatore).
  </p>
  </div>
 
