@@ -56,7 +56,7 @@ export default function HeroSection() {
  return (
  <section
  ref={containerRef}
- className="relative min-h-[92vh] sm:min-h-screen w-full flex items-center justify-center pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-8 lg:px-12 xl:px-16 overflow-hidden bg-black"
+ className="relative min-h-[92vh] sm:min-h-screen w-full flex items-center justify-center pt-14 sm:pt-16 pb-12 sm:pb-16 px-4 sm:px-8 lg:px-12 xl:px-16 overflow-hidden bg-black"
  >
  {/* ColorBends WebGL animated backdrop (the only background layer) */}
  <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -108,7 +108,7 @@ export default function HeroSection() {
  >
  <div className="space-y-1.5 text-[10px] xs:text-[11px] sm:text-xs md:text-sm text-slate-300 font-normal leading-relaxed">
  <div className="flex flex-col items-center justify-center gap-2.5 sm:gap-4">
- <div className="relative shrink-0 h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 rounded-full overflow-hidden ring-2 ring-white/40 shadow-[0_0_25px_rgba(255,255,255,0.25)] flex items-center justify-center">
+ <div className="relative shrink-0 mt-3 sm:mt-4 md:mt-5 h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 rounded-full overflow-hidden ring-2 ring-white/40 shadow-[0_0_25px_rgba(255,255,255,0.25)] flex items-center justify-center">
  <img
  src="/logos/aids.jpg"
  alt="Department of AI & Data Science"
@@ -126,12 +126,12 @@ export default function HeroSection() {
  <p className="uppercase tracking-wide leading-snug">
  In Association with <span className="text-white">AIQubit</span>
  </p>
- <div className="mx-auto h-px w-16 bg-white/40" />
+ <div className="mx-auto h-px w-12 bg-white/40" />
  </div>
  </motion.div>
 
  {/* Hero Heading — BIG + centered */}
- <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4 pt-3 sm:pt-4 md:pt-4 lg:pt-6 w-full">
+ <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4 pt-1 sm:pt-1 md:pt-2 lg:pt-2 w-full">
  <h1
  className="text-[2.6rem] min-[400px]:text-5xl xs:text-6xl sm:text-6xl md:text-8xl lg:text-9xl xl:text-[11rem] font-thin tracking-tight text-white leading-[1.02] sm:leading-[0.98]"
  style={{ textShadow: '4px 4px 0px #111184' }}
@@ -158,7 +158,7 @@ export default function HeroSection() {
  {/* Description */}
  <motion.p
  variants={itemVariants}
- className="text-xs sm:text-sm md:text-sm lg:text-base text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed px-2 sm:px-0"
+ className="text-xs sm:text-sm md:text-sm lg:text-base text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed px-2 sm:px-0 -mt-3 sm:-mt-4"
  >
  Join India&apos;s brightest innovators, developers, designers and entrepreneurs to solve real-world challenges, compete for exciting prizes and build the future.
  </motion.p>

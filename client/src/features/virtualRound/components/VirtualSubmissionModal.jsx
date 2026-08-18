@@ -116,17 +116,20 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-950/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-2xl bg-[#090d16] border border-white/15 rounded-3xl shadow-2xl overflow-hidden my-8"
+          className="group relative w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-white/25 bg-white/[0.04] backdrop-blur-2xl shadow-2xl shadow-black/40 overflow-hidden my-8"
         >
+          {/* Subtle gradient highlight on top-left for depth */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent" />
+
           {/* Modal Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-white/[0.02]">
+          <div className="relative flex items-center justify-between px-6 py-5 border-b border-white/10">
             <div className="flex items-center space-x-3">
-              <div className="p-2.5 rounded-2xl bg-[#4a5cd9]/20 border border-[#4a5cd9]/30 text-[#8e9dff]">
+              <div className="p-2.5 rounded-xl bg-white/15 border border-white/25 text-white shadow-lg shadow-black/20 backdrop-blur-xl">
                 <HiCloudArrowUp className="w-6 h-6" />
               </div>
               <div>
@@ -136,14 +139,14 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-900/60 hover:bg-slate-800 transition-all cursor-pointer"
+              className="p-2 rounded-xl text-slate-300 hover:text-white bg-white/10 border border-white/15 hover:border-white/30 hover:bg-white/15 transition-all cursor-pointer"
             >
               <HiXMark className="w-5 h-5" />
             </button>
           </div>
 
           {/* Modal Body / Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="relative p-6 space-y-5 max-h-[80vh] overflow-y-auto">
             {/* Team Info Banner */}
             <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -279,23 +282,26 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
                 type="button"
                 onClick={onClose}
                 disabled={submitting}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-slate-900 border border-slate-700 transition-all cursor-pointer"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-white/10 border border-white/15 hover:border-white/30 hover:bg-white/15 transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting || (vrConfig && (vrConfig.submissionOpen === false || vrConfig.isAcceptingSubmissions === false))}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-[#4a5cd9] hover:bg-[#5a6ce9] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all cursor-pointer shadow-lg shadow-[#4a5cd9]/30 flex items-center space-x-2"
+                className="group/cta relative inline-flex items-center justify-center space-x-2.5 px-6 py-2.5 rounded-2xl font-bold text-xs text-white bg-[#3645bf] hover:bg-[#4a5cd9] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-300 cursor-pointer shadow-xl shadow-[#3645bf]/40 hover:shadow-2xl hover:shadow-[#3645bf]/60 overflow-hidden touch-manipulation"
               >
-                {submitting ? (
-                  <span>Submitting Project...</span>
-                ) : (
-                  <>
-                    <HiCheckCircle className="w-4 h-4" />
-                    <span>Submit Project Now</span>
-                  </>
-                )}
+                <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                <span className="relative flex items-center justify-center space-x-2.5">
+                  {submitting ? (
+                    <span>Submitting Project...</span>
+                  ) : (
+                    <>
+                      <HiCheckCircle className="w-4 h-4" />
+                      <span>Submit Project Now</span>
+                    </>
+                  )}
+                </span>
               </button>
             </div>
           </form>

@@ -85,12 +85,12 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(calc(-50% - 0.5rem));
+    transform: translateX(-50%);
   }
 }
 
 .animate-sponsor-marquee {
-  animation: sponsorMarquee 24s linear infinite;
+  animation: sponsorMarquee 60s linear infinite;
 }
 
 /* Perspective utilities retained for any inline transforms */

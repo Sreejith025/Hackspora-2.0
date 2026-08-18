@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { HiTrophy, HiCheckBadge, HiBuildingLibrary, HiSparkles, HiMagnifyingGlass } from 'react-icons/hi2';
+import { HiTrophy, HiCheckBadge, HiBuildingLibrary, HiMagnifyingGlass } from 'react-icons/hi2';
 import { virtualRoundService } from '../../../services/virtualRoundService';
 
 export default function PublicResultsSection() {
@@ -73,11 +73,11 @@ export default function PublicResultsSection() {
       ) : shortlistedTeams.length === 0 ? (
         <div className="p-8 rounded-3xl border border-white/10 bg-white/[0.02] text-center space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mx-auto flex items-center justify-center">
-            <HiSparkles className="w-6 h-6" />
+            <HiTrophy className="w-6 h-6" />
           </div>
-          <h4 className="text-base font-bold text-white">Results Under Evaluation</h4>
+          <h4 className="text-base font-bold text-white">Results will be displayed here</h4>
           <p className="text-xs text-slate-400 max-w-md mx-auto">
-            The Virtual Round submissions are currently under review by our jury panel. Shortlisted teams will be announced here once evaluations complete.
+            The results will be displayed here after being evaluated by our jury panel.
           </p>
         </div>
       ) : (

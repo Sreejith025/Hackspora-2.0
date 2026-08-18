@@ -1,41 +1,35 @@
-// Replace `src` on each SponsorLogo with the real image path (e.g. '/logos/google.svg')
-// once available. All tiles use a black/white monochrome palette so they read as a
-// unified set; swap the entire <SponsorLogo> body for an <img> when adding real assets.
 const sponsors = [
- { name: 'TECHNO VERSATILE', short: 'TV' },
- { name: 'SYNVOLVE INTELLIS', short: 'SI' },
- { name: 'NEXTSTEP LEARNING', short: 'NL' },
- { name: 'LITZ TECH', short: 'LT' },
+ { name: 'Collaborator 1', src: '/logow1.jpeg' },
+ { name: 'Collaborator 2', src: '/logow2.jpeg' },
+ { name: 'Collaborator 3', src: '/logow3.jpeg' },
+ { name: 'Collaborator 4', src: '/logow4.jpeg' },
 ];
 
-function SponsorLogo({ name, short }) {
+function SponsorLogo({ name, src }) {
  return (
  <div className="flex h-12 min-w-32 items-center justify-center gap-2 px-5 sm:h-16 sm:min-w-48 sm:gap-3 sm:px-7">
- <div
- className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-white/30 bg-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
- aria-hidden="true"
- >
- <span className="text-[10px] sm:text-xs font-black tracking-tight text-white">
- {short}
- </span>
- </div>
- <span className="text-xs font-black uppercase tracking-[0.14em] text-white sm:text-base sm:tracking-[0.18em]">
- {name}
- </span>
+ <img
+ src={src}
+ alt={name}
+ draggable={false}
+ className={`w-auto object-contain ${src === '/logow3.jpeg' || src === '/logow1.jpeg' ? 'h-36 sm:h-40' : 'h-24 sm:h-28'}`}
+ />
  </div>
  );
 }
 
 export default function SponsorsMarquee() {
- const marqueeItems = [...sponsors, ...sponsors];
+ const marqueeItems = [...sponsors, ...sponsors, ...sponsors, ...sponsors];
 
  return (
- <section className="relative overflow-hidden bg-black py-10 sm:py-14 md:py-16">
+ <section className="relative overflow-hidden bg-black pt-20 pb-16 sm:pt-24 sm:pb-20 md:pt-28 md:pb-24">
  <div className="mx-auto max-w-[1600px] px-4 sm:px-8 lg:px-12 xl:px-16">
- <div className="mb-4 flex items-center justify-center gap-3">
- <span className="text-sm font-extrabold uppercase tracking-[0.32em] text-white/80 sm:text-base md:text-lg lg:text-xl">
- Sponsors
+ <div className="mb-24 flex items-center justify-center gap-3">
+ <div className="h-px w-16 sm:w-24 bg-white/40" />
+ <span className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+ Collaborators
  </span>
+ <div className="h-px w-16 sm:w-24 bg-white/40" />
  </div>
  </div>
 
@@ -48,7 +42,7 @@ export default function SponsorsMarquee() {
  <SponsorLogo
  key={`${sponsor.name}-${index}`}
  name={sponsor.name}
- short={sponsor.short}
+ src={sponsor.src}
  aria-hidden={index >= sponsors.length}
  />
  ))}

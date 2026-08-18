@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
   HiSquares2X2,
@@ -7,27 +8,20 @@ import {
   HiDocumentText,
   HiRocketLaunch,
   HiMegaphone,
-  HiUser,
-  HiCog6Tooth,
   HiCheckCircle,
-  HiLockClosed,
+  HiXCircle,
+  HiMinusCircle,
   HiClock,
   HiCheck,
-  HiTrophy,
-  HiEye,
 } from 'react-icons/hi2';
 import { registrationService } from '../services/registrationService';
 import { virtualRoundService } from '../services/virtualRoundService';
-import VirtualSubmissionModal from '../features/virtualRound/components/VirtualSubmissionModal';
 
 const sidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: HiSquares2X2 },
   { id: 'my-team', label: 'My Team', icon: HiUserGroup },
   { id: 'problem-statements', label: 'Problem Statements', icon: HiDocumentText },
-  { id: 'virtual-round', label: 'Virtual Round', icon: HiRocketLaunch },
   { id: 'announcements', label: 'Announcements', icon: HiMegaphone },
-  { id: 'profile', label: 'Profile', icon: HiUser },
-  { id: 'settings', label: 'Settings', icon: HiCog6Tooth },
 ];
 
 // About-style glass card — re-used across every surface.
@@ -63,30 +57,25 @@ export default function ParticipantDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [teamData, setTeamData] = useState(null);
   const [vrData, setVrData] = useState(null);
-  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [publishedProblems, setPublishedProblems] = useState([]);
   const [loadingProblems, setLoadingProblems] = useState(false);
-  const [vrConfig, setVrConfig] = useState(null);
 
   useEffect(() => {
     let ignore = false;
     async function loadData() {
       try {
         setLoadingProblems(true);
-        const [team, vrRes, psRes, configRes] = await Promise.all([
+        const [team, vrRes, psRes] = await Promise.all([
           registrationService.getMyTeam(userEmail).catch(() => null),
           userEmail ? virtualRoundService.getMySubmission(userEmail).catch(() => null) : Promise.resolve(null),
           virtualRoundService.getPublishedProblemStatements().catch(() => null),
-          virtualRoundService.getRoundConfig().catch(() => null),
         ]);
         if (!ignore) {
           if (team) setTeamData(team);
           if (vrRes?.success) setVrData(vrRes);
           if (psRes?.success && Array.isArray(psRes.data)) setPublishedProblems(psRes.data);
-          if (configRes?.success) setVrConfig(configRes.data || configRes);
         }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
@@ -156,19 +145,62 @@ export default function ParticipantDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Card 1: Registration Status */}
         <GlassCard className="p-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white/70 uppercase">Registration Status</span>
-            <div className="w-2.5 h-2.5 rounded-full bg-[#4a5cd9] animate-ping" />
-          </div>
-          <div className="flex items-center space-x-3 pt-1">
-            <div className="p-3 rounded-2xl bg-[#4a5cd9]/15 border border-[#4a5cd9]/40 text-[#aeb5ff]">
-              <HiCheckCircle className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="text-2xl font-black text-white">{displayTeam.status || 'Verified'}</div>
-              <span className="text-xs text-white/70">Verified Squad</span>
-            </div>
-          </div>
+          {(() => {
+            const status = (displayTeam.status || 'Pending').toLowerCase();
+            const isVerified = status === 'verified';
+            const isRejected = status === 'rejected';
+            const isPending = !isVerified && !isRejected;
+
+            const StatusIcon = isVerified
+              ? HiCheckCircle
+              : isRejected
+              ? HiXCircle
+              : HiMinusCircle;
+
+            const accentText = isVerified
+              ? 'text-emerald-300'
+              : isRejected
+              ? 'text-rose-300'
+              : 'text-amber-300';
+
+            const accentBg = isVerified
+              ? 'bg-emerald-500/15 border-emerald-500/40'
+              : isRejected
+              ? 'bg-rose-500/15 border-rose-500/40'
+              : 'bg-amber-500/15 border-amber-500/40';
+
+            const subtitle = isVerified
+              ? 'Verified Squad'
+              : isRejected
+              ? 'Registration Rejected'
+              : 'Verification Pending';
+
+            const symbol = isVerified
+              ? '✓'
+              : isRejected
+              ? '✗'
+              : '—';
+
+            return (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white/70 uppercase">Registration Status</span>
+                </div>
+                <div className="flex items-center space-x-3 pt-1">
+                  <div className={`p-3 rounded-2xl border ${accentBg} ${accentText}`}>
+                    <StatusIcon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-black text-white flex items-center space-x-2">
+                      <span>{symbol}</span>
+                      <span>{displayTeam.status || 'Pending'}</span>
+                    </div>
+                    <span className="text-xs text-white/70">{subtitle}</span>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </GlassCard>
 
         {/* Card 2: Team ID */}
@@ -224,7 +256,7 @@ export default function ParticipantDashboard() {
           </div>
         </GlassCard>
 
-        {/* Card 5: Virtual Round */}
+        {/* Card 5: Virtual Round — quick status, deep work lives at /virtual-round */}
         <GlassCard className="p-6 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-white/70 uppercase">Virtual Round</span>
@@ -246,26 +278,17 @@ export default function ParticipantDashboard() {
               <HiRocketLaunch className="w-5 h-5 text-cyan-400" />
               <span className="capitalize">{vrStatus === 'submitted' ? 'Submission Received' : vrStatus.replace('_', ' ')}</span>
             </div>
-            
-            {hasSubmitted ? (
-              <button
-                onClick={() => setIsViewModalOpen(true)}
-                className="w-full py-2 rounded-xl text-xs font-bold text-cyan-300 bg-cyan-500/20 border border-cyan-500/40 hover:bg-cyan-500/30 transition-all cursor-pointer flex items-center justify-center space-x-1.5"
-              >
-                <HiEye className="w-4 h-4" />
-                <span>View Submission</span>
-              </button>
-            ) : isEligible ? (
-              <button
-                onClick={() => setIsSubmitModalOpen(true)}
-                className="w-full py-2 rounded-xl text-xs font-bold text-white bg-[#4a5cd9] hover:bg-[#5a6ce9] transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-md shadow-[#4a5cd9]/30"
-              >
+
+            <Link
+              to="/virtual-round"
+              className="group/cta relative w-full inline-flex items-center justify-center space-x-2 px-5 py-3 rounded-2xl font-bold text-xs text-white bg-[#3645bf] hover:bg-[#4a5cd9] active:scale-95 transition-all duration-300 cursor-pointer shadow-xl shadow-[#3645bf]/40 hover:shadow-2xl hover:shadow-[#3645bf]/60 overflow-hidden touch-manipulation"
+            >
+              <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <span className="relative flex items-center justify-center space-x-2">
                 <HiRocketLaunch className="w-4 h-4" />
-                <span>Submit Project</span>
-              </button>
-            ) : (
-              <p className="text-xs text-slate-400 italic">Eligibility Verification Pending</p>
-            )}
+                <span>Open Virtual Round</span>
+              </span>
+            </Link>
           </div>
         </GlassCard>
 
@@ -447,101 +470,6 @@ export default function ParticipantDashboard() {
     </div>
   );
 
-  const renderVirtualRoundTab = () => (
-    <div className="space-y-6">
-      {/* Shortlisted Celebration Banner */}
-      {vrStatus === 'shortlisted' && (
-        <GlassCard className="p-6 sm:p-8 bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-slate-900 border-emerald-500/40 space-y-4">
-          <div className="flex items-center space-x-3 text-emerald-400 font-bold text-xs uppercase tracking-widest">
-            <HiTrophy className="w-6 h-6" />
-            <span>CONGRATULATIONS! GRAND FINALE QUALIFIER</span>
-          </div>
-          <h3 className="text-2xl sm:text-3xl font-black text-white">
-            Your Team is Shortlisted for the Grand Finale!
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Your project submission has passed the evaluation criteria of the Hackspora 2.0 Virtual Round. Prepare your physical demonstration and final pitch deck for the Grand Finale on campus!
-          </p>
-        </GlassCard>
-      )}
-
-      {/* Rejected Status Respectful Outcome Message */}
-      {vrStatus === 'rejected' && (
-        <GlassCard className="p-6 bg-slate-900/90 border-slate-800 space-y-2">
-          <h4 className="text-base font-bold text-white">Evaluation Completed</h4>
-          <p className="text-xs text-slate-400">
-            Thank you for participating in Hackspora 2.0 Virtual Round. While your team was not selected for the final shortlist this time, we commend your innovation and hard work.
-          </p>
-        </GlassCard>
-      )}
-
-      {/* Virtual Round Status Overview Card */}
-      <GlassCard className="p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/15 pb-4">
-          <div>
-            <div className="flex items-center space-x-2 text-cyan-400 text-xs font-bold uppercase">
-              <HiRocketLaunch className="w-4 h-4" />
-              <span>Virtual Round Status</span>
-            </div>
-            <h3 className="text-2xl font-black text-white mt-1">Project Evaluation Portal</h3>
-          </div>
-
-          <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 self-start sm:self-auto">
-            Status: {vrStatus.replace('_', ' ')}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-            <span className="text-[10px] text-slate-400 uppercase font-bold">Squad ID</span>
-            <p className="text-base font-bold text-white font-mono">{displayTeam.teamId}</p>
-          </div>
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-            <span className="text-[10px] text-slate-400 uppercase font-bold">Eligibility</span>
-            <p className="text-base font-bold text-emerald-400">{isEligible ? 'Eligible for Virtual Round' : 'Under Verification'}</p>
-          </div>
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-            <span className="text-[10px] text-slate-400 uppercase font-bold">Evaluator</span>
-            <p className="text-base font-bold text-cyan-300">
-              {displayTeam.evaluatorName || vrData?.team?.evaluatorName || vrData?.submission?.evaluatorName || 'Evaluator will be assigned soon'}
-            </p>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 pt-2">
-          {hasSubmitted ? (
-            <button
-              onClick={() => setIsViewModalOpen(true)}
-              className="px-6 py-3 rounded-xl text-xs font-bold text-white bg-cyan-600 hover:bg-cyan-500 transition-all cursor-pointer flex items-center space-x-2 shadow-lg shadow-cyan-600/30"
-            >
-              <HiEye className="w-4 h-4" />
-              <span>View My Submission</span>
-            </button>
-          ) : isEligible ? (
-            (vrConfig && (vrConfig.submissionOpen === false || vrConfig.isAcceptingSubmissions === false)) ? (
-              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center space-x-3 w-full">
-                <HiLockClosed className="w-5 h-5 shrink-0 text-rose-400" />
-                <div>
-                  <span className="font-bold text-sm text-white block">🔒 Virtual Round submissions are currently closed.</span>
-                  <span className="text-slate-300">Please wait until the admin opens submissions.</span>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsSubmitModalOpen(true)}
-                className="px-6 py-3 rounded-xl text-xs font-bold text-white bg-[#4a5cd9] hover:bg-[#5a6ce9] transition-all cursor-pointer flex items-center space-x-2 shadow-lg shadow-[#4a5cd9]/30"
-              >
-                <HiRocketLaunch className="w-4 h-4" />
-                <span>Submit Project Now</span>
-              </button>
-            )
-          ) : null}
-        </div>
-      </GlassCard>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-black text-white pt-20 sm:pt-24 pb-16 px-3 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
@@ -589,11 +517,9 @@ export default function ParticipantDashboard() {
             {activeTab === 'dashboard' && renderDashboardTab()}
             {activeTab === 'my-team' && renderMyTeamTab()}
             {activeTab === 'problem-statements' && renderProblemStatementsTab()}
-            {activeTab === 'virtual-round' && renderVirtualRoundTab()}
             {activeTab !== 'dashboard' &&
               activeTab !== 'my-team' &&
-              activeTab !== 'problem-statements' &&
-              activeTab !== 'virtual-round' && (
+              activeTab !== 'problem-statements' && (
                 <GlassCard className="p-8 text-center space-y-4" hoverable={false}>
                   <h3 className="text-xl font-bold text-white capitalize">{activeTab} Module</h3>
                   <p className="text-xs text-white/70">
@@ -604,82 +530,6 @@ export default function ParticipantDashboard() {
           </AnimatePresence>
         </main>
       </div>
-
-      {/* Modal: Project Submission */}
-      <VirtualSubmissionModal
-        isOpen={isSubmitModalOpen}
-        onClose={() => setIsSubmitModalOpen(false)}
-        userEmail={userEmail}
-        team={displayTeam}
-        onSuccess={() => {
-          setRefreshKey((prev) => prev + 1);
-        }}
-      />
-
-      {/* Modal: View Submission */}
-      {isViewModalOpen && vrData?.submission && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="relative w-full max-w-xl bg-[#090d16] border border-white/15 rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div>
-                <h4 className="text-lg font-bold text-white">Your Project Submission</h4>
-                <p className="text-xs text-slate-400">{vrData.submission.teamName} ({vrData.submission.teamId})</p>
-              </div>
-              <button
-                onClick={() => setIsViewModalOpen(false)}
-                className="px-3 py-1.5 rounded-xl bg-slate-900 text-xs font-bold text-slate-300 hover:text-white"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Problem Statement</span>
-                <span className="text-white font-semibold text-sm">{vrData.submission.problemStatementName}</span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">GitHub Repository</span>
-                <a href={vrData.submission.githubLink} target="_blank" rel="noreferrer" className="text-cyan-400 underline font-mono">
-                  {vrData.submission.githubLink}
-                </a>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Demo Video URL</span>
-                <a href={vrData.submission.videoLink} target="_blank" rel="noreferrer" className="text-purple-400 underline font-mono">
-                  {vrData.submission.videoLink}
-                </a>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Presentation Deck Link</span>
-                <a href={vrData.submission.pptLink || vrData.submission.pptFileUrl} target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold underline font-mono text-xs">
-                  View Presentation ({vrData.submission.pptLink || vrData.submission.pptFileUrl})
-                </a>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Evaluator</span>
-                <span className="text-white font-semibold text-xs">
-                  {vrData.submission.evaluatorName ? `Evaluator: ${vrData.submission.evaluatorName}` : 'Evaluator will be assigned soon'}
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
-                <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Submitted At</span>
-                  <span className="text-slate-200">{new Date(vrData.submission.submittedAt).toLocaleString()}</span>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-bold uppercase text-[10px]">
-                  {vrData.submission.status}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

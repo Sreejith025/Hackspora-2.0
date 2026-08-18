@@ -105,7 +105,7 @@ export default function HeroStatsStrip() {
  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/12 via-white/[0.03] to-transparent opacity-80" />
  <div className="relative flex items-center space-x-2 text-white/85 shrink-0">
  <HiBuildingOffice2 className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-100" />
- <span className="text-xs uppercase tracking-wider">Sponsors</span>
+ <span className="text-xs uppercase tracking-wider">Internships</span>
  </div>
  <div className="relative flex items-center space-x-2 text-[10px] sm:text-[11px] tracking-wider text-cyan-100">
  <span>TECHNO VERSATILE</span>

@@ -8,7 +8,7 @@ import {
  HiUserGroup,
  HiCpuChip,
 } from 'react-icons/hi2';
-import { FaGithub, FaLinkedin, FaInstagram, FaXTwitter, FaDiscord } from 'react-icons/fa6';
+import { FaLinkedin, FaInstagram, FaDiscord } from 'react-icons/fa6';
 
 export default function Footer() {
  const location = useLocation();
@@ -51,10 +51,8 @@ export default function Footer() {
  ];
 
  const socialLinks = [
- { name: 'GitHub', href: 'https://github.com', icon: FaGithub },
- { name: 'LinkedIn', href: 'https://linkedin.com', icon: FaLinkedin },
- { name: 'Instagram', href: 'https://instagram.com', icon: FaInstagram },
- { name: 'X / Twitter', href: 'https://x.com', icon: FaXTwitter },
+ { name: 'LinkedIn', href: 'https://www.linkedin.com/in/aiqubit-association-2b7446330?utm_source=share_via&utm_content=profile&utm_medium=member_android', icon: FaLinkedin },
+ { name: 'Instagram', href: 'https://www.instagram.com/aiqubit2k26?igsh=Mm5kbDVvNG16eWtl&igsi=Mm5kbDVvNG16eWtl', icon: FaInstagram },
  { name: 'Discord', href: 'https://discord.com', icon: FaDiscord },
  ];
 
@@ -82,13 +80,7 @@ export default function Footer() {
  </span>
  </Link>
 
- <div className="flex items-center space-x-2.5">
- <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-[11px] sm:text-xs font-medium">
- <img src="/logos/kahe.jpg" alt="KAHE Logo" className="h-4 w-auto rounded bg-white p-0.5" />
- <img src="/logos/aids.jpg" alt="AIDS Logo" className="h-4 w-auto rounded bg-white p-0.5" />
- <span className="ml-1">Dept. of AI & DS, KAHE</span>
- </div>
- </div>
+
 
  <p className="text-sm sm:text-sm text-slate-400 leading-relaxed max-w-sm">
  The premier national-level hackathon driving technology innovation, artificial intelligence solutions, and real-world impact for future creators.
