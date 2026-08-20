@@ -28,7 +28,7 @@ const detailItems = [
  {
  icon: HiPhone,
  label: 'Helpline',
- value: '+91 90438 69570',
+ value: '+91 77081 18216',
  },
  {
  icon: HiMapPin,
@@ -152,7 +152,7 @@ export default function ContactSection() {
  </div>
 
  <form
- action="https://formsubmit.co/abisri024@gmail.com"
+ action="https://formsubmit.co/hackspora2.0@gmail.com"
  method="POST"
  onSubmit={handleSubmit}
  className="space-y-5"
