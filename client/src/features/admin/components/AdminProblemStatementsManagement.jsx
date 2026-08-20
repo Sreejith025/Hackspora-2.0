@@ -16,6 +16,8 @@ import { virtualRoundService } from '../../../services/virtualRoundService';
 import { ADMIN_EMAIL } from '../../../constants/authConfig';
 
 export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EMAIL }) {
+  const activeAdminEmail = (adminEmail && typeof adminEmail === 'string' && adminEmail.trim()) ? adminEmail.trim() : ADMIN_EMAIL;
+
   const [problemStatements, setProblemStatements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -32,8 +34,7 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
 
   const loadProblemStatements = useCallback(async () => {
     try {
-      setLoading(true);
-      const res = await virtualRoundService.getAdminProblemStatements(adminEmail);
+      const res = await virtualRoundService.getAdminProblemStatements(activeAdminEmail);
       if (res?.success && Array.isArray(res.data)) {
         setProblemStatements(res.data);
       }
@@ -43,11 +44,31 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
     } finally {
       setLoading(false);
     }
-  }, [adminEmail]);
+  }, [activeAdminEmail]);
 
   useEffect(() => {
-    loadProblemStatements();
-  }, [loadProblemStatements]);
+    let ignore = false;
+    virtualRoundService
+      .getAdminProblemStatements(activeAdminEmail)
+      .then((res) => {
+        if (!ignore && res?.success && Array.isArray(res.data)) {
+          setProblemStatements(res.data);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          console.error('Failed to fetch problem statements:', err);
+          toast.error('Error loading problem statements from database.');
+        }
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeAdminEmail]);
 
   // Open Create Modal
   const handleOpenCreateModal = () => {
@@ -87,10 +108,11 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
       };
 
       let res;
-      if (editingPs) {
-        res = await virtualRoundService.updateProblemStatement(editingPs._id, payload, adminEmail);
+      const targetId = editingPs?._id || editingPs?.id;
+      if (editingPs && targetId) {
+        res = await virtualRoundService.updateProblemStatement(targetId, payload, activeAdminEmail);
       } else {
-        res = await virtualRoundService.createProblemStatement(payload, adminEmail);
+        res = await virtualRoundService.createProblemStatement(payload, activeAdminEmail);
       }
 
       if (res?.success) {
@@ -112,7 +134,7 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
     const nextStatus = currentStatus === 'published' ? 'draft' : 'published';
     try {
       setUpdating(true);
-      const res = await virtualRoundService.togglePublishProblemStatement(psId, nextStatus, adminEmail);
+      const res = await virtualRoundService.togglePublishProblemStatement(psId, nextStatus, activeAdminEmail);
       if (res?.success) {
         toast.success(
           `Problem Statement ${nextStatus === 'published' ? 'Published' : 'Unpublished'} successfully.`
@@ -131,7 +153,7 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
     if (!window.confirm(`Are you sure you want to delete "${psName}"?`)) return;
     try {
       setUpdating(true);
-      const res = await virtualRoundService.deleteProblemStatement(psId, adminEmail);
+      const res = await virtualRoundService.deleteProblemStatement(psId, activeAdminEmail);
       if (res?.success) {
         toast.success('Problem Statement deleted successfully.');
         loadProblemStatements();
@@ -144,10 +166,10 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
   };
 
   // Search Filter
-  const filteredProblems = problemStatements.filter(
+  const filteredProblems = (Array.isArray(problemStatements) ? problemStatements : []).filter(
     (ps) =>
-      ps.name.toLowerCase().includes(search.toLowerCase()) ||
-      ps.description.toLowerCase().includes(search.toLowerCase())
+      (ps?.name || '').toLowerCase().includes(search.toLowerCase()) ||
+      (ps?.description || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -185,14 +207,18 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1">
           <span className="text-[10px] font-bold uppercase text-slate-400">Total Problem Statements</span>
-          <div className="text-2xl font-black text-white">{problemStatements.length}</div>
+          <div className="text-2xl font-black text-white">
+            {Array.isArray(problemStatements) ? problemStatements.length : 0}
+          </div>
           <span className="text-[10px] text-slate-500">Registered Tracks</span>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-900/80 border border-emerald-500/30 space-y-1">
           <span className="text-[10px] font-bold uppercase text-emerald-400">Published Problems</span>
           <div className="text-2xl font-black text-emerald-300">
-            {problemStatements.filter((p) => p.status === 'published').length}
+            {Array.isArray(problemStatements)
+              ? problemStatements.filter((p) => p?.status === 'published').length
+              : 0}
           </div>
           <span className="text-[10px] text-slate-500">Live for Participants</span>
         </div>
@@ -200,7 +226,9 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
         <div className="p-4 rounded-2xl bg-slate-900/80 border border-amber-500/30 space-y-1">
           <span className="text-[10px] font-bold uppercase text-amber-400">Draft / Unpublished</span>
           <div className="text-2xl font-black text-amber-300">
-            {problemStatements.filter((p) => p.status !== 'published').length}
+            {Array.isArray(problemStatements)
+              ? problemStatements.filter((p) => p?.status !== 'published').length
+              : 0}
           </div>
           <span className="text-[10px] text-slate-500">Hidden from Dropdown</span>
         </div>
@@ -237,12 +265,18 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredProblems.map((ps) => {
-            const isPublished = ps.status === 'published';
+            const psId = ps?._id || ps?.id;
+            const isPublished = ps?.status === 'published';
             const displayStatus = isPublished ? 'Published' : 'Draft';
+            const formattedLink = ps?.link
+              ? ps.link.startsWith('http://') || ps.link.startsWith('https://')
+                ? ps.link
+                : `https://${ps.link}`
+              : '';
 
             return (
               <div
-                key={ps._id}
+                key={psId}
                 className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-cyan-500/30 transition-all flex flex-col justify-between space-y-4 shadow-xl"
               >
                 <div className="space-y-2">
@@ -251,7 +285,7 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
                       <span className="text-[10px] font-bold uppercase text-slate-500 block tracking-wider">
                         Problem Statement
                       </span>
-                      <h3 className="text-base font-bold text-white tracking-tight">{ps.name}</h3>
+                      <h3 className="text-base font-bold text-white tracking-tight">{ps?.name}</h3>
                     </div>
 
                     {/* Status Badge */}
@@ -270,12 +304,12 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
                   </div>
 
                   <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">
-                    {ps.description}
+                    {ps?.description}
                   </p>
 
-                  {ps.link && (
+                  {formattedLink && (
                     <a
-                      href={ps.link}
+                      href={formattedLink}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[11px] text-cyan-400 hover:underline inline-flex items-center space-x-1.5 font-mono pt-1"
@@ -297,7 +331,7 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
                   </button>
 
                   <button
-                    onClick={() => handleTogglePublishPs(ps._id, ps.status)}
+                    onClick={() => handleTogglePublishPs(psId, ps?.status)}
                     disabled={updating}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       isPublished
@@ -309,7 +343,7 @@ export default function AdminProblemStatementsManagement({ adminEmail = ADMIN_EM
                   </button>
 
                   <button
-                    onClick={() => handleDeletePs(ps._id, ps.name)}
+                    onClick={() => handleDeletePs(psId, ps?.name)}
                     disabled={updating}
                     className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs transition-all cursor-pointer"
                     title="Delete Problem Statement"

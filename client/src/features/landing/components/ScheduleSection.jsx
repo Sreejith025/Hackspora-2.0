@@ -103,7 +103,7 @@ const lastYearAchievementsGallery = [
  {
  id: 2,
  src: '/last year achievements/achievement2.jpg',
- title: '24-Hour Non-Stop Hackathon Arena',
+ title: '24-Hours Non-Stop Hackathon Arena',
  category: 'Hackathon',
  },
  {

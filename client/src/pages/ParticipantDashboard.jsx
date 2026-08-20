@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
@@ -13,6 +13,8 @@ import {
   HiMinusCircle,
   HiClock,
   HiCheck,
+  HiLockClosed,
+  HiArrowPath,
 } from 'react-icons/hi2';
 import { registrationService } from '../services/registrationService';
 import { virtualRoundService } from '../services/virtualRoundService';
@@ -118,26 +120,60 @@ export default function ParticipantDashboard() {
   const timelineEvents = [
     { label: 'Account Created', status: 'completed' },
     { label: 'Registration Completed', status: 'completed' },
-    { label: 'Registration Verified', status: 'completed' },
+    { label: 'Registration Verified', status: displayTeam.status === 'Verified' ? 'completed' : 'upcoming' },
     { label: 'Problem Statements', status: hasPublishedProblems ? 'completed' : 'upcoming' },
-    { label: 'Virtual Round', status: hasSubmitted ? 'completed' : 'active' },
+    { label: 'Virtual Round', status: hasSubmitted ? 'completed' : isEligible ? 'active' : 'locked' },
     { label: 'Grand Finale Results', status: vrStatus === 'shortlisted' ? 'completed' : 'upcoming' },
   ];
+
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   const renderDashboardTab = () => (
     <div className="space-y-8">
       {/* Top Welcome Card */}
-      <GlassCard className="p-6 sm:p-8 space-y-3">
-        <div className="space-y-2 text-center md:text-left">
-          <div className="flex items-center justify-center md:justify-start space-x-2 text-[#aeb5ff] text-xs font-bold">
-            <span>STUDENT HACKATHON HUB</span>
+      <GlassCard className="p-6 sm:p-8 space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2 text-center lg:text-left">
+            <div className="flex items-center justify-center lg:justify-start space-x-2 text-[#aeb5ff] text-xs font-bold">
+              <span>STUDENT HACKATHON HUB</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">
+              Welcome back, {displayTeam.leaderName || userName}!
+            </h2>
+            <p className="text-xs sm:text-sm text-white/70">
+              Registered Squad: <strong className="text-white font-bold">{displayTeam.teamName || 'My Team'}</strong> ({displayTeam.teamId || 'N/A'})
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white">
-            Welcome back, {displayTeam.leaderName}!
-          </h2>
-          <p className="text-xs sm:text-sm text-white/70">
-            Registered Squad: <strong className="text-white font-bold">{displayTeam.teamName}</strong> ({displayTeam.teamId})
-          </p>
+
+          {/* WhatsApp Group QR Code Box */}
+          <div className="flex flex-col sm:flex-row items-center gap-3.5 p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 shadow-lg shrink-0">
+            <img
+              src="/Qr whatsapp/qr1.jpg"
+              alt="WhatsApp Group QR Code"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-contain bg-white p-1 border border-emerald-400/40 shadow-md shrink-0"
+            />
+            <div className="text-center sm:text-left space-y-1 max-w-[200px]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">
+                Official Squad Chat
+              </span>
+              <p className="text-xs font-bold text-white leading-tight">
+                Join this WhatsApp group
+              </p>
+              <p className="text-[11px] text-emerald-200/70 leading-tight">
+                Scan QR code for instant updates & announcements.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleRefresh}
+            className="self-center lg:self-auto inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all border border-white/20 active:scale-95 cursor-pointer shrink-0"
+          >
+            <HiArrowPath className={`w-4 h-4 ${loadingProblems ? 'animate-spin' : ''}`} />
+            <span>Refresh Data</span>
+          </button>
         </div>
       </GlassCard>
 
@@ -173,7 +209,9 @@ export default function ParticipantDashboard() {
               ? 'Verified Squad'
               : isRejected
               ? 'Registration Rejected'
-              : 'Verification Pending';
+              : isPending
+              ? 'Verification Pending'
+              : 'Status Unknown';
 
             const symbol = isVerified
               ? '✓'
@@ -256,7 +294,7 @@ export default function ParticipantDashboard() {
           </div>
         </GlassCard>
 
-        {/* Card 5: Virtual Round — quick status, deep work lives at /virtual-round */}
+        {/* Card 5: Virtual Round */}
         <GlassCard className="p-6 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-white/70 uppercase">Virtual Round</span>
@@ -267,9 +305,11 @@ export default function ParticipantDashboard() {
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : vrStatus === 'under_review'
                 ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
-                : 'bg-[#4a5cd9]/20 text-white border border-[#4a5cd9]/40'
+                : isEligible
+                ? 'bg-[#4a5cd9]/20 text-white border border-[#4a5cd9]/40'
+                : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
             }`}>
-              {vrStatus.replace('_', ' ')}
+              {isEligible ? vrStatus.replace('_', ' ') : 'Pending Verification'}
             </span>
           </div>
 
@@ -299,9 +339,9 @@ export default function ParticipantDashboard() {
             <HiMegaphone className="w-4 h-4 text-white" />
           </div>
           <div className="pt-1">
-            <div className="text-sm font-bold text-white">Virtual Round is Live</div>
+            <div className="text-sm font-bold text-white">No New Announcements</div>
             <p className="text-xs text-white/70 mt-0.5 truncate">
-              Submit your GitHub repo, demo video, and presentation slides!
+              Stay tuned for official updates from organizers.
             </p>
           </div>
         </GlassCard>
@@ -388,21 +428,28 @@ export default function ParticipantDashboard() {
         <GlassCard className="p-6 space-y-3">
           <h4 className="text-sm font-bold text-white uppercase tracking-wider">Team Leader</h4>
           <div className="space-y-1 text-xs text-slate-300">
-            <p><strong className="text-white">Name:</strong> {displayTeam.leaderName}</p>
-            <p><strong className="text-white">Email:</strong> {displayTeam.leaderEmail}</p>
-            <p><strong className="text-white">College:</strong> {displayTeam.collegeName}</p>
+            <p><strong className="text-white">Name:</strong> {displayTeam.leaderName || userName}</p>
+            <p><strong className="text-white">Email:</strong> {displayTeam.leaderEmail || userEmail}</p>
+            <p><strong className="text-white">Phone:</strong> {displayTeam.leaderPhone || 'N/A'}</p>
+            <p><strong className="text-white">College:</strong> {displayTeam.collegeName || 'N/A'}</p>
+            <p><strong className="text-white">Department:</strong> {displayTeam.branch || displayTeam.department || 'N/A'}</p>
           </div>
         </GlassCard>
 
         <GlassCard className="p-6 space-y-3">
           <h4 className="text-sm font-bold text-white uppercase tracking-wider">Members ({displayTeam.members ? displayTeam.members.length : 0})</h4>
           <div className="space-y-2 text-xs text-slate-300">
-            {(displayTeam.members || []).map((m, idx) => (
-              <div key={idx} className="p-2 rounded-xl bg-white/5 border border-white/10">
-                <p className="font-semibold text-white">{m.fullName}</p>
-                <p className="text-slate-400">{m.email}</p>
-              </div>
-            ))}
+            {(displayTeam.members || []).length === 0 ? (
+              <p className="text-white/50 italic">No additional squad members added.</p>
+            ) : (
+              (displayTeam.members || []).map((m, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-0.5">
+                  <p className="font-semibold text-white">{m?.fullName || `Member ${idx + 1}`}</p>
+                  <p className="text-slate-400">{m?.email || 'No email provided'}</p>
+                  {m?.phone && <p className="text-slate-500 text-[11px]">Phone: {m.phone}</p>}
+                </div>
+              ))
+            )}
           </div>
         </GlassCard>
       </div>
@@ -437,15 +484,15 @@ export default function ParticipantDashboard() {
         </GlassCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {publishedProblems.map((ps) => (
-            <GlassCard key={ps._id} className="p-6 flex flex-col justify-between space-y-4">
+          {publishedProblems.map((ps, idx) => (
+            <GlassCard key={ps._id || ps.id || idx} className="p-6 flex flex-col justify-between space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <span className="text-[10px] font-bold uppercase text-cyan-400 tracking-wider block">
                       Published Track
                     </span>
-                    <h4 className="text-lg font-bold text-white tracking-tight">{ps.name}</h4>
+                    <h4 className="text-lg font-bold text-white tracking-tight">{ps.name || ps.title}</h4>
                   </div>
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0">
                     Live
@@ -470,21 +517,59 @@ export default function ParticipantDashboard() {
     </div>
   );
 
+  const renderAnnouncementsTab = () => (
+    <div className="space-y-6">
+      <GlassCard className="p-6 sm:p-8 space-y-3">
+        <div className="flex items-center space-x-2 text-[#aeb5ff] font-bold text-xs uppercase tracking-wider">
+          <HiMegaphone className="w-4 h-4 text-amber-400" />
+          <span>Hackathon Notifications</span>
+        </div>
+        <h3 className="text-2xl font-black text-white">Latest Announcements</h3>
+        <p className="text-xs sm:text-sm text-slate-300">
+          Stay updated with official announcements, deadlines, and guidelines for Hackspora 2.0.
+        </p>
+      </GlassCard>
+
+      <GlassCard className="p-12 text-center space-y-3">
+        <HiMegaphone className="w-10 h-10 text-slate-500 mx-auto" />
+        <h4 className="text-base font-bold text-white">No Announcements Posted Yet</h4>
+        <p className="text-xs text-slate-400 max-w-md mx-auto">
+          Official announcements, updates, and news will appear here when broadcasted by the organizers.
+        </p>
+      </GlassCard>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-black text-white pt-20 sm:pt-24 pb-16 px-3 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
         {/* Left Sidebar */}
         <aside className="w-full lg:w-64 shrink-0 space-y-2">
-          <GlassCard className="p-3 sm:p-4 mb-3 sm:mb-4" hoverable={false}>
+          <GlassCard className="p-3.5 sm:p-4 mb-3 sm:mb-4 space-y-3" hoverable={false}>
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-xl bg-[#4a5cd9] text-white flex items-center justify-center font-black text-base shadow-md shadow-[#4a5cd9]/30 shrink-0">
-                {userName.charAt(0)}
+                {(displayTeam.leaderName || userName || 'P').charAt(0).toUpperCase()}
               </div>
               <div className="overflow-hidden">
-                <h4 className="text-sm font-bold text-white truncate">{userName}</h4>
+                <h4 className="text-sm font-bold text-white truncate">{displayTeam.leaderName || userName}</h4>
                 <span className="text-[11px] text-white/70 block truncate">
                   {displayTeam.teamId}
                 </span>
+              </div>
+            </div>
+
+            {/* WhatsApp Group Quick Badge */}
+            <div className="pt-2.5 border-t border-white/10 flex items-center space-x-2.5">
+              <img
+                src="/Qr whatsapp/qr1.jpg"
+                alt="WhatsApp Group QR Code"
+                className="w-11 h-11 rounded-lg object-contain bg-white p-0.5 border border-emerald-400/40 shrink-0 shadow"
+              />
+              <div className="overflow-hidden">
+                <span className="text-[11px] font-bold text-emerald-300 block truncate">
+                  Join this WhatsApp group
+                </span>
+                <span className="text-[10px] text-white/60 block truncate">Scan QR for official updates</span>
               </div>
             </div>
           </GlassCard>
@@ -514,19 +599,29 @@ export default function ParticipantDashboard() {
         {/* Right Main Content */}
         <main className="flex-1 min-w-0">
           <AnimatePresence mode="wait">
-            {activeTab === 'dashboard' && renderDashboardTab()}
-            {activeTab === 'my-team' && renderMyTeamTab()}
-            {activeTab === 'problem-statements' && renderProblemStatementsTab()}
-            {activeTab !== 'dashboard' &&
-              activeTab !== 'my-team' &&
-              activeTab !== 'problem-statements' && (
-                <GlassCard className="p-8 text-center space-y-4" hoverable={false}>
-                  <h3 className="text-xl font-bold text-white capitalize">{activeTab} Module</h3>
-                  <p className="text-xs text-white/70">
-                    This section is active and ready for your Hackspora 2.0 workflow.
-                  </p>
-                </GlassCard>
-              )}
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {activeTab === 'dashboard' && renderDashboardTab()}
+              {activeTab === 'my-team' && renderMyTeamTab()}
+              {activeTab === 'problem-statements' && renderProblemStatementsTab()}
+              {activeTab === 'announcements' && renderAnnouncementsTab()}
+              {activeTab !== 'dashboard' &&
+                activeTab !== 'my-team' &&
+                activeTab !== 'problem-statements' &&
+                activeTab !== 'announcements' && (
+                  <GlassCard className="p-8 text-center space-y-4" hoverable={false}>
+                    <h3 className="text-xl font-bold text-white capitalize">{activeTab} Module</h3>
+                    <p className="text-xs text-white/70">
+                      This section is active and ready for your Hackspora 2.0 workflow.
+                    </p>
+                  </GlassCard>
+                )}
+            </motion.div>
           </AnimatePresence>
         </main>
       </div>
