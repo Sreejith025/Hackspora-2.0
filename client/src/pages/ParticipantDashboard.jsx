@@ -728,7 +728,7 @@ export default function ParticipantDashboard() {
               />
               <div className="overflow-hidden">
                 <span className="text-[11px] font-bold text-emerald-300 block truncate">
-                  Join this Discord group
+                  Join this WhatsApp group
                 </span>
                 <span className="text-[10px] text-white/60 block truncate">Scan QR for official updates</span>
               </div>
