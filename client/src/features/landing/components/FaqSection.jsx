@@ -21,7 +21,7 @@ const faqs = [
  },
  {
  q: 'What are the event rounds and dates?',
- a: 'Round 1 (Virtual Screening) is on 23 August 2026 (7-hour hackathon, problem statements at 9:30 AM, submission 5:00-6:00 PM). Round 2 (Grand Finale) is a 24-hour offline hackathon on 18 & 19 September 2026 at KAHE, Coimbatore.',
+ a: 'Round 1 (Virtual Screening) is on 23 August 2026 (7-hour hackathon, problem statements at 9:30 AM, submission 5:00-6:00 PM). Round 2 (Grand Finale) is a 24-hour offline hackathon on 19 & 20 September 2026 at KAHE, Coimbatore.',
  },
  {
  q: 'Are problem statements the same for Virtual and Offline rounds?',
