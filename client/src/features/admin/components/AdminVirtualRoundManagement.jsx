@@ -12,6 +12,9 @@ import {
   HiVideoCamera,
   HiSparkles,
   HiUser,
+  HiClipboardDocument,
+  HiArrowTopRightOnSquare,
+  HiPencilSquare,
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { virtualRoundService } from '../../../services/virtualRoundService';
@@ -36,8 +39,9 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
   const [selectedSub, setSelectedSub] = useState(null);
   const [updating, setUpdating] = useState(false);
 
-  // Pre-assignment evaluator state for teams
+  // Pre-assignment evaluator and mentor link state for teams
   const [teamEvaluatorInputs, setTeamEvaluatorInputs] = useState({});
+  const [teamMentorLinkInputs, setTeamMentorLinkInputs] = useState({});
   const [editingTeamEvalId, setEditingTeamEvalId] = useState(null);
 
   const loadAdminData = useCallback(async () => {
@@ -93,23 +97,26 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
     };
   }, [activeAdminEmail, search, statusFilter]);
 
-  // Pre-assign evaluator to a team before Virtual Round
-  const handlePreAssignTeamEvaluator = async (teamId, nameToAssign = null) => {
-    const inputVal = nameToAssign !== null ? nameToAssign : (teamEvaluatorInputs[teamId] || '').trim();
-    if (nameToAssign === null && !inputVal) {
-      toast.error('Please enter an Evaluator Name.');
+  // Pre-assign evaluator/mentor and meeting link to a team
+  const handlePreAssignTeamEvaluator = async (teamId, overrideName = null, overrideLink = null) => {
+    const evaluatorName = overrideName !== null ? overrideName : (teamEvaluatorInputs[teamId] !== undefined ? teamEvaluatorInputs[teamId] : '').trim();
+    const mentorLink = overrideLink !== null ? overrideLink : (teamMentorLinkInputs[teamId] !== undefined ? teamMentorLinkInputs[teamId] : '').trim();
+
+    if (mentorLink && !/^https?:\/\/.+/i.test(mentorLink)) {
+      toast.error('Invalid Mentor Link format. Link must start with http:// or https://');
       return;
     }
+
     try {
       setUpdating(true);
-      const res = await virtualRoundService.assignTeamEvaluator(teamId, inputVal, activeAdminEmail);
+      const res = await virtualRoundService.assignTeamEvaluator(teamId, evaluatorName, mentorLink, activeAdminEmail);
       if (res?.success) {
-        toast.success(res.message || 'Evaluator updated successfully.');
+        toast.success(res.message || 'Mentor details updated successfully.');
         setEditingTeamEvalId(null);
         loadAdminData();
       }
     } catch (err) {
-      toast.error(err.message || 'Failed to assign evaluator.');
+      toast.error(err.message || 'Failed to update mentor details.');
     } finally {
       setUpdating(false);
     }
@@ -269,7 +276,7 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
         </div>
       </div>
 
-      {/* 3. Evaluator Assignment Section (Available BEFORE Virtual Round starts) */}
+      {/* 3. Mentor & Evaluator Assignment Section (Available BEFORE Virtual Round starts) */}
       <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/90 space-y-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
           <div>
@@ -277,9 +284,9 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
               <HiUser className="w-4 h-4" />
               <span>Pre-Submission Setup</span>
             </div>
-            <h3 className="text-xl font-extrabold text-white mt-1">Evaluator Assignment</h3>
+            <h3 className="text-xl font-extrabold text-white mt-1">Mentor & Evaluator Assignment</h3>
             <p className="text-xs text-slate-400">
-              Assign evaluators to registered teams before Virtual Round submissions begin. Assigned evaluators will automatically be attached to team submissions.
+              Assign dedicated mentors and unique team meeting links to registered squads. Each team gets its own meeting link.
             </p>
           </div>
           <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold shrink-0 self-start sm:self-auto">
@@ -288,12 +295,22 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
         </div>
 
         {teamsList.length === 0 ? (
-          <p className="text-xs text-slate-500 italic py-4 text-center">No registered teams found for evaluator assignment.</p>
+          <p className="text-xs text-slate-500 italic py-4 text-center">No registered teams found for mentor assignment.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
             {teamsList.map((t) => {
               const isEditing = editingTeamEvalId === t._id;
               const hasEvaluator = !!t.evaluatorName;
+              const hasLink = !!t.mentorLink;
+
+              const currentEvalInput = teamEvaluatorInputs[t._id] !== undefined ? teamEvaluatorInputs[t._id] : (t.evaluatorName || '');
+              const currentLinkInput = teamMentorLinkInputs[t._id] !== undefined ? teamMentorLinkInputs[t._id] : (t.mentorLink || '');
+
+              const copyLinkToClipboard = (linkToCopy) => {
+                if (!linkToCopy) return;
+                navigator.clipboard.writeText(linkToCopy);
+                toast.success('Copied mentor link to clipboard!');
+              };
 
               return (
                 <div key={t._id} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 flex flex-col justify-between">
@@ -308,67 +325,121 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
                   </div>
 
                   <div className="pt-2 border-t border-slate-900 space-y-2">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Evaluator</span>
-
                     {isEditing ? (
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="text"
-                          placeholder="e.g. Sreejith, Harijith..."
-                          value={teamEvaluatorInputs[t._id] !== undefined ? teamEvaluatorInputs[t._id] : (t.evaluatorName || '')}
-                          onChange={(e) => setTeamEvaluatorInputs((prev) => ({ ...prev, [t._id]: e.target.value }))}
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-cyan-500 text-xs text-white focus:outline-none"
-                        />
-                        <button
-                          onClick={() => handlePreAssignTeamEvaluator(t._id)}
-                          disabled={updating}
-                          className="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shrink-0 cursor-pointer"
-                        >
-                          Assign
-                        </button>
-                        <button
-                          onClick={() => setEditingTeamEvalId(null)}
-                          className="p-1 text-slate-400 hover:text-white shrink-0"
-                        >
-                          <HiXMark className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : hasEvaluator ? (
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center space-x-1.5 text-xs text-emerald-400 font-bold truncate">
-                          <HiUser className="w-4 h-4 shrink-0" />
-                          <span className="truncate">{t.evaluatorName}</span>
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Mentor Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Sreejith"
+                            value={currentEvalInput}
+                            onChange={(e) => setTeamEvaluatorInputs((prev) => ({ ...prev, [t._id]: e.target.value }))}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-cyan-500 text-xs text-white focus:outline-none"
+                          />
                         </div>
-                        <div className="flex items-center space-x-2 shrink-0">
+                        <div>
+                          <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Mentor Link (Google Meet / Zoom)</label>
+                          <input
+                            type="url"
+                            placeholder="https://meet.google.com/abc-123"
+                            value={currentLinkInput}
+                            onChange={(e) => setTeamMentorLinkInputs((prev) => ({ ...prev, [t._id]: e.target.value }))}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-cyan-500 text-xs text-white focus:outline-none"
+                          />
+                        </div>
+                        <div className="flex items-center justify-end space-x-2 pt-1">
                           <button
-                            onClick={() => {
-                              setEditingTeamEvalId(t._id);
-                              setTeamEvaluatorInputs((prev) => ({ ...prev, [t._id]: t.evaluatorName }));
-                            }}
-                            className="text-[10px] text-cyan-400 hover:underline cursor-pointer font-semibold"
+                            onClick={() => setEditingTeamEvalId(null)}
+                            className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold hover:text-white"
                           >
-                            Change
+                            Cancel
                           </button>
                           <button
-                            onClick={() => handlePreAssignTeamEvaluator(t._id, '')}
-                            className="text-[10px] text-rose-400 hover:underline cursor-pointer font-semibold"
+                            onClick={() => handlePreAssignTeamEvaluator(t._id)}
+                            disabled={updating}
+                            className="px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs cursor-pointer flex items-center space-x-1"
                           >
-                            Remove
+                            <span>Save Details</span>
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] text-slate-500 italic">Not Assigned</span>
-                        <button
-                          onClick={() => {
-                            setEditingTeamEvalId(t._id);
-                            setTeamEvaluatorInputs((prev) => ({ ...prev, [t._id]: '' }));
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 text-[10px] font-bold cursor-pointer"
-                        >
-                          Assign Evaluator
-                        </button>
+                      <div className="space-y-2">
+                        {/* Mentor Name Row */}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] uppercase font-bold text-slate-400">Mentor:</span>
+                          <span className="text-xs font-bold text-emerald-400 truncate">
+                            {t.evaluatorName || 'Not Assigned'}
+                          </span>
+                        </div>
+
+                        {/* Mentor Link Row */}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] uppercase font-bold text-slate-400">Link:</span>
+                          {t.mentorLink ? (
+                            <a
+                              href={t.mentorLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-cyan-400 hover:underline truncate max-w-[170px]"
+                              title={t.mentorLink}
+                            >
+                              {t.mentorLink}
+                            </a>
+                          ) : (
+                            <span className="text-[11px] text-slate-500 italic">No link set</span>
+                          )}
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-900/60">
+                          <div className="flex items-center space-x-1.5">
+                            {t.mentorLink && (
+                              <>
+                                <button
+                                  onClick={() => copyLinkToClipboard(t.mentorLink)}
+                                  className="px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-[10px] font-bold cursor-pointer flex items-center space-x-1"
+                                  title="Copy Meeting Link"
+                                >
+                                  <HiClipboardDocument className="w-3 h-3 text-cyan-400" />
+                                  <span>Copy</span>
+                                </button>
+                                <a
+                                  href={t.mentorLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 text-[10px] font-bold cursor-pointer flex items-center space-x-1"
+                                  title="Open Meeting Link"
+                                >
+                                  <HiArrowTopRightOnSquare className="w-3 h-3" />
+                                  <span>Open</span>
+                                </a>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => {
+                                setEditingTeamEvalId(t._id);
+                                setTeamEvaluatorInputs((prev) => ({ ...prev, [t._id]: t.evaluatorName || '' }));
+                                setTeamMentorLinkInputs((prev) => ({ ...prev, [t._id]: t.mentorLink || '' }));
+                              }}
+                              className="text-[10px] text-cyan-400 hover:underline cursor-pointer font-semibold flex items-center space-x-1"
+                            >
+                              <HiPencilSquare className="w-3 h-3" />
+                              <span>{hasEvaluator || hasLink ? 'Edit' : 'Add Link'}</span>
+                            </button>
+                            {(hasEvaluator || hasLink) && (
+                              <button
+                                onClick={() => handlePreAssignTeamEvaluator(t._id, '', '')}
+                                className="text-[10px] text-rose-400 hover:underline cursor-pointer font-semibold"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

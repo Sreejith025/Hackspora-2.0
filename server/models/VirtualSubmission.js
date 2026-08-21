@@ -55,6 +55,11 @@ const virtualSubmissionSchema = new mongoose.Schema(
       default: null,
       trim: true,
     },
+    mentorLink: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     assignedAt: {
       type: Date,
       default: null,

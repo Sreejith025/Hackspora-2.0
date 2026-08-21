@@ -106,6 +106,7 @@ router.get('/my-submission', async (req, res) => {
     const submission = await VirtualSubmission.findOne({ teamId: team.teamId });
     const evalAssignment = await VirtualRoundEvaluatorAssignment.findOne({ teamId: team.teamId });
     const assignedEvaluatorName = evalAssignment?.evaluatorName || team.evaluatorName || null;
+    const assignedMentorLink = evalAssignment?.mentorLink || team.mentorLink || '';
     const assignedEvaluatorAt = evalAssignment?.assignedAt || team.evaluatorAssignedAt || null;
 
     let virtualRoundStatus = 'registered';
@@ -126,6 +127,7 @@ router.get('/my-submission', async (req, res) => {
         leaderEmail: team.leaderEmail,
         collegeName: team.collegeName,
         evaluatorName: assignedEvaluatorName,
+        mentorLink: assignedMentorLink,
         evaluatorAssignedAt: assignedEvaluatorAt,
       },
       virtualRoundStatus,
@@ -578,6 +580,7 @@ router.get('/admin/teams-evaluators', verifyAdminAccess, async (req, res) => {
           collegeName: t.collegeName,
           status: t.status,
           evaluatorName: assign?.evaluatorName || t.evaluatorName || '',
+          mentorLink: assign?.mentorLink || t.mentorLink || '',
           evaluatorAssignedAt: assign?.assignedAt || t.evaluatorAssignedAt || null,
           evaluatorAssignedBy: assign?.assignedBy || t.evaluatorAssignedBy || '',
         };
@@ -590,11 +593,11 @@ router.get('/admin/teams-evaluators', verifyAdminAccess, async (req, res) => {
 });
 
 // @route   PATCH /api/virtual-round/admin/teams/:teamId/evaluator
-// @desc    Pre-assign, change, or remove evaluator for a team in VirtualRoundEvaluatorAssignment and sync VirtualSubmission
+// @desc    Pre-assign, change, or remove evaluator/mentor link for a team in VirtualRoundEvaluatorAssignment and sync TeamRegistration & VirtualSubmission
 router.patch('/admin/teams/:teamId/evaluator', verifyAdminAccess, async (req, res) => {
   try {
     const { teamId } = req.params;
-    const { evaluatorName } = req.body;
+    const { evaluatorName, mentorLink } = req.body;
     const adminEmail = req.adminEmail || ADMIN_EMAIL;
 
     const team = await TeamRegistration.findOne({
@@ -606,22 +609,39 @@ router.patch('/admin/teams/:teamId/evaluator', verifyAdminAccess, async (req, re
     }
 
     const assignedName = evaluatorName && typeof evaluatorName === 'string' ? evaluatorName.trim() : '';
+    const assignedLink = mentorLink && typeof mentorLink === 'string' ? mentorLink.trim() : '';
+
+    if (assignedLink && !/^https?:\/\/.+/i.test(assignedLink)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Mentor Link format. Link must start with http:// or https://',
+      });
+    }
 
     const assignment = await VirtualRoundEvaluatorAssignment.findOneAndUpdate(
       { teamId: team.teamId },
       {
         teamName: team.teamName,
         evaluatorName: assignedName,
-        assignedAt: assignedName ? new Date() : null,
-        assignedBy: assignedName ? adminEmail : '',
+        mentorLink: assignedLink,
+        assignedAt: assignedName || assignedLink ? new Date() : null,
+        assignedBy: assignedName || assignedLink ? adminEmail : '',
       },
       { upsert: true, new: true }
     );
+
+    // Sync mentor info to TeamRegistration
+    team.evaluatorName = assignedName;
+    team.mentorLink = assignedLink;
+    team.evaluatorAssignedAt = assignment.assignedAt;
+    team.evaluatorAssignedBy = assignment.assignedBy;
+    await team.save();
 
     // If VirtualSubmission exists for this team, update evaluator details on submission too
     const submission = await VirtualSubmission.findOne({ teamId: team.teamId });
     if (submission) {
       submission.evaluatorName = assignedName || null;
+      submission.mentorLink = assignedLink;
       submission.assignedAt = assignment.assignedAt;
       submission.assignedBy = assignment.assignedBy || null;
       await submission.save();
@@ -629,12 +649,13 @@ router.patch('/admin/teams/:teamId/evaluator', verifyAdminAccess, async (req, re
 
     res.json({
       success: true,
-      message: assignedName
-        ? `Evaluator '${assignedName}' pre-assigned to team ${team.teamName}.`
-        : `Evaluator removed from team ${team.teamName}.`,
+      message: assignedName || assignedLink
+        ? `Mentor details updated for team ${team.teamName}.`
+        : `Mentor removed from team ${team.teamName}.`,
       data: {
         ...team.toObject(),
         evaluatorName: assignment.evaluatorName,
+        mentorLink: assignment.mentorLink,
         evaluatorAssignedAt: assignment.assignedAt,
         evaluatorAssignedBy: assignment.assignedBy,
       },

@@ -15,7 +15,11 @@ import {
   HiCheck,
   HiLockClosed,
   HiArrowPath,
+  HiUser,
+  HiArrowTopRightOnSquare,
+  HiClipboardDocument,
 } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
 import { registrationService } from '../services/registrationService';
 import { virtualRoundService } from '../services/virtualRoundService';
 import { announcementService } from '../services/announcementService';
@@ -119,6 +123,9 @@ export default function ParticipantDashboard() {
   };
 
   const totalMembersCount = 1 + (displayTeam.members ? displayTeam.members.length : 0);
+
+  const assignedMentorName = vrData?.team?.evaluatorName || displayTeam.evaluatorName || null;
+  const assignedMentorLink = vrData?.team?.mentorLink || displayTeam.mentorLink || '';
 
   const vrStatus = vrData?.virtualRoundStatus || 'registered';
   const hasSubmitted = !!vrData?.submission;
@@ -459,6 +466,60 @@ export default function ParticipantDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Mentor Card */}
+        <GlassCard className="p-6 space-y-4 md:col-span-2" hoverable={false}>
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="flex items-center space-x-2 text-cyan-400 font-bold text-xs uppercase tracking-wider">
+              <HiUser className="w-4 h-4 text-emerald-400" />
+              <span>Assigned Squad Mentor</span>
+            </div>
+            <span className="text-[11px] text-white/60 font-semibold">Team Meeting Hub</span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-xs text-white/60 font-medium uppercase block">Mentor Name</span>
+              <div className="text-lg font-black text-white flex items-center space-x-2">
+                <span className={assignedMentorName ? 'text-emerald-400' : 'text-slate-400 italic font-normal text-sm'}>
+                  {assignedMentorName || 'Not Assigned Yet'}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-xs text-white/60 font-medium uppercase block">Mentor Meeting Link</span>
+              {assignedMentorLink ? (
+                <div className="flex items-center space-x-2">
+                  <a
+                    href={assignedMentorLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-xs hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
+                  >
+                    <HiArrowTopRightOnSquare className="w-4 h-4" />
+                    <span>Join Mentor Meeting</span>
+                  </a>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(assignedMentorLink);
+                      toast.success('Copied mentor meeting link!');
+                    }}
+                    className="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-xs hover:bg-white/20 transition-all cursor-pointer flex items-center space-x-1"
+                    title="Copy Meeting Link"
+                  >
+                    <HiClipboardDocument className="w-4 h-4 text-cyan-300" />
+                    <span>Copy Link</span>
+                  </button>
+                </div>
+              ) : (
+                <p className="text-xs text-amber-300 font-semibold italic bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl inline-block">
+                  Mentor link will be provided soon.
+                </p>
+              )}
+            </div>
+          </div>
+        </GlassCard>
+
         <GlassCard className="p-6 space-y-3">
           <h4 className="text-sm font-bold text-white uppercase tracking-wider">Team Leader</h4>
           <div className="space-y-1 text-xs text-slate-300">

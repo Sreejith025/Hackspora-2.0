@@ -112,6 +112,11 @@ const teamRegistrationSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    mentorLink: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     evaluatorAssignedAt: {
       type: Date,
       default: null,

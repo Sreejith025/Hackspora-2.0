@@ -168,18 +168,18 @@ export const virtualRoundService = {
     }
   },
 
-  // ADMIN: Pre-assign evaluator to a team before Virtual Round
-  async assignTeamEvaluator(teamId, evaluatorName, adminEmail) {
+  // ADMIN: Pre-assign evaluator/mentor and meeting link to a team before Virtual Round
+  async assignTeamEvaluator(teamId, evaluatorName, mentorLink = '', adminEmail) {
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/admin/teams/${teamId}/evaluator`,
-        { evaluatorName, adminEmail },
+        { evaluatorName, mentorLink, adminEmail },
         { headers: { 'x-admin-email': adminEmail } }
       );
       return response.data;
     } catch (err) {
-      console.error('Admin assign team evaluator error:', err?.response?.data || err.message);
-      throw new Error(err?.response?.data?.message || 'Failed to assign team evaluator.', { cause: err });
+      console.error('Admin assign team evaluator/mentor error:', err?.response?.data || err.message);
+      throw new Error(err?.response?.data?.message || 'Failed to assign team evaluator/mentor.', { cause: err });
     }
   },
 

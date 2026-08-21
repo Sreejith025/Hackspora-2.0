@@ -19,6 +19,11 @@ const virtualRoundEvaluatorAssignmentSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    mentorLink: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     assignedAt: {
       type: Date,
       default: Date.now,
