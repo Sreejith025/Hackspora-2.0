@@ -162,7 +162,7 @@ export default function ParticipantDashboard() {
                 Join this WhatsApp group
               </p>
               <p className="text-[11px] text-emerald-200/70 leading-tight">
-                Scan QR code for instant updates & announcements.
+                Scan QR code for instant updates & announcements. Only for Team Leaders
               </p>
             </div>
           </div>
