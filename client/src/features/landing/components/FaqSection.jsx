@@ -13,7 +13,7 @@ const faqs = [
  },
  {
  q: 'When is the registration fee collected?',
- a: 'Initial team registration is open. The registration fee of ₹250 per participant is collected ONLY after a team is shortlisted in the Round 1 Virtual Screening Round and confirms participation in the Offline Grand Finale.',
+ a: 'Initial team registration is open. The registration fee of ₹1250 per Team is collected ONLY after a team is shortlisted in the Round 1 Virtual Screening Round and confirms participation in the Offline Grand Finale.',
  },
  {
  q: 'What is the required team size?',
