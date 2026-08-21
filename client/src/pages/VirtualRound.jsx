@@ -57,6 +57,7 @@ export default function VirtualRound() {
   const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Time remaining countdown state
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -64,6 +65,7 @@ export default function VirtualRound() {
   useEffect(() => {
     let ignore = false;
     async function init() {
+      setIsLoading(true);
       try {
         const configRes = await virtualRoundService.getRoundConfig();
         if (!ignore && configRes?.success) {
@@ -78,6 +80,10 @@ export default function VirtualRound() {
         }
       } catch (err) {
         console.error('Failed to load Virtual Round data:', err);
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
       }
     }
     init();
@@ -88,10 +94,10 @@ export default function VirtualRound() {
 
   // Countdown timer effect
   useEffect(() => {
-    if (!config?.submissionDeadline) return;
+    // Fixed deadline: August 23rd, 2026 at 09:30 AM (IST)
+    const deadline = new Date('2026-08-23T09:30:00+05:30');
 
     const tick = () => {
-      const deadline = new Date(config.submissionDeadline);
       const diff = deadline - new Date();
       if (diff <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -108,7 +114,7 @@ export default function VirtualRound() {
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [config?.submissionDeadline]);
+  }, []);
 
   const team = submissionData?.team;
   const isEligible = submissionData?.isEligible;
@@ -179,12 +185,11 @@ export default function VirtualRound() {
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`${cardClass} p-6 sm:p-10 space-y-6`}
+        className="p-6 sm:p-10 space-y-6"
       >
-        <div className={cardGradientOverlay} />
         <div className="relative space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
+          <div className="space-y-2 max-w-2xl pb-12">
             <div className="flex items-center space-x-2 text-[#8e9dff] text-xs font-bold uppercase tracking-widest">
               <HiRocketLaunch className="w-4 h-4" />
               <span>HACKSPORA 2.0 EVALUATION ENGINE</span>
@@ -192,21 +197,27 @@ export default function VirtualRound() {
             <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
               Virtual Round
             </h1>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed pb-4">
               Submit your team&apos;s project repositories, demo video link, and presentation slides to enter evaluation for the Grand Finale.
+            </p>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed pb-4">
+              Step into a high-energy 24-hour coding experience designed for builders, thinkers, and innovators. From the moment the challenge is announced, your team will brainstorm, design, develop, and deliver a solution that demonstrates both technical ability and creativity.
+            </p>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+              No matter whether you are starting your development journey or already building projects, this hackathon gives you a platform to learn, collaborate, test your limits, and showcase what you can create.
             </p>
           </div>
 
-          {/* Countdown Card */}
-          <div className="w-full sm:w-[320px] rounded-2xl p-5 space-y-3 shrink-0">
-            <div className="flex items-center gap-2 text-white">
-              <HiClock className="w-4 h-4 text-[#b77611]" />
-              <span className="text-[11px] font-extrabold uppercase tracking-widest">
-                Starts in
+          {/* Countdown Timer */}
+          <div className="w-full sm:w-auto shrink-0 -ml-16">
+            <div className="flex items-center gap-3 text-white mb-4">
+              <HiClock className="w-6 h-6 text-[#b77611]" />
+              <span className="text-sm font-extrabold uppercase tracking-widest text-white/90">
+                Round Starts in
               </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="grid grid-cols-4 gap-4 text-center">
               {[
                 { label: 'Days', value: timeLeft.days },
                 { label: 'Hours', value: timeLeft.hours },
@@ -215,23 +226,23 @@ export default function VirtualRound() {
               ].map((unit) => (
                 <div
                   key={unit.label}
-                  className="rounded-xl border border-white/15 bg-white/90 px-2 py-3 shadow-sm"
+                  className="px-4 py-3"
                 >
-                  <div className="relative flex h-10 items-center justify-center overflow-hidden">
+                  <div className="relative flex h-16 items-center justify-center overflow-hidden">
                     <AnimatePresence mode="popLayout">
                       <motion.span
                         key={unit.value}
-                        initial={{ y: -16, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 16, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: 'easeOut' }}
-                        className="text-2xl font-black tracking-tight text-slate-950 font-mono"
+                        initial={{ y: -20, opacity: 0, scale: 0.8 }}
+                        animate={{ y: 0, opacity: 1, scale: 1 }}
+                        exit={{ y: 20, opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                        className="text-4xl font-black tracking-tight text-white font-mono"
                       >
                         {String(unit.value).padStart(2, '0')}
                       </motion.span>
                     </AnimatePresence>
                   </div>
-                  <span className="mt-1.5 block text-[8px] font-extrabold uppercase tracking-wide text-slate-500">
+                  <span className="mt-2 block text-xs font-extrabold uppercase tracking-wider text-white/60">
                     {unit.label}
                   </span>
                 </div>
@@ -244,11 +255,23 @@ export default function VirtualRound() {
         <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
             <span className="text-xs text-slate-400 font-semibold">Your Status:</span>
-            {getStatusBadge()}
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-[#4a5cd9] border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-xs text-slate-400">Loading...</span>
+              </div>
+            ) : (
+              getStatusBadge()
+            )}
           </div>
 
           <div>
-            {!isSignedIn ? (
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-[#4a5cd9] border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-xs text-slate-400">Loading...</span>
+              </div>
+            ) : !isSignedIn ? (
               <Link to="/login" className={ctaButtonClass}>
                 <span className={ctaShimmer} />
                 <span className="relative flex items-center justify-center space-x-2.5">
@@ -281,10 +304,9 @@ export default function VirtualRound() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`${cardClass} border-emerald-500/40 p-6 sm:p-8 space-y-4`}
+          className="border-emerald-500/40 p-6 sm:p-8 space-y-4"
         >
-          <div className={cardGradientOverlay} />
-          <div className="relative space-y-4">
+          <div className="space-y-4">
             <div className="flex items-center space-x-3 text-emerald-400 font-bold text-xs uppercase tracking-widest">
               <HiTrophy className="w-6 h-6" />
               <span>CONGRATULATIONS! GRAND FINALE QUALIFIER</span>
@@ -301,9 +323,8 @@ export default function VirtualRound() {
 
       {/* Rejected Status Respectful Outcome Message */}
       {virtualStatus === 'rejected' && (
-        <div className={`${cardClass} p-6 space-y-2`}>
-          <div className={cardGradientOverlay} />
-          <div className="relative space-y-2">
+        <div className="p-6 space-y-2">
+          <div className="space-y-2">
             <h4 className="text-base font-bold text-white">Evaluation Completed</h4>
             <p className="text-xs text-slate-400">
               Thank you for participating in Hackspora 2.0 Virtual Round. While your team was not selected for the final shortlist this time, we commend your innovation and hard work.
@@ -313,9 +334,8 @@ export default function VirtualRound() {
       )}
 
       {/* Virtual Round Status Overview Card */}
-      <div className={`${cardClass} p-6 sm:p-8 space-y-6`}>
-        <div className={cardGradientOverlay} />
-        <div className="relative space-y-6">
+      <div className="p-6 sm:p-8 space-y-6">
+        <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
             <div>
               <div className="flex items-center space-x-2 text-[#8e9dff] text-xs font-bold uppercase">
@@ -369,9 +389,8 @@ export default function VirtualRound() {
       {/* 2. Grid: Submission Requirements & Official Guidelines */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Submission Requirements (5 Cols) */}
-        <div className={`${cardClass} lg:col-span-5 p-6 space-y-4`}>
-          <div className={cardGradientOverlay} />
-          <div className="relative space-y-4">
+        <div className="lg:col-span-5 p-6 space-y-4">
+          <div className="space-y-4">
             <div className="flex items-center space-x-2 text-[#8e9dff] text-xs font-bold uppercase">
               <HiCheckCircle className="w-4 h-4" />
               <span>Submission Checklist</span>
@@ -423,9 +442,8 @@ export default function VirtualRound() {
         </div>
 
         {/* Official Guidelines (7 Cols) */}
-        <div className={`${cardClass} lg:col-span-7 p-6 space-y-4`}>
-          <div className={cardGradientOverlay} />
-          <div className="relative space-y-4">
+        <div className="lg:col-span-7 p-6 space-y-4">
+          <div className="space-y-4">
             <div className="flex items-center space-x-2 text-[#8e9dff] text-xs font-bold uppercase">
               <HiShieldCheck className="w-4 h-4" />
               <span>Official Rules & Guidelines</span>
@@ -434,11 +452,15 @@ export default function VirtualRound() {
 
             <div className="space-y-3 pt-2">
               {(config?.guidelines || [
-                'Each team must submit a GitHub repository containing clean, documented code and a descriptive README.md.',
+                'Each team must submit a GitHub repository containing clean, documented code and a descriptive README.md file.',
                 'Submit a 3 to 5 minute video demonstration showcasing your project architecture, features, and live execution.',
                 'Presentation slides must be uploaded in .ppt or .pptx format summarizing the problem, solution, technology stack, and future scope.',
+                'Teams will be assigned dedicated evaluators/mentors, and their respective GitHub IDs will be provided for collaboration.',
+                'Team leaders are required to add their assigned evaluators as GitHub collaborators to their project repositories.',
                 'Only team leaders or registered team members may submit the project on behalf of their team.',
-                'Resubmissions or modifications are locked once the submission is under review.',
+                'Resubmissions or modifications are not permitted once the submission is under review.',
+                'The jury\'s decision is final and binding for all participants.',
+                'All participants are requested to strictly follow the guidelines outlined above.',
               ]).map((rule, idx) => (
                 <div key={idx} className="flex items-start space-x-3 text-xs sm:text-sm text-slate-300 bg-slate-900/40 p-3.5 rounded-2xl border border-slate-800/60">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#4a5cd9]/20 text-[#8e9dff] font-bold text-xs flex items-center justify-center border border-[#4a5cd9]/30">
@@ -447,6 +469,168 @@ export default function VirtualRound() {
                   <span className="leading-relaxed mt-0.5">{rule}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Development Guidelines Section */}
+      <div className="p-6 sm:p-8 space-y-6">
+        <div className="space-y-6">
+          <div className="flex items-center space-x-2 text-[#4a5cd9] text-xs font-bold uppercase">
+            <HiShieldCheck className="w-4 h-4" />
+            <span>Development Guidelines</span>
+          </div>
+          <h3 className="text-xl font-bold text-white">Project Best Practices</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            {/* Essential Requirements */}
+            <div className="space-y-3">
+              <h4 className="text-base font-bold text-[#4a5cd9] uppercase tracking-wider flex items-center gap-2">
+                <HiCheckCircle className="w-4 h-4" />
+                Essential Requirements
+              </h4>
+              <ul className="space-y-2">
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Clean, well-documented code with comments explaining complex logic</span>
+                </li>
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Responsive design that works across different screen sizes</span>
+                </li>
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Proper error handling and user-friendly error messages</span>
+                </li>
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Complete README with setup instructions and dependencies</span>
+                </li>
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Functional core features that demonstrate the solution</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Value-Add Features */}
+            <div className="space-y-3">
+              <h4 className="text-base font-bold text-[#4a5cd9] uppercase tracking-wider flex items-center gap-2">
+                <HiTrophy className="w-4 h-4" />
+                Value-Add Features
+              </h4>
+              <ul className="space-y-2">
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Additional features beyond the basic requirements</span>
+                </li>
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Optimized performance and fast load times</span>
+                </li>
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Advanced UI/UX with smooth animations and transitions</span>
+                </li>
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Unit tests or integration tests where applicable</span>
+                </li>
+                <li className="text-sm sm:text-base text-slate-300 flex items-start gap-2">
+                  <span className="text-[#4a5cd9] mt-1">•</span>
+                  <span>Deployment-ready configuration and live demo</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Prizes Section */}
+      <div className="p-6 sm:p-8 space-y-6">
+        <div className="space-y-6">
+          <div className="flex items-center space-x-2 text-[#8e9dff] text-xs font-bold uppercase">
+            <HiTrophy className="w-4 h-4" />
+            <span>Prizes & Rewards</span>
+          </div>
+          <h3 className="text-2xl sm:text-3xl font-black text-white">Employment & Prizes Await the Winners!</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+            {/* 1st Prize */}
+            <div className="relative p-6 rounded-2xl bg-white/[0.05] backdrop-blur-xl space-y-4 hover:bg-white/[0.08] transition-all duration-300">
+              <div className="absolute top-4 right-4 text-yellow-400">
+                <HiTrophy className="w-8 h-8" />
+              </div>
+              <div className="flex items-center gap-2 text-yellow-400 font-bold text-xs uppercase tracking-wider">
+                <span className="text-lg">🥇</span>
+                <span>1st Prize</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-2xl font-black text-white">₹10,000</div>
+                <ul className="space-y-1 text-xs sm:text-sm text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <span className="text-yellow-400">•</span>
+                    <span>Internship Offer</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-yellow-400">•</span>
+                    <span>Certificates</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-yellow-400">•</span>
+                    <span>Gift Hampers</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* First Runner Up */}
+            <div className="relative p-6 rounded-2xl bg-white/[0.05] backdrop-blur-xl space-y-4 hover:bg-white/[0.08] transition-all duration-300">
+              <div className="absolute top-4 right-4 text-slate-300">
+                <HiTrophy className="w-8 h-8" />
+              </div>
+              <div className="flex items-center gap-2 text-slate-300 font-bold text-xs uppercase tracking-wider">
+                <span className="text-lg">🥈</span>
+                <span>First Runner Up</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-2xl font-black text-white">₹7,000</div>
+                <ul className="space-y-1 text-xs sm:text-sm text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <span className="text-slate-400">•</span>
+                    <span>Internship Offer</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-slate-400">•</span>
+                    <span>Certificates</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-slate-400">•</span>
+                    <span>Gift Hampers</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* 2nd Runner Up */}
+            <div className="relative p-6 rounded-2xl bg-white/[0.05] backdrop-blur-xl space-y-4 hover:bg-white/[0.08] transition-all duration-300">
+              <div className="absolute top-4 right-4 text-orange-400">
+                <HiTrophy className="w-8 h-8" />
+              </div>
+              <div className="flex items-center gap-2 text-orange-400 font-bold text-xs uppercase tracking-wider">
+                <span className="text-lg">🥉</span>
+                <span>2nd Runner Up</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-2xl font-black text-white">₹5,000</div>
+                <ul className="space-y-1 text-xs sm:text-sm text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <span className="text-orange-400">•</span>
+                    <span>Certificates</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
