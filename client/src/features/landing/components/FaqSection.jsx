@@ -13,7 +13,7 @@ const faqs = [
  },
  {
  q: 'When is the registration fee collected?',
- a: 'Initial team registration is open. The registration fee of ₹250 per participant is collected ONLY after a team is shortlisted in the Round 1 Virtual Screening Round and confirms participation in the Offline Grand Finale.',
+ a: 'Initial team registration is open. The registration fee of ₹1250 per Team is collected ONLY after a team is shortlisted in the Round 1 Virtual Screening Round and confirms participation in the Offline Grand Finale.',
  },
  {
  q: 'What is the required team size?',
@@ -21,7 +21,7 @@ const faqs = [
  },
  {
  q: 'What are the event rounds and dates?',
- a: 'Round 1 (Virtual Screening) is on 23 August 2026 (7-hour hackathon, problem statements at 9:30 AM, submission 5:00-6:00 PM). Round 2 (Grand Finale) is a 24-hour offline hackathon on 18 & 19 September 2026 at KAHE, Coimbatore.',
+ a: 'Round 1 (Virtual Screening) is on 23 August 2026 (7-hour hackathon, problem statements at 9:30 AM, submission 5:00-6:00 PM). Round 2 (Grand Finale) is a 24-hour offline hackathon on 19 & 20 September 2026 at KAHE, Coimbatore.',
  },
  {
  q: 'Are problem statements the same for Virtual and Offline rounds?',
