@@ -102,11 +102,6 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
     const evaluatorName = overrideName !== null ? overrideName : (teamEvaluatorInputs[teamId] !== undefined ? teamEvaluatorInputs[teamId] : '').trim();
     const mentorLink = overrideLink !== null ? overrideLink : (teamMentorLinkInputs[teamId] !== undefined ? teamMentorLinkInputs[teamId] : '').trim();
 
-    if (mentorLink && !/^https?:\/\/.+/i.test(mentorLink)) {
-      toast.error('Invalid Mentor Link format. Link must start with http:// or https://');
-      return;
-    }
-
     try {
       setUpdating(true);
       const res = await virtualRoundService.assignTeamEvaluator(teamId, evaluatorName, mentorLink, activeAdminEmail);
@@ -276,7 +271,7 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
         </div>
       </div>
 
-      {/* 3. Mentor & Evaluator Assignment Section (Available BEFORE Virtual Round starts) */}
+      {/* 3. Mentor & WhatsApp Group Link Assignment Section (Available BEFORE Virtual Round starts) */}
       <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/90 space-y-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
           <div>
@@ -284,9 +279,9 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
               <HiUser className="w-4 h-4" />
               <span>Pre-Submission Setup</span>
             </div>
-            <h3 className="text-xl font-extrabold text-white mt-1">Mentor & Evaluator Assignment</h3>
+            <h3 className="text-xl font-extrabold text-white mt-1">Mentor & WhatsApp Link Assignment</h3>
             <p className="text-xs text-slate-400">
-              Assign dedicated mentors and unique team meeting links to registered squads. Each team gets its own meeting link.
+              Assign dedicated mentors and team-specific WhatsApp group links to registered squads. Each team receives its own unique WhatsApp group link.
             </p>
           </div>
           <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold shrink-0 self-start sm:self-auto">
@@ -309,7 +304,7 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
               const copyLinkToClipboard = (linkToCopy) => {
                 if (!linkToCopy) return;
                 navigator.clipboard.writeText(linkToCopy);
-                toast.success('Copied mentor link to clipboard!');
+                toast.success('Copied WhatsApp group link to clipboard!');
               };
 
               return (
@@ -338,10 +333,10 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Mentor Link (Google Meet / Zoom)</label>
+                          <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Mentor WhatsApp Group Link</label>
                           <input
-                            type="url"
-                            placeholder="https://meet.google.com/abc-123"
+                            type="text"
+                            placeholder="https://chat.whatsapp.com/... or group link"
                             value={currentLinkInput}
                             onChange={(e) => setTeamMentorLinkInputs((prev) => ({ ...prev, [t._id]: e.target.value }))}
                             className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-cyan-500 text-xs text-white focus:outline-none"
@@ -375,10 +370,10 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
 
                         {/* Mentor Link Row */}
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10px] uppercase font-bold text-slate-400">Link:</span>
+                          <span className="text-[10px] uppercase font-bold text-slate-400">WhatsApp Link:</span>
                           {t.mentorLink ? (
                             <a
-                              href={t.mentorLink}
+                              href={/^https?:\/\//i.test(t.mentorLink) ? t.mentorLink : `https://${t.mentorLink}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-xs text-cyan-400 hover:underline truncate max-w-[170px]"
@@ -399,20 +394,20 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
                                 <button
                                   onClick={() => copyLinkToClipboard(t.mentorLink)}
                                   className="px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-[10px] font-bold cursor-pointer flex items-center space-x-1"
-                                  title="Copy Meeting Link"
+                                  title="Copy WhatsApp Group Link"
                                 >
                                   <HiClipboardDocument className="w-3 h-3 text-cyan-400" />
                                   <span>Copy</span>
                                 </button>
                                 <a
-                                  href={t.mentorLink}
+                                  href={/^https?:\/\//i.test(t.mentorLink) ? t.mentorLink : `https://${t.mentorLink}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 text-[10px] font-bold cursor-pointer flex items-center space-x-1"
-                                  title="Open Meeting Link"
+                                  className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 text-[10px] font-bold cursor-pointer flex items-center space-x-1"
+                                  title="Open WhatsApp Group Link"
                                 >
                                   <HiArrowTopRightOnSquare className="w-3 h-3" />
-                                  <span>Open</span>
+                                  <span>Join</span>
                                 </a>
                               </>
                             )}

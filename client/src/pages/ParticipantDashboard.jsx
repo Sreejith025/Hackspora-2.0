@@ -471,9 +471,9 @@ export default function ParticipantDashboard() {
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center space-x-2 text-cyan-400 font-bold text-xs uppercase tracking-wider">
               <HiUser className="w-4 h-4 text-emerald-400" />
-              <span>Assigned Squad Mentor</span>
+              <span>Assigned Squad Mentor & WhatsApp Group</span>
             </div>
-            <span className="text-[11px] text-white/60 font-semibold">Team Meeting Hub</span>
+            <span className="text-[11px] text-white/60 font-semibold">Team Mentorship Hub</span>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -487,25 +487,25 @@ export default function ParticipantDashboard() {
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs text-white/60 font-medium uppercase block">Mentor Meeting Link</span>
+              <span className="text-xs text-white/60 font-medium uppercase block">Mentor WhatsApp Group Link</span>
               {assignedMentorLink ? (
                 <div className="flex items-center space-x-2">
                   <a
-                    href={assignedMentorLink}
+                    href={/^https?:\/\//i.test(assignedMentorLink) ? assignedMentorLink : `https://${assignedMentorLink}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-xs hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
                   >
                     <HiArrowTopRightOnSquare className="w-4 h-4" />
-                    <span>Join Mentor Meeting</span>
+                    <span>Join WhatsApp Group</span>
                   </a>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(assignedMentorLink);
-                      toast.success('Copied mentor meeting link!');
+                      toast.success('Copied WhatsApp group link!');
                     }}
                     className="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-xs hover:bg-white/20 transition-all cursor-pointer flex items-center space-x-1"
-                    title="Copy Meeting Link"
+                    title="Copy WhatsApp Group Link"
                   >
                     <HiClipboardDocument className="w-4 h-4 text-cyan-300" />
                     <span>Copy Link</span>
@@ -513,7 +513,7 @@ export default function ParticipantDashboard() {
                 </div>
               ) : (
                 <p className="text-xs text-amber-300 font-semibold italic bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl inline-block">
-                  Mentor link will be provided soon.
+                  Mentor WhatsApp link will be provided soon.
                 </p>
               )}
             </div>

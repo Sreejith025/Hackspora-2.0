@@ -611,13 +611,6 @@ router.patch('/admin/teams/:teamId/evaluator', verifyAdminAccess, async (req, re
     const assignedName = evaluatorName && typeof evaluatorName === 'string' ? evaluatorName.trim() : '';
     const assignedLink = mentorLink && typeof mentorLink === 'string' ? mentorLink.trim() : '';
 
-    if (assignedLink && !/^https?:\/\/.+/i.test(assignedLink)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid Mentor Link format. Link must start with http:// or https://',
-      });
-    }
-
     const assignment = await VirtualRoundEvaluatorAssignment.findOneAndUpdate(
       { teamId: team.teamId },
       {
