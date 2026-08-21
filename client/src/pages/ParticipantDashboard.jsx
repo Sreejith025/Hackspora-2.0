@@ -18,6 +18,7 @@ import {
 } from 'react-icons/hi2';
 import { registrationService } from '../services/registrationService';
 import { virtualRoundService } from '../services/virtualRoundService';
+import { announcementService } from '../services/announcementService';
 
 const sidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: HiSquares2X2 },
@@ -64,25 +65,34 @@ export default function ParticipantDashboard() {
   const [publishedProblems, setPublishedProblems] = useState([]);
   const [loadingProblems, setLoadingProblems] = useState(false);
 
+  const [announcements, setAnnouncements] = useState([]);
+  const [loadingAnnouncements, setLoadingAnnouncements] = useState(false);
+
   useEffect(() => {
     let ignore = false;
     async function loadData() {
       try {
         setLoadingProblems(true);
-        const [team, vrRes, psRes] = await Promise.all([
+        setLoadingAnnouncements(true);
+        const [team, vrRes, psRes, annRes] = await Promise.all([
           registrationService.getMyTeam(userEmail).catch(() => null),
           userEmail ? virtualRoundService.getMySubmission(userEmail).catch(() => null) : Promise.resolve(null),
           virtualRoundService.getPublishedProblemStatements().catch(() => null),
+          announcementService.getPublishedAnnouncements().catch(() => null),
         ]);
         if (!ignore) {
           if (team) setTeamData(team);
           if (vrRes?.success) setVrData(vrRes);
           if (psRes?.success && Array.isArray(psRes.data)) setPublishedProblems(psRes.data);
+          if (annRes?.success && Array.isArray(annRes.data)) setAnnouncements(annRes.data);
         }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       } finally {
-        if (!ignore) setLoadingProblems(false);
+        if (!ignore) {
+          setLoadingProblems(false);
+          setLoadingAnnouncements(false);
+        }
       }
     }
     loadData();
@@ -339,10 +349,34 @@ export default function ParticipantDashboard() {
             <HiMegaphone className="w-4 h-4 text-white" />
           </div>
           <div className="pt-1">
-            <div className="text-sm font-bold text-white">No New Announcements</div>
-            <p className="text-xs text-white/70 mt-0.5 truncate">
-              Stay tuned for official updates from organizers.
-            </p>
+            {loadingAnnouncements ? (
+              <div className="flex items-center space-x-2 py-1">
+                <div className="w-3.5 h-3.5 border-2 border-white/60 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-xs text-white/70">Loading...</span>
+              </div>
+            ) : announcements.length > 0 ? (
+              <>
+                <div className="text-sm font-bold text-white truncate">
+                  {announcements[0].title}
+                </div>
+                <p className="text-xs text-white/70 mt-0.5 truncate">
+                  {announcements[0].message}
+                </p>
+                <button
+                  onClick={() => setActiveTab('announcements')}
+                  className="text-[11px] font-bold text-[#aeb5ff] hover:underline mt-2 inline-block cursor-pointer"
+                >
+                  View All ({announcements.length}) →
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="text-sm font-bold text-white">No New Announcements</div>
+                <p className="text-xs text-white/70 mt-0.5 truncate">
+                  Stay tuned for official updates from organizers.
+                </p>
+              </>
+            )}
           </div>
         </GlassCard>
       </div>
@@ -519,10 +553,20 @@ export default function ParticipantDashboard() {
 
   const renderAnnouncementsTab = () => (
     <div className="space-y-6">
-      <GlassCard className="p-6 sm:p-8 space-y-3">
-        <div className="flex items-center space-x-2 text-[#aeb5ff] font-bold text-xs uppercase tracking-wider">
-          <HiMegaphone className="w-4 h-4 text-amber-400" />
-          <span>Hackathon Notifications</span>
+      <GlassCard className="p-6 sm:p-8 space-y-3" hoverable={false}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 text-[#aeb5ff] font-bold text-xs uppercase tracking-wider">
+            <HiMegaphone className="w-4 h-4 text-amber-400" />
+            <span>Hackathon Notifications</span>
+          </div>
+          <button
+            onClick={() => setRefreshKey((k) => k + 1)}
+            disabled={loadingAnnouncements}
+            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 transition-all cursor-pointer"
+            title="Refresh announcements"
+          >
+            <HiArrowPath className={`w-4 h-4 ${loadingAnnouncements ? 'animate-spin' : ''}`} />
+          </button>
         </div>
         <h3 className="text-2xl font-black text-white">Latest Announcements</h3>
         <p className="text-xs sm:text-sm text-slate-300">
@@ -530,13 +574,69 @@ export default function ParticipantDashboard() {
         </p>
       </GlassCard>
 
-      <GlassCard className="p-12 text-center space-y-3">
-        <HiMegaphone className="w-10 h-10 text-slate-500 mx-auto" />
-        <h4 className="text-base font-bold text-white">No Announcements Posted Yet</h4>
-        <p className="text-xs text-slate-400 max-w-md mx-auto">
-          Official announcements, updates, and news will appear here when broadcasted by the organizers.
-        </p>
-      </GlassCard>
+      {loadingAnnouncements ? (
+        <GlassCard className="p-12 text-center space-y-3" hoverable={false}>
+          <div className="w-8 h-8 border-2 border-[#4a5cd9] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-xs text-white/70">Fetching live announcements from organizers...</p>
+        </GlassCard>
+      ) : announcements.length === 0 ? (
+        <GlassCard className="p-12 text-center space-y-3" hoverable={false}>
+          <HiMegaphone className="w-10 h-10 text-slate-500 mx-auto" />
+          <h4 className="text-base font-bold text-white">No Announcements Posted Yet</h4>
+          <p className="text-xs text-slate-400 max-w-md mx-auto">
+            Official announcements, updates, and news will appear here when broadcasted by the organizers.
+          </p>
+        </GlassCard>
+      ) : (
+        <div className="space-y-4">
+          {announcements.map((item) => (
+            <GlassCard key={item._id || item.id} className="p-6 space-y-3" hoverable={true}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <div className="flex items-center space-x-2.5">
+                  <span
+                    className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${
+                      item.type === 'urgent'
+                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                        : item.type === 'update'
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                        : item.type === 'event'
+                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                        : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                    }`}
+                  >
+                    {item.type || 'General'}
+                  </span>
+                  <h4 className="text-lg font-bold text-white">{item.title}</h4>
+                </div>
+                <span className="text-[11px] text-white/60">
+                  {new Date(item.createdAt).toLocaleString(undefined, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                </span>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
+                {item.message}
+              </p>
+
+              {item.link && (
+                <div className="pt-2">
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#4a5cd9]/30 border border-[#4a5cd9]/50 text-xs font-bold text-[#aeb5ff] hover:bg-[#4a5cd9]/50 hover:text-white transition-all"
+                  >
+                    <span>View Resource Link</span>
+                    <span className="text-xs">→</span>
+                  </a>
+                </div>
+              )}
+            </GlassCard>
+          ))}
+        </div>
+      )}
     </div>
   );
 

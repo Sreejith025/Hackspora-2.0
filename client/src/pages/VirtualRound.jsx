@@ -21,12 +21,7 @@ import { virtualRoundService } from '../services/virtualRoundService';
 import VirtualSubmissionModal from '../features/virtualRound/components/VirtualSubmissionModal';
 import PublicResultsSection from '../features/virtualRound/components/PublicResultsSection';
 
-// Reusable card & button styles — match About section's pillar cards
-// and the "Download Brochure" CTA so the page reads as one design system.
-const cardClass =
-  'group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/25 bg-white/[0.12] backdrop-blur-2xl shadow-2xl shadow-black/25 transition-all duration-300';
-const cardGradientOverlay =
-  'pointer-events-none absolute inset-0 bg-gradient-to-br from-white/12 via-white/[0.03] to-transparent opacity-80';
+// Reusable button styles — match the "Download Brochure" CTA so the page reads as one design system.
 const ctaButtonClass =
   'group/cta relative inline-flex items-center justify-center space-x-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl font-bold text-xs sm:text-sm text-white bg-[#3645bf] hover:bg-[#4a5cd9] active:scale-95 transition-all duration-300 cursor-pointer shadow-xl shadow-[#3645bf]/40 hover:shadow-2xl hover:shadow-[#3645bf]/60 overflow-hidden touch-manipulation';
 const ctaShimmer =

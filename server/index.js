@@ -19,10 +19,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const registrationRoutes = require('./routes/registrationRoutes');
 const virtualRoundRoutes = require('./routes/virtualRoundRoutes');
 const problemStatementRoutes = require('./routes/problemStatementRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/virtual-round', virtualRoundRoutes);
 app.use('/api/problem-statements', problemStatementRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hackspora 2.0 API server is running...');

@@ -10,7 +10,7 @@ export const getRootApiUrl = () => {
   if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
     let clean = envUrl
       .trim()
-      .replace(/\/+(registrations|virtual-round|problem-statements|categories|participant)\/?$/i, '')
+      .replace(/\/+(registrations|virtual-round|problem-statements|categories|participant|announcements)\/?$/i, '')
       .replace(/\/+$/, '');
     if (!clean.endsWith('/api') && !clean.includes('/api/')) {
       clean = `${clean}/api`;

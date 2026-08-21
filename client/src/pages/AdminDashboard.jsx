@@ -23,6 +23,7 @@ import { isAdminUser, ADMIN_EMAIL } from '../constants/authConfig';
 import AdminRegistrationManagement from '../features/admin/components/AdminRegistrationManagement';
 import AdminVirtualRoundManagement from '../features/admin/components/AdminVirtualRoundManagement';
 import AdminProblemStatementsManagement from '../features/admin/components/AdminProblemStatementsManagement';
+import AdminAnnouncementsManagement from '../features/admin/components/AdminAnnouncementsManagement';
 
 const adminSidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: HiSquares2X2 },
@@ -282,10 +283,12 @@ export default function AdminDashboard() {
             {activeTab === 'registrations' && <AdminRegistrationManagement />}
             {activeTab === 'problem-statements' && <AdminProblemStatementsManagement adminEmail={userEmail} />}
             {activeTab === 'virtual-round' && <AdminVirtualRoundManagement adminEmail={userEmail} />}
+            {activeTab === 'announcements' && <AdminAnnouncementsManagement adminEmail={userEmail} />}
             {activeTab !== 'dashboard' &&
               activeTab !== 'registrations' &&
               activeTab !== 'problem-statements' &&
-              activeTab !== 'virtual-round' && (
+              activeTab !== 'virtual-round' &&
+              activeTab !== 'announcements' && (
                 <div className="glass-card p-8 rounded-3xl border border-slate-800 text-center space-y-4">
                   <HiSparkles className="w-8 h-8 text-cyan-400 mx-auto animate-bounce" />
                   <h3 className="text-xl font-bold text-white capitalize">{activeTab} Control</h3>
