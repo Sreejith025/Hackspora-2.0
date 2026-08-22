@@ -62,6 +62,26 @@ export default function TeamRegistrationWizard() {
  const [isAlreadyRegisteredModalOpen, setIsAlreadyRegisteredModalOpen] = useState(false);
  const [alreadyRegisteredData, setAlreadyRegisteredData] = useState(null);
 
+ const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+ const [loadingConfig, setLoadingConfig] = useState(true);
+
+ // Fetch registration config status
+ useEffect(() => {
+   async function checkConfig() {
+     try {
+       const res = await registrationService.getRegistrationConfig();
+       if (res && typeof res.isRegistrationOpen === 'boolean') {
+         setIsRegistrationOpen(res.isRegistrationOpen);
+       }
+     } catch (err) {
+       console.error('Error loading registration config:', err);
+     } finally {
+       setLoadingConfig(false);
+     }
+   }
+   checkConfig();
+ }, []);
+
  // Check if user is already registered upon page mount
  useEffect(() => {
  const verifyUserRegistration = async () => {
@@ -913,14 +933,66 @@ export default function TeamRegistrationWizard() {
  </div>
 
  <p className="text-xs text-white/60 italic">
- Note: Problem statements remain locked until released by the hackathon committee.
+Note: Problem statements remain locked until released by the hackathon committee.
  </p>
  </motion.div>
  );
 
- if (registeredResult) {
- return renderSuccessView();
- }
+  if (!loadingConfig && !isRegistrationOpen && !registeredResult && !alreadyRegisteredData) {
+    return (
+      <div className="w-full max-w-3xl mx-auto space-y-6">
+        <div className="glass-card rounded-3xl p-8 sm:p-12 border border-rose-500/30 bg-gradient-to-b from-rose-950/20 via-slate-900/90 to-slate-950 text-center max-w-2xl mx-auto space-y-6 shadow-2xl">
+          <div className="w-20 h-20 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center mx-auto text-4xl shadow-inner">
+            <HiLockClosed className="w-10 h-10 text-rose-400" />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              Registration Closed
+            </h2>
+            <p className="text-base font-semibold text-rose-300">
+              New team registrations are currently closed.
+            </p>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+            New team registrations for Hackspora 2.0 are currently locked. If your team is already registered, you can log in to view your team dashboard and Virtual Round submissions.
+          </p>
+
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all cursor-pointer border border-slate-700"
+            >
+              Back to Home
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#4a5cd9] hover:bg-[#5a6ce9] text-white font-bold text-xs transition-all cursor-pointer shadow-lg shadow-[#4a5cd9]/30"
+            >
+              Participant Dashboard
+            </button>
+          </div>
+        </div>
+
+        {/* Already Registered Modal */}
+        <AlreadyRegisteredModal
+          isOpen={isAlreadyRegisteredModalOpen}
+          onClose={() => {
+            setIsAlreadyRegisteredModalOpen(false);
+            navigate('/dashboard');
+          }}
+          teamData={alreadyRegisteredData}
+        />
+      </div>
+    );
+  }
+
+  if (registeredResult) {
+    return renderSuccessView();
+  }
 
  return (
  <div className="w-full max-w-4xl mx-auto space-y-5 sm:space-y-8">

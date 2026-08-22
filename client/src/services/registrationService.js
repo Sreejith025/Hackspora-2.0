@@ -6,6 +6,31 @@ const API_BASE_URL = `${getRootApiUrl()}/registrations`;
 console.log('[RegistrationService] Active API_BASE_URL:', API_BASE_URL);
 
 export const registrationService = {
+  // Get registration status config (Open/Closed)
+  async getRegistrationConfig() {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/config`);
+      return response.data;
+    } catch (err) {
+      console.error('Error fetching registration config:', err);
+      return { success: false, isRegistrationOpen: true };
+    }
+  },
+
+  // Update registration status config (Admin Access)
+  async updateRegistrationConfig(isRegistrationOpen, updatedBy = 'admin') {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/config`, {
+        isRegistrationOpen,
+        updatedBy,
+      });
+      return response.data;
+    } catch (err) {
+      console.error('Error updating registration config:', err);
+      throw err;
+    }
+  },
+
  // Check if Clerk user or email is already registered in MongoDB Atlas
  async checkRegistrationStatus(clerkId, email = '') {
  if (!clerkId && !email) {

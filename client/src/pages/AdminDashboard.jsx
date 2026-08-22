@@ -56,12 +56,21 @@ export default function AdminDashboard() {
     },
   });
 
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+  const [togglingConfig, setTogglingConfig] = useState(false);
+
   // Load Admin Data
   useEffect(() => {
     async function loadAdminData() {
       try {
-        const statsData = await registrationService.getStats();
+        const [statsData, configData] = await Promise.all([
+          registrationService.getStats(),
+          registrationService.getRegistrationConfig(),
+        ]);
         if (statsData) setStats(statsData);
+        if (configData && typeof configData.isRegistrationOpen === 'boolean') {
+          setIsRegistrationOpen(configData.isRegistrationOpen);
+        }
       } catch (err) {
         console.error('Failed to load admin dashboard data', err);
       }
@@ -71,6 +80,25 @@ export default function AdminDashboard() {
       loadAdminData();
     }
   }, [hasAccess]);
+
+  const handleToggleRegistrationStatus = async () => {
+    setTogglingConfig(true);
+    const newStatus = !isRegistrationOpen;
+    try {
+      const res = await registrationService.updateRegistrationConfig(newStatus, userEmail || 'admin');
+      if (res?.success) {
+        setIsRegistrationOpen(res.isRegistrationOpen);
+        toast.success(`Registration is now ${res.isRegistrationOpen ? 'OPEN 🟢' : 'CLOSED 🔴'}`);
+      } else {
+        toast.error('Failed to update registration status');
+      }
+    } catch (err) {
+      console.error('Error toggling registration status:', err);
+      toast.error('Failed to update registration status');
+    } finally {
+      setTogglingConfig(false);
+    }
+  };
 
   const handleLogout = () => {
     signOut(() => navigate('/'));
@@ -101,6 +129,45 @@ export default function AdminDashboard() {
   // Render Dashboard Overview Analytics
   const renderDashboardAnalytics = () => (
     <div className="space-y-8">
+      {/* Registration Status Control Card */}
+      <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-800 bg-slate-900/90 shadow-2xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <span>REGISTRATION SYSTEM CONTROL</span>
+            </div>
+            <div className="flex items-center space-x-3 mt-1">
+              <span className="text-xl sm:text-2xl font-black text-white">Registration Status:</span>
+              <span className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-extrabold border ${
+                isRegistrationOpen
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+              }`}>
+                <span>{isRegistrationOpen ? '🟢 OPEN' : '🔴 CLOSED'}</span>
+              </span>
+            </div>
+            <p className="text-xs text-slate-300">
+              {isRegistrationOpen
+                ? 'OPEN → users can register new teams.'
+                : 'CLOSED → users cannot register. Existing participant login and dashboards remain working.'}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleToggleRegistrationStatus}
+            disabled={togglingConfig}
+            className={`px-6 py-3 rounded-xl font-extrabold text-xs transition-all cursor-pointer shadow-lg shrink-0 flex items-center space-x-2 ${
+              isRegistrationOpen
+                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
+            }`}
+          >
+            <span>{isRegistrationOpen ? 'Switch to CLOSED 🔴' : 'Switch to OPEN 🟢'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* Live Registration Progress Banner */}
       <div className="glass-card rounded-3xl p-6 sm:p-8 border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-slate-900/90 to-purple-950/40 shadow-2xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -79,47 +79,77 @@ export default function AdminRegistrationManagement() {
  return () => document.removeEventListener('mousedown', handleClickOutside);
  }, []);
 
- // Fetch Data Function
- const fetchData = async () => {
- setLoading(true);
- try {
- const [statsRes, teamsRes] = await Promise.all([
- registrationService.getStats(),
- registrationService.getAllRegistrations({ search: '', college: 'All', sort: 'newest' }),
- ]);
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+  const [togglingConfig, setTogglingConfig] = useState(false);
 
- if (statsRes) setStats(statsRes);
- if (teamsRes?.data) setTeams(teamsRes.data);
- } catch (err) {
- console.error('Failed to load registrations', err);
- toast.error('Failed to load registration data.');
- } finally {
- setLoading(false);
- }
- };
+  // Fetch Data Function
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [statsRes, teamsRes, configRes] = await Promise.all([
+        registrationService.getStats(),
+        registrationService.getAllRegistrations({ search: '', college: 'All', sort: 'newest' }),
+        registrationService.getRegistrationConfig(),
+      ]);
 
- useEffect(() => {
- let isMounted = true;
- Promise.all([
- registrationService.getStats(),
- registrationService.getAllRegistrations({ search: '', college: 'All', sort: 'newest' }),
- ])
- .then(([statsRes, teamsRes]) => {
- if (!isMounted) return;
- if (statsRes) setStats(statsRes);
- if (teamsRes?.data) setTeams(teamsRes.data);
- })
- .catch((err) => {
- console.error('Failed to load registrations', err);
- })
- .finally(() => {
- if (isMounted) setLoading(false);
- });
+      if (statsRes) setStats(statsRes);
+      if (teamsRes?.data) setTeams(teamsRes.data);
+      if (configRes && typeof configRes.isRegistrationOpen === 'boolean') {
+        setIsRegistrationOpen(configRes.isRegistrationOpen);
+      }
+    } catch (err) {
+      console.error('Failed to load registrations', err);
+      toast.error('Failed to load registration data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
- return () => {
- isMounted = false;
- };
- }, []);
+  const handleToggleRegistrationStatus = async () => {
+    setTogglingConfig(true);
+    const newStatus = !isRegistrationOpen;
+    try {
+      const res = await registrationService.updateRegistrationConfig(newStatus);
+      if (res?.success) {
+        setIsRegistrationOpen(res.isRegistrationOpen);
+        toast.success(`Registration is now ${res.isRegistrationOpen ? 'OPEN 🟢' : 'CLOSED 🔴'}`);
+      } else {
+        toast.error('Failed to update registration status');
+      }
+    } catch (err) {
+      console.error('Error toggling registration status:', err);
+      toast.error('Failed to update registration status');
+    } finally {
+      setTogglingConfig(false);
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      registrationService.getStats(),
+      registrationService.getAllRegistrations({ search: '', college: 'All', sort: 'newest' }),
+      registrationService.getRegistrationConfig(),
+    ])
+      .then(([statsRes, teamsRes, configRes]) => {
+        if (!isMounted) return;
+        if (statsRes) setStats(statsRes);
+        if (teamsRes?.data) setTeams(teamsRes.data);
+        if (configRes && typeof configRes.isRegistrationOpen === 'boolean') {
+          setIsRegistrationOpen(configRes.isRegistrationOpen);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load registrations', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
  // Derived Filter Options
  const uniqueColleges = useMemo(() => {
@@ -341,6 +371,32 @@ export default function AdminRegistrationManagement() {
  <p className="text-sm text-slate-400 mt-1">
  Manage all hackathon team registrations, verification statuses, exports, and participant details.
  </p>
+ </div>
+
+ {/* Registration Status Toggle Control */}
+ <div className="p-4 sm:p-5 rounded-2xl border border-slate-800 bg-slate-900/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+ <div className="flex items-center space-x-3">
+ <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Registration Status:</span>
+ <span className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black border ${
+ isRegistrationOpen
+ ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+ : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+ }`}>
+ <span>{isRegistrationOpen ? '🟢 OPEN' : '🔴 CLOSED'}</span>
+ </span>
+ </div>
+ <button
+ type="button"
+ onClick={handleToggleRegistrationStatus}
+ disabled={togglingConfig}
+ className={`px-4 py-2 rounded-xl font-extrabold text-xs transition-all cursor-pointer shadow-md shrink-0 flex items-center space-x-2 ${
+ isRegistrationOpen
+ ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
+ : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
+ }`}
+ >
+ <span>{isRegistrationOpen ? 'Switch to CLOSED 🔴' : 'Switch to OPEN 🟢'}</span>
+ </button>
  </div>
 
  {/* Right Side Actions */}

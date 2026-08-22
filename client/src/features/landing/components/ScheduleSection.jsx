@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRegisterFlow } from '../../../hooks';
 import {
  HiCheckCircle,
  HiRocketLaunch,
@@ -127,6 +128,7 @@ const lastYearAchievementsGallery = [
 ];
 
 export default function ScheduleSection() {
+ const { isRegistrationOpen, isRegistered } = useRegisterFlow();
  const [activeImage, setActiveImage] = useState(null);
  const [activeMetric, setActiveMetric] = useState(0);
 
@@ -410,13 +412,25 @@ export default function ScheduleSection() {
  {/* Centered Register Button */}
  <div className="pt-2 w-full sm:w-auto">
  <a
- href="#home"
- className="group/cta relative inline-flex items-center justify-center space-x-2.5 px-6 sm:px-10 py-3.5 sm:py-4 rounded-2xl font-extrabold text-sm sm:text-base text-white bg-[#3645bf] hover:bg-[#4a5cd9] active:scale-95 transition-all duration-300 cursor-pointer shadow-xl shadow-[#3645bf]/40 hover:shadow-2xl hover:shadow-[#3645bf]/60 overflow-hidden touch-manipulation w-full sm:w-auto"
+ href={isRegistered ? '/dashboard' : '/register'}
+ className={`group/cta relative inline-flex items-center justify-center space-x-2.5 px-6 sm:px-10 py-3.5 sm:py-4 rounded-2xl font-extrabold text-sm sm:text-base text-white active:scale-95 transition-all duration-300 cursor-pointer shadow-xl overflow-hidden touch-manipulation w-full sm:w-auto ${
+ isRegistered
+ ? 'bg-[#4a5cd9] hover:bg-[#5a6ce9] shadow-[#4a5cd9]/40 hover:shadow-[#4a5cd9]/60'
+ : !isRegistrationOpen
+ ? 'bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-200 shadow-rose-950/50'
+ : 'bg-[#3645bf] hover:bg-[#4a5cd9] shadow-[#3645bf]/40 hover:shadow-[#3645bf]/60'
+ }`}
  >
  {/* Shimmer sweep */}
  <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
- <span className="relative">Register for HackSpora 2.0</span>
+ <span className="relative">
+ {isRegistered
+ ? 'Go to Dashboard'
+ : !isRegistrationOpen
+ ? 'Registration Closed'
+ : 'Register for HackSpora 2.0'}
+ </span>
  <span className="relative inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/15 group-hover/cta:bg-white/25 transition-colors">
  <HiArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/cta:translate-x-0.5" />
  </span>
@@ -426,8 +440,8 @@ export default function ScheduleSection() {
  {/* Trust line */}
  <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 pt-3 text-[10px] sm:text-xs text-slate-400 font-medium">
  <span className="inline-flex items-center space-x-1.5">
- <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
- <span>Registrations Open</span>
+ <span className={`w-1.5 h-1.5 rounded-full ${isRegistrationOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+ <span>{isRegistrationOpen ? 'Registrations Open' : 'Registration Closed'}</span>
  </span>
  <span className="hidden sm:inline w-px h-3 bg-white/15" />
  <span>Free to participate</span>

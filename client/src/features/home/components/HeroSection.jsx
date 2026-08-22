@@ -37,12 +37,13 @@ const itemVariants = {
 export default function HeroSection() {
  const containerRef = useRef(null);
  const {
- isChecking,
- isRegistered,
- registeredData,
- isModalOpen,
- handleRegisterNow,
- closeModal,
+  isChecking,
+  isRegistered,
+  isRegistrationOpen,
+  registeredData,
+  isModalOpen,
+  handleRegisterNow,
+  closeModal,
  } = useRegisterFlow();
 
  const { scrollYProgress } = useScroll({
@@ -179,6 +180,15 @@ export default function HeroSection() {
  <span className="relative flex items-center justify-center space-x-2">
  <span>Dashboard</span>
  <HiArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/cta:translate-x-0.5" />
+ </span>
+ </Link>
+ ) : !isRegistrationOpen ? (
+ <Link
+ to="/register"
+ className="group/cta relative inline-flex items-center justify-center px-6 sm:px-6 py-3 sm:py-3 text-sm sm:text-xs md:text-sm font-extrabold text-rose-200 bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 rounded-2xl active:scale-95 transition-all duration-300 w-full min-h-[48px] cursor-pointer touch-manipulation shadow-xl shadow-rose-950/50 overflow-hidden"
+ >
+ <span className="relative flex items-center justify-center space-x-2">
+ <span>Registration Closed</span>
  </span>
  </Link>
  ) : (

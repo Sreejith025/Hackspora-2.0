@@ -12,6 +12,19 @@ export function useRegisterFlow() {
  const [isRegistered, setIsRegistered] = useState(false);
  const [registeredData, setRegisteredData] = useState(null);
  const [isModalOpen, setIsModalOpen] = useState(false);
+ const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+
+ useEffect(() => {
+   let isMounted = true;
+   registrationService.getRegistrationConfig().then((res) => {
+     if (isMounted && res && typeof res.isRegistrationOpen === 'boolean') {
+       setIsRegistrationOpen(res.isRegistrationOpen);
+     }
+   });
+   return () => {
+     isMounted = false;
+   };
+ }, []);
 
  const clerkId = user?.id || '';
  const userEmail = user?.primaryEmailAddress?.emailAddress || '';
@@ -110,14 +123,15 @@ export function useRegisterFlow() {
  const closeModal = () => setIsModalOpen(false);
 
  return {
- isLoaded,
- isSignedIn,
- isChecking,
- isRegistered,
- registeredData,
- isModalOpen,
- handleRegisterNow,
- closeModal,
- checkStatus,
+   isLoaded,
+   isSignedIn,
+   isChecking,
+   isRegistered,
+   isRegistrationOpen,
+   registeredData,
+   isModalOpen,
+   handleRegisterNow,
+   closeModal,
+   checkStatus,
  };
 }

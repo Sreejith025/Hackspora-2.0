@@ -1,6 +1,53 @@
 const express = require('express');
 const router = express.Router();
 const TeamRegistration = require('../models/TeamRegistration');
+const RegistrationConfig = require('../models/RegistrationConfig');
+
+// @route   GET /api/registrations/config
+// @desc    Get registration status configuration
+router.get('/config', async (req, res) => {
+  try {
+    const config = await RegistrationConfig.getSingletonConfig();
+    return res.json({
+      success: true,
+      isRegistrationOpen: config.isRegistrationOpen,
+      data: config,
+    });
+  } catch (error) {
+    console.error('Get Registration Config Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch registration configuration.' });
+  }
+});
+
+// @route   PUT /api/registrations/config
+// @desc    Update registration open/closed status (Admin Access)
+router.put('/config', async (req, res) => {
+  try {
+    const { isRegistrationOpen, updatedBy } = req.body;
+    const config = await RegistrationConfig.getSingletonConfig();
+
+    if (typeof isRegistrationOpen === 'boolean') {
+      config.isRegistrationOpen = isRegistrationOpen;
+    } else if (req.body.status) {
+      config.isRegistrationOpen = req.body.status === 'OPEN';
+    }
+
+    if (updatedBy) {
+      config.updatedBy = updatedBy;
+    }
+
+    const updatedConfig = await config.save();
+    return res.json({
+      success: true,
+      message: `Registration status updated to ${updatedConfig.isRegistrationOpen ? 'OPEN' : 'CLOSED'}`,
+      isRegistrationOpen: updatedConfig.isRegistrationOpen,
+      data: updatedConfig,
+    });
+  } catch (error) {
+    console.error('Update Registration Config Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update registration configuration.' });
+  }
+});
 
 // @route   POST /api/registrations
 // @desc    Register a new team (Auto Verified, Unique HS2026-XXX Team ID)
@@ -8,6 +55,15 @@ router.post('/', async (req, res) => {
   console.log("Registration Request:", req.body);
 
   try {
+    // Check if registration is open
+    const config = await RegistrationConfig.getSingletonConfig();
+    if (!config.isRegistrationOpen) {
+      return res.status(403).json({
+        success: false,
+        message: 'Registration is currently closed.',
+      });
+    }
+
     const {
       clerkId,
       teamName,
