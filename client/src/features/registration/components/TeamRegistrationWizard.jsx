@@ -959,20 +959,13 @@ Note: Problem statements remain locked until released by the hackathon committee
             New team registrations for Hackspora 2.0 are currently locked. If your team is already registered, you can log in to view your team dashboard and Virtual Round submissions.
           </p>
 
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="pt-4 flex items-center justify-center">
             <button
               type="button"
               onClick={() => navigate('/')}
               className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all cursor-pointer border border-slate-700"
             >
               Back to Home
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard')}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#4a5cd9] hover:bg-[#5a6ce9] text-white font-bold text-xs transition-all cursor-pointer shadow-lg shadow-[#4a5cd9]/30"
-            >
-              Participant Dashboard
             </button>
           </div>
         </div>
