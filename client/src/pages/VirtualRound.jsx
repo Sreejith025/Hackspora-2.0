@@ -184,7 +184,7 @@ export default function VirtualRound() {
       >
         <div className="relative space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl pb-12">
+          <div className="space-y-2 max-w-2xl pb-2 md:pb-0">
             <div className="flex items-center space-x-2 text-[#8e9dff] text-xs font-bold uppercase tracking-widest">
               <HiRocketLaunch className="w-4 h-4" />
               <span>HACKSPORA 2.0 EVALUATION ENGINE</span>
@@ -204,15 +204,15 @@ export default function VirtualRound() {
           </div>
 
           {/* Countdown Timer */}
-          <div className="w-full sm:w-auto shrink-0 -ml-16">
-            <div className="flex items-center gap-3 text-white mb-4">
-              <HiClock className="w-6 h-6 text-[#b77611]" />
-              <span className="text-sm font-extrabold uppercase tracking-widest text-white/90">
+          <div className="w-full lg:w-auto shrink-0 glass-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl shadow-xl">
+            <div className="flex items-center gap-2.5 text-white mb-3 sm:mb-4">
+              <HiClock className="w-5 h-5 sm:w-6 sm:h-6 text-[#b77611]" />
+              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-white/90">
                 Round Starts in
               </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-4 gap-1.5 xs:gap-2 sm:gap-4 text-center w-full max-w-full">
               {[
                 { label: 'Days', value: timeLeft.days },
                 { label: 'Hours', value: timeLeft.hours },
@@ -221,23 +221,23 @@ export default function VirtualRound() {
               ].map((unit) => (
                 <div
                   key={unit.label}
-                  className="px-4 py-3"
+                  className="px-1 py-2 sm:px-4 sm:py-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex flex-col items-center justify-center min-w-0"
                 >
-                  <div className="relative flex h-16 items-center justify-center overflow-hidden">
-                    <AnimatePresence mode="popLayout">
+                  <div className="relative flex h-8 xs:h-10 sm:h-14 items-center justify-center overflow-hidden w-full">
+                    <AnimatePresence mode="wait">
                       <motion.span
                         key={unit.value}
-                        initial={{ y: -20, opacity: 0, scale: 0.8 }}
+                        initial={{ y: -16, opacity: 0, scale: 0.9 }}
                         animate={{ y: 0, opacity: 1, scale: 1 }}
-                        exit={{ y: 20, opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.3, ease: 'easeOut' }}
-                        className="text-4xl font-black tracking-tight text-white font-mono"
+                        exit={{ y: 16, opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.2, ease: 'easeInOut' }}
+                        className="text-xl xs:text-2xl sm:text-4xl font-black tracking-tight text-white font-mono"
                       >
                         {String(unit.value).padStart(2, '0')}
                       </motion.span>
                     </AnimatePresence>
                   </div>
-                  <span className="mt-2 block text-xs font-extrabold uppercase tracking-wider text-white/60">
+                  <span className="mt-1 sm:mt-2 block text-[9px] xs:text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-white/60 truncate w-full">
                     {unit.label}
                   </span>
                 </div>
