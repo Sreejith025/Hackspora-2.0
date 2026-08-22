@@ -8,7 +8,6 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
   const [publishedProblems, setPublishedProblems] = useState([]);
   const [selectedPsId, setSelectedPsId] = useState('');
   const [problemStatementName, setProblemStatementName] = useState('');
-  const [customProblem, setCustomProblem] = useState('');
   const [githubLink, setGithubLink] = useState('');
   const [videoLink, setVideoLink] = useState('');
   const [pptLink, setPptLink] = useState('');
@@ -48,27 +47,23 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
   const handlePsChange = (e) => {
     const val = e.target.value;
     setSelectedPsId(val);
-    if (val === 'Other') {
-      setProblemStatementName('Other');
+    const found = publishedProblems.find((p) => p._id === val || p.name === val);
+    if (found) {
+      setSelectedPsId(found._id);
+      setProblemStatementName(found.name);
     } else {
-      const found = publishedProblems.find((p) => p._id === val || p.name === val);
-      if (found) {
-        setSelectedPsId(found._id);
-        setProblemStatementName(found.name);
-      } else {
-        setProblemStatementName(val);
-      }
+      setProblemStatementName(val);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let finalPsId = selectedPsId === 'Other' ? undefined : selectedPsId;
-    let finalPsName = selectedPsId === 'Other' ? customProblem.trim() : problemStatementName.trim();
+    let finalPsId = selectedPsId;
+    let finalPsName = problemStatementName.trim();
 
     if (!finalPsName) {
-      toast.error('Please select or specify your Problem Statement.');
+      toast.error('Please select your Problem Statement.');
       return;
     }
 
@@ -185,19 +180,7 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
                       {ps.name}
                     </option>
                   ))}
-                  <option value="Other" className="bg-slate-900 text-cyan-400">Other / Custom Track</option>
                 </select>
-              )}
-
-              {selectedPsId === 'Other' && (
-                <input
-                  type="text"
-                  placeholder="Enter custom problem statement name..."
-                  value={customProblem}
-                  onChange={(e) => setCustomProblem(e.target.value)}
-                  required
-                  className="w-full mt-2 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-sm text-white focus:outline-none focus:border-[#4a5cd9]"
-                />
               )}
             </div>
 
