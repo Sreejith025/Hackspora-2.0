@@ -471,7 +471,7 @@ export default function ParticipantDashboard() {
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center space-x-2 text-cyan-400 font-bold text-xs uppercase tracking-wider">
               <HiUser className="w-4 h-4 text-emerald-400" />
-              <span>Assigned Squad Mentor & WhatsApp Group</span>
+              <span>Assigned Squad Mentor & Discord Server</span>
             </div>
             <span className="text-[11px] text-white/60 font-semibold">Team Mentorship Hub</span>
           </div>
@@ -497,7 +497,7 @@ export default function ParticipantDashboard() {
                     className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-xs hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
                   >
                     <HiArrowTopRightOnSquare className="w-4 h-4" />
-                    <span>Join Discord Group</span>
+                    <span>Join Discord Server</span>
                   </a>
                   <button
                     onClick={() => {
