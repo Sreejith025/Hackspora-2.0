@@ -487,7 +487,7 @@ export default function ParticipantDashboard() {
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs text-white/60 font-medium uppercase block">Mentor WhatsApp Group Link</span>
+              <span className="text-xs text-white/60 font-medium uppercase block">Mentor Discord Group Link</span>
               {assignedMentorLink ? (
                 <div className="flex items-center space-x-2">
                   <a
@@ -497,15 +497,15 @@ export default function ParticipantDashboard() {
                     className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-xs hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
                   >
                     <HiArrowTopRightOnSquare className="w-4 h-4" />
-                    <span>Join WhatsApp Group</span>
+                    <span>Join Discord Group</span>
                   </a>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(assignedMentorLink);
-                      toast.success('Copied WhatsApp group link!');
+                      toast.success('Copied Discord group link!');
                     }}
                     className="px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-xs hover:bg-white/20 transition-all cursor-pointer flex items-center space-x-1"
-                    title="Copy WhatsApp Group Link"
+                    title="Copy Discord Group Link"
                   >
                     <HiClipboardDocument className="w-4 h-4 text-cyan-300" />
                     <span>Copy Link</span>
@@ -513,7 +513,7 @@ export default function ParticipantDashboard() {
                 </div>
               ) : (
                 <p className="text-xs text-amber-300 font-semibold italic bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl inline-block">
-                  Mentor WhatsApp link will be provided soon.
+                  Mentor Discord Server link will be provided soon.
                 </p>
               )}
             </div>
