@@ -15,6 +15,7 @@ import {
   HiLockClosed,
   HiClock,
   HiXMark,
+  HiPencilSquare,
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { virtualRoundService } from '../services/virtualRoundService';
@@ -275,10 +276,28 @@ export default function VirtualRound() {
                 </span>
               </Link>
             ) : hasSubmitted ? (
-              <PrimaryButton onClick={() => setIsViewModalOpen(true)}>
-                <HiEye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                <span>View Submission</span>
-              </PrimaryButton>
+              <div className="flex flex-wrap items-center gap-3">
+                <PrimaryButton onClick={() => setIsViewModalOpen(true)}>
+                  <HiEye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  <span>View Submission</span>
+                </PrimaryButton>
+
+                {config && (config.submissionOpen === false || config.isAcceptingSubmissions === false) ? (
+                  <button
+                    disabled
+                    className="group/cta relative inline-flex items-center justify-center space-x-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl font-bold text-xs sm:text-sm text-slate-400 bg-slate-800/60 border border-slate-700/60 opacity-60 cursor-not-allowed"
+                    title="Submissions are currently locked by Admin"
+                  >
+                    <HiLockClosed className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400" />
+                    <span>Update Submission (Locked)</span>
+                  </button>
+                ) : (
+                  <PrimaryButton onClick={() => setIsSubmissionModalOpen(true)}>
+                    <HiPencilSquare className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    <span>Update Submission</span>
+                  </PrimaryButton>
+                )}
+              </div>
             ) : isEligible && config?.isRoundActive && config?.isAcceptingSubmissions ? (
               <PrimaryButton onClick={() => setIsSubmissionModalOpen(true)}>
                 <HiRocketLaunch className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -634,15 +653,17 @@ export default function VirtualRound() {
       {/* 3. Public Results Showcase Section */}
       <PublicResultsSection />
 
-      {/* Modal: Project Submission */}
+      {/* Modal: Project Submission / Update */}
       <VirtualSubmissionModal
         isOpen={isSubmissionModalOpen}
         onClose={() => setIsSubmissionModalOpen(false)}
         userEmail={userEmail}
         team={team}
+        existingSubmission={submissionData?.submission}
+        isUpdate={hasSubmitted}
         onSuccess={() => {
           setRefreshKey((prev) => prev + 1);
-          toast.success('Submission recorded!');
+          toast.success(hasSubmitted ? 'Submission updated successfully!' : 'Submission recorded!');
         }}
       />
 
@@ -722,6 +743,30 @@ export default function VirtualRound() {
                   <span className="px-3 py-1 rounded-full bg-[#4a5cd9]/20 text-[#8e9dff] font-bold uppercase text-[10px]">
                     {submissionData.submission.status}
                   </span>
+                </div>
+
+                {/* Footer Action for Updating Submission */}
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-400">
+                    Need to modify your links?
+                  </span>
+                  {config && (config.submissionOpen === false || config.isAcceptingSubmissions === false) ? (
+                    <span className="text-xs text-rose-400 font-semibold flex items-center space-x-1">
+                      <HiLockClosed className="w-3.5 h-3.5" />
+                      <span>Submissions Locked</span>
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setIsViewModalOpen(false);
+                        setIsSubmissionModalOpen(true);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-[#3645bf] hover:bg-[#4a5cd9] text-white font-bold text-xs flex items-center space-x-2 transition-all cursor-pointer shadow-md"
+                    >
+                      <HiPencilSquare className="w-4 h-4" />
+                      <span>Update Submission</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>

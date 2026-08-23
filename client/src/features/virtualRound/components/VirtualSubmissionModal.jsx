@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiXMark, HiCloudArrowUp, HiCheckCircle, HiDocumentText, HiLink, HiVideoCamera, HiLockClosed } from 'react-icons/hi2';
+import { HiXMark, HiCloudArrowUp, HiCheckCircle, HiDocumentText, HiLink, HiVideoCamera, HiLockClosed, HiPencilSquare } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { virtualRoundService } from '../../../services/virtualRoundService';
 
-export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, team, onSuccess }) {
+export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, team, existingSubmission = null, isUpdate = false, onSuccess }) {
   const [publishedProblems, setPublishedProblems] = useState([]);
   const [selectedPsId, setSelectedPsId] = useState('');
   const [problemStatementName, setProblemStatementName] = useState('');
@@ -16,10 +16,27 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
 
   const [vrConfig, setVrConfig] = useState(null);
 
+  const isEditMode = Boolean(isUpdate || existingSubmission);
+
   useEffect(() => {
     if (!isOpen) return;
+
     let ignore = false;
     async function loadModalData() {
+      if (existingSubmission) {
+        setSelectedPsId(existingSubmission.problemStatementId || '');
+        setProblemStatementName(existingSubmission.problemStatementName || '');
+        setGithubLink(existingSubmission.githubLink || '');
+        setVideoLink(existingSubmission.videoLink || '');
+        setPptLink(existingSubmission.pptLink || existingSubmission.pptFileUrl || '');
+      } else {
+        setSelectedPsId('');
+        setProblemStatementName('');
+        setGithubLink('');
+        setVideoLink('');
+        setPptLink('');
+      }
+
       try {
         setLoadingPs(true);
         const [psRes, configRes] = await Promise.all([
@@ -27,7 +44,22 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
           virtualRoundService.getRoundConfig().catch(() => null),
         ]);
         if (!ignore) {
-          if (psRes?.success && Array.isArray(psRes.data)) setPublishedProblems(psRes.data);
+          if (psRes?.success && Array.isArray(psRes.data)) {
+            setPublishedProblems(psRes.data);
+
+            // Sync selected problem statement ID with fetched list if editing
+            if (existingSubmission) {
+              const matched = psRes.data.find(
+                (p) =>
+                  String(p._id) === String(existingSubmission.problemStatementId) ||
+                  p.name === existingSubmission.problemStatementName
+              );
+              if (matched) {
+                setSelectedPsId(matched._id);
+                setProblemStatementName(matched.name);
+              }
+            }
+          }
           if (configRes?.success) setVrConfig(configRes.data || configRes);
         }
       } catch (err) {
@@ -36,18 +68,19 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
         if (!ignore) setLoadingPs(false);
       }
     }
+
     loadModalData();
     return () => {
       ignore = true;
     };
-  }, [isOpen]);
+  }, [isOpen, existingSubmission]);
 
   if (!isOpen) return null;
 
   const handlePsChange = (e) => {
     const val = e.target.value;
     setSelectedPsId(val);
-    const found = publishedProblems.find((p) => p._id === val || p.name === val);
+    const found = publishedProblems.find((p) => String(p._id) === String(val) || p.name === val);
     if (found) {
       setSelectedPsId(found._id);
       setProblemStatementName(found.name);
@@ -61,6 +94,11 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
 
     let finalPsId = selectedPsId;
     let finalPsName = problemStatementName.trim();
+
+    if (!finalPsName && finalPsId) {
+      const found = publishedProblems.find((p) => String(p._id) === String(finalPsId));
+      if (found) finalPsName = found.name;
+    }
 
     if (!finalPsName) {
       toast.error('Please select your Problem Statement.');
@@ -93,17 +131,23 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
         pptLink: pptLink.trim(),
       };
 
-      const res = await virtualRoundService.submitProject(payload);
+      const res = isEditMode
+        ? await virtualRoundService.updateProject(payload)
+        : await virtualRoundService.submitProject(payload);
 
       if (res?.success) {
-        toast.success('Project submitted successfully for Virtual Round!');
+        toast.success(
+          isEditMode
+            ? 'Submission updated successfully!'
+            : 'Project submitted successfully for Virtual Round!'
+        );
         if (onSuccess) onSuccess(res.data || res.submission);
         onClose();
       } else {
         toast.error(res?.message || 'Submission failed. Please check form details.');
       }
     } catch (err) {
-      toast.error(err.message || 'Error submitting project. Please try again.');
+      toast.error(err.message || 'Error processing request. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -125,11 +169,17 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
           <div className="relative flex items-center justify-between px-6 py-5 border-b border-white/10">
             <div className="flex items-center space-x-3">
               <div className="p-2.5 rounded-xl bg-white/15 border border-white/25 text-white shadow-lg shadow-black/20 backdrop-blur-xl">
-                <HiCloudArrowUp className="w-6 h-6" />
+                {isEditMode ? <HiPencilSquare className="w-6 h-6" /> : <HiCloudArrowUp className="w-6 h-6" />}
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white tracking-tight">Virtual Round Submission</h3>
-                <p className="text-xs text-slate-400">Submit your project repositories, demo video, and presentation deck link</p>
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  {isEditMode ? 'Update Virtual Round Submission' : 'Virtual Round Submission'}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {isEditMode
+                    ? 'Update your project repositories, demo video, and presentation deck link'
+                    : 'Submit your project repositories, demo video, and presentation deck link'}
+                </p>
               </div>
             </div>
             <button
@@ -277,11 +327,11 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
                 <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 <span className="relative flex items-center justify-center space-x-2.5">
                   {submitting ? (
-                    <span>Submitting Project...</span>
+                    <span>{isEditMode ? 'Updating Submission...' : 'Submitting Project...'}</span>
                   ) : (
                     <>
                       <HiCheckCircle className="w-4 h-4" />
-                      <span>Submit Project Now</span>
+                      <span>{isEditMode ? 'Update Submission Now' : 'Submit Project Now'}</span>
                     </>
                   )}
                 </span>
@@ -293,3 +343,4 @@ export default function VirtualSubmissionModal({ isOpen, onClose, userEmail, tea
     </AnimatePresence>
   );
 }
+

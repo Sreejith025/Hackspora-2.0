@@ -54,6 +54,28 @@ export const virtualRoundService = {
     }
   },
 
+  // Update existing project details (Participant) - JSON payload
+  async updateProject(payload) {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/update-submission`, payload);
+      return response.data;
+    } catch (err) {
+      console.error('Update project error:', err?.response?.data || err.message);
+      const serverMessage =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.response?.data?.msg;
+
+      if (serverMessage) {
+        throw new Error(serverMessage, { cause: err });
+      }
+      if (!err.response) {
+        throw new Error('Unable to connect to backend server. Please make sure the backend server is running on port 5000.', { cause: err });
+      }
+      throw new Error(err.message || 'Failed to update project for Virtual Round. Please try again.', { cause: err });
+    }
+  },
+
   // Fetch public shortlisted results (Public - strictly hides rejected status)
   async getPublicResults() {
     try {

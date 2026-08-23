@@ -290,6 +290,133 @@ router.post('/submit', async (req, res) => {
   }
 });
 
+// @route   PUT /api/virtual-round/update-submission or /submit
+// @desc    Update existing Virtual Round project submission links
+const handleUpdateSubmission = async (req, res) => {
+  try {
+    const { userEmail, problemStatementId, problemStatementName, githubLink, videoLink, pptLink } = req.body;
+
+    if (!userEmail || !userEmail.trim()) {
+      return res.status(400).json({ success: false, message: 'Authentication email is required.' });
+    }
+
+    const normalizedEmail = userEmail.toLowerCase().trim();
+
+    // 1. Verify User belongs to a Team (Derive team on backend)
+    const team = await TeamRegistration.findOne({
+      $or: [{ leaderEmail: normalizedEmail }, { 'members.email': normalizedEmail }],
+    });
+
+    if (!team) {
+      return res.status(400).json({
+        success: false,
+        message: 'You are not registered in any team. Only registered teams can update Virtual Round submissions.',
+      });
+    }
+
+    // 2. Check Virtual Round is active & accepting submissions
+    const config = await VirtualRoundConfig.getSingletonConfig();
+    if (!config.isRoundActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'Virtual Round is currently inactive. Submission updates are not allowed.',
+      });
+    }
+    if (!config.isAcceptingSubmissions) {
+      return res.status(403).json({
+        success: false,
+        message: 'Virtual Round submissions are currently locked. Updates are not allowed.',
+      });
+    }
+
+    // 2b. Check Deadline
+    if (config.submissionDeadline && new Date() > new Date(config.submissionDeadline)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Virtual Round submission deadline has passed.',
+      });
+    }
+
+    // 3. Verify Team Eligibility
+    let isEligible = team.status === 'Verified';
+    if (config.eligibleTeamIds && config.eligibleTeamIds.length > 0 && !config.allVerifiedEligible) {
+      isEligible = isEligible && config.eligibleTeamIds.includes(team.teamId);
+    }
+
+    if (!isEligible) {
+      return res.status(400).json({
+        success: false,
+        message: 'Your team is not eligible for Virtual Round submission.',
+      });
+    }
+
+    // 4. Find existing submission
+    const existingSubmission = await VirtualSubmission.findOne({ teamId: team.teamId });
+    if (!existingSubmission) {
+      return res.status(404).json({
+        success: false,
+        message: 'No existing submission found to update.',
+      });
+    }
+
+    // 5. Input Validation for URLs
+    if (!githubLink || !isValidGithubUrl(githubLink) || !videoLink || !isValidUrl(videoLink) || !pptLink || !isValidUrl(pptLink)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide valid submission links.',
+      });
+    }
+
+    // 6. Problem Statement Verification against MongoDB
+    let psRecord = null;
+    if (problemStatementId) {
+      psRecord = await ProblemStatement.findById(problemStatementId);
+    }
+    if (!psRecord && problemStatementName) {
+      psRecord = await ProblemStatement.findOne({ name: problemStatementName.trim() });
+    }
+
+    if (!psRecord) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid problem statement.',
+      });
+    }
+
+    if (psRecord.status !== 'published') {
+      return res.status(400).json({
+        success: false,
+        message: 'This problem statement is no longer available.',
+      });
+    }
+
+    // 7. Update ONLY the editable submission fields and save (updatedAt updated automatically)
+    existingSubmission.problemStatementId = psRecord._id;
+    existingSubmission.problemStatementName = psRecord.name;
+    existingSubmission.githubLink = githubLink.trim();
+    existingSubmission.videoLink = videoLink.trim();
+    existingSubmission.pptLink = pptLink.trim();
+
+    const updatedSubmission = await existingSubmission.save();
+
+    return res.json({
+      success: true,
+      message: 'Submission updated successfully!',
+      data: updatedSubmission,
+      submission: updatedSubmission,
+    });
+  } catch (error) {
+    console.error('Virtual Submission Update Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Server error updating submission.',
+    });
+  }
+};
+
+router.put('/update-submission', handleUpdateSubmission);
+router.put('/submit', handleUpdateSubmission);
+
 // @route   GET /api/virtual-round/public-results
 // @desc    Get public list of shortlisted teams ONLY (Rejected status is strictly hidden)
 router.get('/public-results', async (req, res) => {
