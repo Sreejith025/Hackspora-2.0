@@ -16,11 +16,13 @@ import {
   HiClock,
   HiXMark,
   HiPencilSquare,
+  HiArrowDownTray,
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { virtualRoundService } from '../services/virtualRoundService';
 import VirtualSubmissionModal from '../features/virtualRound/components/VirtualSubmissionModal';
 import PublicResultsSection from '../features/virtualRound/components/PublicResultsSection';
+import { downloadSubmissionPDF } from '../utils/submissionPdfGenerator';
 
 // Reusable button styles — match the "Download Brochure" CTA so the page reads as one design system.
 const ctaButtonClass =
@@ -280,6 +282,11 @@ export default function VirtualRound() {
                 <PrimaryButton onClick={() => setIsViewModalOpen(true)}>
                   <HiEye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   <span>View Submission</span>
+                </PrimaryButton>
+
+                <PrimaryButton onClick={() => downloadSubmissionPDF(submissionData?.submission)}>
+                  <HiArrowDownTray className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  <span>Download Submission PDF</span>
                 </PrimaryButton>
 
                 {config && (config.submissionOpen === false || config.isAcceptingSubmissions === false) ? (
@@ -691,13 +698,23 @@ export default function VirtualRound() {
                     <p className="text-xs text-slate-400">{submissionData.submission.teamName} ({submissionData.submission.teamId})</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setIsViewModalOpen(false)}
-                  aria-label="Close"
-                  className="p-2 rounded-xl text-slate-300 hover:text-white bg-white/10 border border-white/15 hover:border-white/30 hover:bg-white/15 transition-all cursor-pointer"
-                >
-                  <HiXMark className="w-5 h-5" />
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => downloadSubmissionPDF(submissionData.submission)}
+                    className="px-3.5 py-2 rounded-xl bg-[#3645bf] hover:bg-[#4a5cd9] text-white font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-md"
+                    title="Download Submission PDF"
+                  >
+                    <HiArrowDownTray className="w-4 h-4 text-white" />
+                    <span>Download PDF</span>
+                  </button>
+                  <button
+                    onClick={() => setIsViewModalOpen(false)}
+                    aria-label="Close"
+                    className="p-2 rounded-xl text-slate-300 hover:text-white bg-white/10 border border-white/15 hover:border-white/30 hover:bg-white/15 transition-all cursor-pointer"
+                  >
+                    <HiXMark className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               {/* Modal Body */}

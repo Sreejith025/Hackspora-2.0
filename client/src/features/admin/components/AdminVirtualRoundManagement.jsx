@@ -15,10 +15,12 @@ import {
   HiClipboardDocument,
   HiArrowTopRightOnSquare,
   HiPencilSquare,
+  HiArrowDownTray,
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 import { virtualRoundService } from '../../../services/virtualRoundService';
 import { ADMIN_EMAIL } from '../../../constants/authConfig';
+import { downloadSubmissionPDF, downloadEvaluatorSubmissionsPDF } from '../../../utils/submissionPdfGenerator';
 
 export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }) {
   const activeAdminEmail = (adminEmail && typeof adminEmail === 'string' && adminEmail.trim()) ? adminEmail.trim() : ADMIN_EMAIL;
@@ -36,6 +38,7 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
   const [teamsList, setTeamsList] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [evaluatorFilter, setEvaluatorFilter] = useState('All');
   const [selectedSub, setSelectedSub] = useState(null);
   const [updating, setUpdating] = useState(false);
 
@@ -175,6 +178,27 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
   };
 
   const isSubmissionsOpen = config ? (config.submissionOpen ?? config.isAcceptingSubmissions ?? true) : true;
+
+  // Extract unique evaluator names from submissions & team assignments
+  const evaluatorOptions = Array.from(
+    new Set(
+      [...submissions.map((s) => s.evaluatorName), ...teamsList.map((t) => t.evaluatorName)].filter(
+        (name) => name && typeof name === 'string' && name.trim().length > 0
+      )
+    )
+  );
+
+  // Filter submissions by evaluator filter
+  const filteredSubmissions = submissions.filter((sub) => {
+    if (evaluatorFilter !== 'All') {
+      if (evaluatorFilter === 'Unassigned') {
+        if (sub.evaluatorName && sub.evaluatorName.trim()) return false;
+      } else {
+        if ((sub.evaluatorName || '').trim().toLowerCase() !== evaluatorFilter.trim().toLowerCase()) return false;
+      }
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-8">
@@ -458,20 +482,50 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
           />
         </div>
 
-        <div className="flex items-center space-x-2 w-full sm:w-auto">
-          <HiFunnel className="w-4 h-4 text-slate-400" />
-          <span className="text-xs text-slate-400 font-semibold">Filter:</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none cursor-pointer"
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          {/* Status Filter */}
+          <div className="flex items-center space-x-2">
+            <HiFunnel className="w-4 h-4 text-slate-400" />
+            <span className="text-xs text-slate-400 font-semibold">Status:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none cursor-pointer"
+            >
+              <option value="All">All Submissions</option>
+              <option value="submitted">Submitted</option>
+              <option value="under_review">Under Review</option>
+              <option value="shortlisted">Shortlisted</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
+          {/* Evaluator Filter */}
+          <div className="flex items-center space-x-2">
+            <HiUser className="w-4 h-4 text-slate-400" />
+            <span className="text-xs text-slate-400 font-semibold">Evaluator:</span>
+            <select
+              value={evaluatorFilter}
+              onChange={(e) => setEvaluatorFilter(e.target.value)}
+              className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none cursor-pointer"
+            >
+              <option value="All">All Evaluators</option>
+              <option value="Unassigned">Unassigned</option>
+              {evaluatorOptions.map((ev) => (
+                <option key={ev} value={ev}>{ev}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Evaluator Wise PDF Download Button */}
+          <button
+            onClick={() => downloadEvaluatorSubmissionsPDF(evaluatorFilter, filteredSubmissions)}
+            className="px-3.5 py-2 rounded-xl bg-cyan-600/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-600/30 text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 shadow-md"
+            title="Download Evaluator Report PDF"
           >
-            <option value="All">All Submissions</option>
-            <option value="submitted">Submitted</option>
-            <option value="under_review">Under Review</option>
-            <option value="shortlisted">Shortlisted</option>
-            <option value="rejected">Rejected</option>
-          </select>
+            <HiArrowDownTray className="w-4 h-4 text-cyan-400" />
+            <span>{evaluatorFilter === 'All' ? 'Download Evaluator PDF' : `Download ${evaluatorFilter} PDF`}</span>
+          </button>
         </div>
       </div>
 
@@ -481,7 +535,7 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
           <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
           <span>Loading Virtual Round submissions...</span>
         </div>
-      ) : submissions.length === 0 ? (
+      ) : filteredSubmissions.length === 0 ? (
         <div className="p-12 rounded-3xl border border-slate-800 bg-slate-950 text-center space-y-2">
           <HiSparkles className="w-8 h-8 text-slate-600 mx-auto" />
           <h4 className="text-base font-bold text-white">No Submissions Found</h4>
@@ -501,7 +555,7 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80 bg-slate-900/40">
-              {submissions.map((sub) => {
+              {filteredSubmissions.map((sub) => {
                 return (
                   <tr key={sub._id} className="hover:bg-slate-900/90 transition-colors">
                     <td className="py-3.5 px-4 space-y-0.5">
@@ -579,6 +633,14 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
 
                     <td className="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
                       <button
+                        onClick={() => downloadSubmissionPDF(sub)}
+                        className="p-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 transition-all cursor-pointer border border-cyan-500/30"
+                        title="Download Submission PDF"
+                      >
+                        <HiArrowDownTray className="w-4 h-4" />
+                      </button>
+
+                      <button
                         onClick={() => setSelectedSub(sub)}
                         className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
                         title="View Details"
@@ -627,12 +689,22 @@ export default function AdminVirtualRoundManagement({ adminEmail = ADMIN_EMAIL }
                 <h4 className="text-lg font-bold text-white">{selectedSub.teamName}</h4>
                 <p className="text-xs text-slate-400">Team ID: {selectedSub.teamId} • Leader: {selectedSub.leaderEmail}</p>
               </div>
-              <button
-                onClick={() => setSelectedSub(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-900 cursor-pointer"
-              >
-                <HiXMark className="w-5 h-5" />
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => downloadSubmissionPDF(selectedSub)}
+                  className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-md"
+                  title="Download Submission PDF"
+                >
+                  <HiArrowDownTray className="w-4 h-4" />
+                  <span>Download Submission PDF</span>
+                </button>
+                <button
+                  onClick={() => setSelectedSub(null)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-900 cursor-pointer"
+                >
+                  <HiXMark className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3 text-xs">
