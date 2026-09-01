@@ -3,7 +3,6 @@ import * as XLSX from 'xlsx';
 import { getRootApiUrl } from './apiConfig';
 
 const API_BASE_URL = `${getRootApiUrl()}/registrations`;
-console.log('[RegistrationService] Active API_BASE_URL:', API_BASE_URL);
 
 export const registrationService = {
   // Get registration status config (Open/Closed)
