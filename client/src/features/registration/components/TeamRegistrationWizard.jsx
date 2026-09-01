@@ -218,70 +218,61 @@ export default function TeamRegistrationWizard() {
 
  // Submit Final Registration
  const handleSubmitRegistration = async (e) => {
- if (e && e.preventDefault) e.preventDefault();
+   if (e && e.preventDefault) e.preventDefault();
 
- if (isSubmitting) return;
+   if (isSubmitting) return;
 
- console.log("Button Clicked: Submit Registration");
+   if (!isConfirmed) {
+     toast.error('Please tap the confirmation checkbox below to complete registration.');
+     const checkEl = document.getElementById('confirmCheck');
+     if (checkEl) checkEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+     return;
+   }
 
- if (!isConfirmed) {
- console.warn("Registration blocked: confirmation checkbox is false");
- toast.error('Please tap the confirmation checkbox below to complete registration.');
- const checkEl = document.getElementById('confirmCheck');
- if (checkEl) checkEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
- return;
- }
+   const totalSquadSize = 1 + members.length;
+   if (totalSquadSize < 3) {
+     toast.error('A team must contain at least 3 members (Leader + at least 2 members).');
+     return;
+   }
+   if (totalSquadSize > 5) {
+     toast.error('Maximum team size is 5 members.');
+     return;
+   }
 
- const totalSquadSize = 1 + members.length;
- if (totalSquadSize < 3) {
- console.warn(`Registration blocked: squad size is ${totalSquadSize} (< 3)`);
- toast.error('A team must contain at least 3 members (Leader + at least 2 members).');
- return;
- }
- if (totalSquadSize > 5) {
- console.warn(`Registration blocked: squad size is ${totalSquadSize} (> 5)`);
- toast.error('Maximum team size is 5 members.');
- return;
- }
+   setIsSubmitting(true);
+   try {
+     const payload = {
+       clerkId: user?.id || '',
+       ...teamInfo,
+       members,
+     };
 
- console.log("Sending Registration Request...");
- setIsSubmitting(true);
- try {
- const payload = {
- clerkId: user?.id || '',
- ...teamInfo,
- members,
- };
+     const result = await registrationService.registerTeam(payload);
 
- console.log("Payload sent to registration API:", payload);
- const result = await registrationService.registerTeam(payload);
- console.log("Registration API Response Success:", result);
+     setRegisteredResult(result);
 
- setRegisteredResult(result);
+     // Trigger Fireworks Confetti Effect
+     confetti({
+       particleCount: 120,
+       spread: 80,
+       origin: { y: 0.6 },
+       colors: ['#38bdf8', '#818cf8', '#a855f7', '#06b6d4'],
+     });
 
- // Trigger Fireworks Confetti Effect
- confetti({
- particleCount: 120,
- spread: 80,
- origin: { y: 0.6 },
- colors: ['#38bdf8', '#818cf8', '#a855f7', '#06b6d4'],
- });
-
- toast.success('Registration Completed Successfully!');
- } catch (err) {
- console.error("Registration Error Caught:", err);
- if (err.response?.data?.registered || err.response?.data?.data) {
- setAlreadyRegisteredData(err.response.data.data || null);
- setIsAlreadyRegisteredModalOpen(true);
- toast.error('You are already registered for Hackspora 2.0.');
- } else {
- const errMsg = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
- toast.error(errMsg);
- console.error("Toast error displayed:", errMsg);
- }
- } finally {
- setIsSubmitting(false);
- }
+     toast.success('Registration Completed Successfully!');
+   } catch (err) {
+     console.error("Registration Error Caught:", err);
+     if (err.response?.data?.registered || err.response?.data?.data) {
+       setAlreadyRegisteredData(err.response.data.data || null);
+       setIsAlreadyRegisteredModalOpen(true);
+       toast.error('You are already registered for Hackspora 2.0.');
+     } else {
+       const errMsg = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+       toast.error(errMsg);
+     }
+   } finally {
+     setIsSubmitting(false);
+   }
  };
 
  // Render Step 1
@@ -832,7 +823,6 @@ export default function TeamRegistrationWizard() {
  disabled={isSubmitting}
  onClick={(e) => {
  e.preventDefault();
- console.log("Button Clicked: Complete Registration Submit");
  handleSubmitRegistration(e);
  }}
  className={`w-full py-4 rounded-2xl font-extrabold text-base transition-all flex items-center justify-center space-x-2 cursor-pointer touch-manipulation relative z-20 ${

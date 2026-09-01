@@ -40,9 +40,6 @@ export default function AdminRoute({ children }) {
 
  // Signed in but NOT abisri024@gmail.com -> redirect to participant /dashboard
  if (!isAdmin) {
- console.warn(
- `Unauthorized access attempt to Admin route by ${userEmail}. Only ${ADMIN_EMAIL} is authorized.`
- );
  return (
  <div className="min-h-screen w-full bg-[#02040A] flex flex-col items-center justify-center p-6 text-center space-y-4">
  <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400">

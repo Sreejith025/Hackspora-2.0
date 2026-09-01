@@ -194,13 +194,7 @@ export default function HeroSection() {
  ) : (
  <button
  type="button"
- onClick={(e) => {
- console.log("Register Now Button Clicked");
- handleRegisterNow(e);
- }}
- onTouchEnd={() => {
- console.log("Register Now Button Touched on mobile device");
- }}
+ onClick={handleRegisterNow}
  disabled={isChecking}
  className="group/cta relative inline-flex items-center justify-center px-6 sm:px-6 py-3 sm:py-3 text-sm sm:text-xs md:text-sm font-extrabold text-white bg-[#3645bf] hover:bg-[#4a5cd9] rounded-2xl active:scale-95 transition-all duration-300 w-full min-h-[48px] cursor-pointer touch-manipulation shadow-xl shadow-[#3645bf]/40 hover:shadow-2xl hover:shadow-[#3645bf]/60 overflow-hidden"
  >

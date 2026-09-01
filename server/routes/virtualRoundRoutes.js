@@ -28,11 +28,13 @@ const ADMIN_EMAIL = 'abisri024@gmail.com';
 // Middleware to check admin authorization
 const verifyAdminAccess = (req, res, next) => {
   const adminEmailHeader = req.headers['x-admin-email'] || req.query.adminEmail || req.body?.adminEmail;
-  if (adminEmailHeader && typeof adminEmailHeader === 'string' && adminEmailHeader.trim()) {
-    req.adminEmail = adminEmailHeader.toLowerCase().trim();
-  } else {
-    req.adminEmail = ADMIN_EMAIL;
+  if (!adminEmailHeader || adminEmailHeader.toLowerCase().trim() !== ADMIN_EMAIL.toLowerCase().trim()) {
+    return res.status(403).json({
+      success: false,
+      message: 'Access Denied: Admin authorization required.',
+    });
   }
+  req.adminEmail = adminEmailHeader.toLowerCase().trim();
   next();
 };
 

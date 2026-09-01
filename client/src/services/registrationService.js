@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { getRootApiUrl } from './apiConfig';
+import { ADMIN_EMAIL } from '../constants/authConfig';
 
 const API_BASE_URL = `${getRootApiUrl()}/registrations`;
 
@@ -17,12 +18,13 @@ export const registrationService = {
   },
 
   // Update registration status config (Admin Access)
-  async updateRegistrationConfig(isRegistrationOpen, updatedBy = 'admin') {
+  async updateRegistrationConfig(isRegistrationOpen, updatedBy = 'admin', adminEmail = ADMIN_EMAIL) {
     try {
-      const response = await axios.put(`${API_BASE_URL}/config`, {
-        isRegistrationOpen,
-        updatedBy,
-      });
+      const response = await axios.put(
+        `${API_BASE_URL}/config`,
+        { isRegistrationOpen, updatedBy, adminEmail },
+        { headers: { 'x-admin-email': adminEmail } }
+      );
       return response.data;
     } catch (err) {
       console.error('Error updating registration config:', err);
@@ -49,101 +51,121 @@ export const registrationService = {
  },
 
  // Register team directly to MongoDB Atlas
- async registerTeam(teamData) {
- console.log('[Axios] Sending Registration Request to:', API_BASE_URL);
- console.log('[Axios] Registration Payload:', teamData);
- try {
- const response = await axios.post(API_BASE_URL, teamData);
- console.log('[Axios] Registration Response Received:', response.status, response.data);
- if (response.data?.success) {
- return response.data.data;
- }
- throw new Error(response.data?.message || 'Registration failed');
- } catch (error) {
- console.error('[Axios] Registration POST Error:', error?.response?.data || error.message);
- throw error;
- }
- },
+  async registerTeam(teamData) {
+    try {
+      const response = await axios.post(API_BASE_URL, teamData);
+      if (response.data?.success) {
+        return response.data.data;
+      }
+      throw new Error(response.data?.message || 'Registration failed');
+    } catch (error) {
+      console.error('[Axios] Registration POST Error:', error?.response?.data || error.message);
+      throw error;
+    }
+  },
 
- // Fetch all registered teams from MongoDB Atlas (for Admin)
- async getAllRegistrations(params = {}) {
- const { search = '', college = 'All', sort = 'newest' } = params;
- const response = await axios.get(API_BASE_URL, {
- params: { search, college, sort },
- });
- return response.data;
- },
+  // Fetch all registered teams from MongoDB Atlas (for Admin)
+  async getAllRegistrations(params = {}) {
+    const { search = '', college = 'All', sort = 'newest', adminEmail = ADMIN_EMAIL } = params;
+    const response = await axios.get(API_BASE_URL, {
+      params: { search, college, sort, adminEmail },
+      headers: { 'x-admin-email': adminEmail },
+    });
+    return response.data;
+  },
 
- // Fetch single team by user email from MongoDB Atlas
- async getMyTeam(email) {
- if (!email) return null;
- try {
- const response = await axios.get(`${API_BASE_URL}/my-team`, {
- params: { email },
- });
- if (response.data?.success) {
- return response.data.data;
- }
- return null;
- } catch (err) {
- if (err.response?.status === 404) return null;
- throw err;
- }
- },
+  // Fetch single team by user email from MongoDB Atlas
+  async getMyTeam(email) {
+    if (!email) return null;
+    try {
+      const response = await axios.get(`${API_BASE_URL}/my-team`, {
+        params: { email },
+      });
+      if (response.data?.success) {
+        return response.data.data;
+      }
+      return null;
+    } catch (err) {
+      if (err.response?.status === 404) return null;
+      throw err;
+    }
+  },
 
- // Fetch Dashboard Stats from MongoDB Atlas
- async getStats() {
- const response = await axios.get(`${API_BASE_URL}/stats`);
- if (response.data?.success) {
- return response.data.data;
- }
- throw new Error(response.data?.message || 'Failed to load stats');
- },
+  // Fetch Dashboard Stats from MongoDB Atlas
+  async getStats(adminEmail = ADMIN_EMAIL) {
+    const response = await axios.get(`${API_BASE_URL}/stats`, {
+      params: { adminEmail },
+      headers: { 'x-admin-email': adminEmail },
+    });
+    if (response.data?.success) {
+      return response.data.data;
+    }
+    throw new Error(response.data?.message || 'Failed to load stats');
+  },
 
- // Update single team status in MongoDB Atlas
- async updateStatus(id, status) {
- const response = await axios.put(`${API_BASE_URL}/${id}/status`, { status });
- if (response.data?.success) {
- return response.data.data;
- }
- throw new Error(response.data?.message || 'Failed to update status');
- },
+  // Update single team status in MongoDB Atlas
+  async updateStatus(id, status, adminEmail = ADMIN_EMAIL) {
+    const response = await axios.put(
+      `${API_BASE_URL}/${id}/status`,
+      { status, adminEmail },
+      { headers: { 'x-admin-email': adminEmail } }
+    );
+    if (response.data?.success) {
+      return response.data.data;
+    }
+    throw new Error(response.data?.message || 'Failed to update status');
+  },
 
- // Update team registration details in MongoDB Atlas
- async updateRegistration(id, updateData) {
- const response = await axios.put(`${API_BASE_URL}/${id}`, updateData);
- if (response.data?.success) {
- return response.data.data;
- }
- throw new Error(response.data?.message || 'Failed to update registration');
- },
+  // Update team registration details in MongoDB Atlas
+  async updateRegistration(id, updateData, adminEmail = ADMIN_EMAIL) {
+    const response = await axios.put(
+      `${API_BASE_URL}/${id}`,
+      { ...updateData, adminEmail },
+      { headers: { 'x-admin-email': adminEmail } }
+    );
+    if (response.data?.success) {
+      return response.data.data;
+    }
+    throw new Error(response.data?.message || 'Failed to update registration');
+  },
 
- // Delete team registration from MongoDB Atlas
- async deleteRegistration(id) {
- const response = await axios.delete(`${API_BASE_URL}/${id}`);
- if (response.data?.success) {
- return response.data.data;
- }
- throw new Error(response.data?.message || 'Failed to delete team registration');
- },
+  // Delete team registration from MongoDB Atlas
+  async deleteRegistration(id, adminEmail = ADMIN_EMAIL) {
+    const response = await axios.delete(`${API_BASE_URL}/${id}`, {
+      data: { adminEmail },
+      headers: { 'x-admin-email': adminEmail },
+    });
+    if (response.data?.success) {
+      return response.data.data;
+    }
+    throw new Error(response.data?.message || 'Failed to delete team registration');
+  },
 
- // Bulk update status in MongoDB Atlas
- async bulkUpdateStatus(ids, status) {
- const response = await axios.post(`${API_BASE_URL}/bulk-status`, { ids, status });
- if (response.data?.success) {
- return response.data;
- }
- throw new Error(response.data?.message || 'Failed to bulk update status');
- },
+  // Bulk update status in MongoDB Atlas
+  async bulkUpdateStatus(ids, status, adminEmail = ADMIN_EMAIL) {
+    const response = await axios.post(
+      `${API_BASE_URL}/bulk-status`,
+      { ids, status, adminEmail },
+      { headers: { 'x-admin-email': adminEmail } }
+    );
+    if (response.data?.success) {
+      return response.data;
+    }
+    throw new Error(response.data?.message || 'Failed to bulk update status');
+  },
 
- // Bulk delete registrations from MongoDB Atlas
- async bulkDeleteRegistrations(ids) {
- const response = await axios.post(`${API_BASE_URL}/bulk-delete`, { ids });
- if (response.data?.success) {
- return response.data;
- }
- throw new Error(response.data?.message || 'Failed to bulk delete registrations');
- },
+  // Bulk delete registrations from MongoDB Atlas
+  async bulkDeleteRegistrations(ids, adminEmail = ADMIN_EMAIL) {
+    const response = await axios.post(
+      `${API_BASE_URL}/bulk-delete`,
+      { ids, adminEmail },
+      { headers: { 'x-admin-email': adminEmail } }
+    );
+    if (response.data?.success) {
+      return response.data;
+    }
+    throw new Error(response.data?.message || 'Failed to bulk delete registrations');
+  },
 
  // Export dataset to Real Excel (.xlsx) file using SheetJS
  exportToExcel(teamsData, filename = 'Hackspora_2.0_Registrations.xlsx') {
