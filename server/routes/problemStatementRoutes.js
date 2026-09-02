@@ -1,21 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ProblemStatement = require('../models/ProblemStatement');
-
-const ADMIN_EMAIL = 'abisri024@gmail.com';
-
-// Middleware to check admin authorization
-const verifyAdminAccess = (req, res, next) => {
-  const adminEmailHeader = req.headers['x-admin-email'] || req.query.adminEmail || req.body?.adminEmail;
-  if (!adminEmailHeader || adminEmailHeader.toLowerCase().trim() !== ADMIN_EMAIL) {
-    return res.status(403).json({
-      success: false,
-      message: 'Access Denied: Admin authorization required.',
-    });
-  }
-  req.adminEmail = adminEmailHeader.toLowerCase().trim();
-  next();
-};
+const { requireAdmin, ADMIN_EMAIL } = require('../middleware/authMiddleware');
 
 // @route   GET /api/problem-statements/published
 // @desc    Get published problem statements only (Participant/Public endpoint)
@@ -65,7 +51,7 @@ router.get('/', async (req, res) => {
 
 // @route   POST /api/problem-statements
 // @desc    Create/publish new Problem Statement (Admin only)
-router.post('/', verifyAdminAccess, async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
   try {
     const { name, description, link, status } = req.body;
 
@@ -133,12 +119,12 @@ const handleUpdateStatement = async (req, res) => {
 
 // @route   PUT & PATCH /api/problem-statements/:id
 // @desc    Edit Problem Statement details (Admin only)
-router.put('/:id', verifyAdminAccess, handleUpdateStatement);
-router.patch('/:id', verifyAdminAccess, handleUpdateStatement);
+router.put('/:id', requireAdmin, handleUpdateStatement);
+router.patch('/:id', requireAdmin, handleUpdateStatement);
 
 // @route   PATCH /api/problem-statements/:id/publish
 // @desc    Publish a Problem Statement (Admin only)
-router.patch('/:id/publish', verifyAdminAccess, async (req, res) => {
+router.patch('/:id/publish', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -164,7 +150,7 @@ router.patch('/:id/publish', verifyAdminAccess, async (req, res) => {
 
 // @route   PATCH /api/problem-statements/:id/unpublish
 // @desc    Unpublish a Problem Statement (Admin only)
-router.patch('/:id/unpublish', verifyAdminAccess, async (req, res) => {
+router.patch('/:id/unpublish', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -190,7 +176,7 @@ router.patch('/:id/unpublish', verifyAdminAccess, async (req, res) => {
 
 // @route   DELETE /api/problem-statements/:id
 // @desc    Delete a Problem Statement (Admin only)
-router.delete('/:id', verifyAdminAccess, async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 

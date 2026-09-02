@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 /**
  * Shared API Configuration & Live Base URL Resolution for Hackspora 2.0
  */
@@ -32,3 +34,22 @@ export const getRootApiUrl = () => {
 
   return 'http://localhost:5000/api';
 };
+
+// Global Axios Interceptor to attach Clerk Bearer Token
+axios.interceptors.request.use(
+  async (config) => {
+    try {
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      }
+    } catch (err) {
+      console.error('[Axios Interceptor] Error retrieving Clerk token:', err);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+

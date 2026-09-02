@@ -2,21 +2,7 @@ const express = require('express');
 const router = express.Router();
 const TeamRegistration = require('../models/TeamRegistration');
 const RegistrationConfig = require('../models/RegistrationConfig');
-
-const ADMIN_EMAIL = 'abisri024@gmail.com';
-
-// Middleware to check admin authorization
-const verifyAdminAccess = (req, res, next) => {
-  const adminEmailHeader = req.headers['x-admin-email'] || req.query.adminEmail || req.body?.adminEmail;
-  if (!adminEmailHeader || adminEmailHeader.toLowerCase().trim() !== ADMIN_EMAIL.toLowerCase().trim()) {
-    return res.status(403).json({
-      success: false,
-      message: 'Access Denied: Admin authorization required.',
-    });
-  }
-  req.adminEmail = adminEmailHeader.toLowerCase().trim();
-  next();
-};
+const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
 
 // @route   GET /api/registrations/config
 // @desc    Get registration status configuration
@@ -36,7 +22,7 @@ router.get('/config', async (req, res) => {
 
 // @route   PUT /api/registrations/config
 // @desc    Update registration open/closed status (Admin Access)
-router.put('/config', verifyAdminAccess, async (req, res) => {
+router.put('/config', requireAdmin, async (req, res) => {
   try {
     const { isRegistrationOpen, updatedBy } = req.body;
     const config = await RegistrationConfig.getSingletonConfig();
@@ -66,7 +52,7 @@ router.put('/config', verifyAdminAccess, async (req, res) => {
 
 // @route   POST /api/registrations
 // @desc    Register a new team (Auto Verified, Unique HS2026-XXX Team ID)
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   try {
     // Check if registration is open
     const config = await RegistrationConfig.getSingletonConfig();
@@ -202,7 +188,7 @@ router.post('/', async (req, res) => {
 
 // @route   GET /api/registrations/check/:clerkId
 // @desc    Check if user is already registered
-router.get('/check/:clerkId', async (req, res) => {
+router.get('/check/:clerkId', requireAuth, async (req, res) => {
   try {
     const { clerkId } = req.params;
     const { email } = req.query;
@@ -242,7 +228,7 @@ router.get('/check/:clerkId', async (req, res) => {
 
 // @route   GET /api/registrations
 // @desc    Get all registrations with search & filtering (Admin Access)
-router.get('/', verifyAdminAccess, async (req, res) => {
+router.get('/', requireAdmin, async (req, res) => {
   try {
     const { search, college, sort = 'newest' } = req.query;
 
@@ -287,7 +273,7 @@ router.get('/', verifyAdminAccess, async (req, res) => {
 
 // @route   GET /api/registrations/my-team
 // @desc    Get single team registration by leader email or member email
-router.get('/my-team', async (req, res) => {
+router.get('/my-team', requireAuth, async (req, res) => {
   try {
     const { email } = req.query;
     if (!email) {
@@ -322,7 +308,7 @@ router.get('/my-team', async (req, res) => {
 
 // @route   GET /api/registrations/stats
 // @desc    Get registration analytics (Total Teams, Participants, Verified, Pending, Rejected, Today, Avg Size, Top College)
-router.get('/stats', verifyAdminAccess, async (req, res) => {
+router.get('/stats', requireAdmin, async (req, res) => {
   try {
     const teams = await TeamRegistration.find({});
     const totalTeams = teams.length;
@@ -402,7 +388,7 @@ router.get('/stats', verifyAdminAccess, async (req, res) => {
 
 // @route   PUT /api/registrations/:id/status
 // @desc    Update a team's verification status
-router.put('/:id/status', verifyAdminAccess, async (req, res) => {
+router.put('/:id/status', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -435,7 +421,7 @@ router.put('/:id/status', verifyAdminAccess, async (req, res) => {
 
 // @route   PUT /api/registrations/:id
 // @desc    Update full team registration details
-router.put('/:id', verifyAdminAccess, async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -464,7 +450,7 @@ router.put('/:id', verifyAdminAccess, async (req, res) => {
 
 // @route   DELETE /api/registrations/:id
 // @desc    Delete a team registration
-router.delete('/:id', verifyAdminAccess, async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -489,7 +475,7 @@ router.delete('/:id', verifyAdminAccess, async (req, res) => {
 
 // @route   POST /api/registrations/bulk-status
 // @desc    Update status for multiple teams in bulk
-router.post('/bulk-status', verifyAdminAccess, async (req, res) => {
+router.post('/bulk-status', requireAdmin, async (req, res) => {
   try {
     const { ids, status } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {
@@ -520,7 +506,7 @@ router.post('/bulk-status', verifyAdminAccess, async (req, res) => {
 
 // @route   POST /api/registrations/bulk-delete
 // @desc    Delete multiple teams in bulk
-router.post('/bulk-delete', verifyAdminAccess, async (req, res) => {
+router.post('/bulk-delete', requireAdmin, async (req, res) => {
   try {
     const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {

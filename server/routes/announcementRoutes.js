@@ -1,21 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Announcement = require('../models/Announcement');
-
-const ADMIN_EMAIL = 'abisri024@gmail.com';
-
-// Middleware to check admin authorization
-const verifyAdminAccess = (req, res, next) => {
-  const adminEmailHeader = req.headers['x-admin-email'] || req.query.adminEmail || req.body?.adminEmail;
-  if (!adminEmailHeader || adminEmailHeader.toLowerCase().trim() !== ADMIN_EMAIL) {
-    return res.status(403).json({
-      success: false,
-      message: 'Access Denied: Admin authorization required.',
-    });
-  }
-  req.adminEmail = adminEmailHeader.toLowerCase().trim();
-  next();
-};
+const { requireAdmin, ADMIN_EMAIL } = require('../middleware/authMiddleware');
 
 // @route   GET /api/announcements/published
 // @desc    Get published announcements only (Participant/Public endpoint)
@@ -40,7 +26,7 @@ router.get('/published', async (req, res) => {
 
 // @route   GET /api/announcements/admin
 // @desc    Get all announcements (Admin endpoint)
-router.get('/admin', verifyAdminAccess, async (req, res) => {
+router.get('/admin', requireAdmin, async (req, res) => {
   try {
     const announcements = await Announcement.find({}).sort({ createdAt: -1 });
 
@@ -86,7 +72,7 @@ router.get('/', async (req, res) => {
 
 // @route   POST /api/announcements
 // @desc    Create a new announcement (Admin only)
-router.post('/', verifyAdminAccess, async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
   try {
     const { title, message, type, link, status } = req.body;
 
@@ -122,7 +108,7 @@ router.post('/', verifyAdminAccess, async (req, res) => {
 
 // @route   PUT /api/announcements/:id
 // @desc    Update an announcement (Admin only)
-router.put('/:id', verifyAdminAccess, async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
   try {
     const { title, message, type, link, status } = req.body;
 
@@ -160,7 +146,7 @@ router.put('/:id', verifyAdminAccess, async (req, res) => {
 
 // @route   DELETE /api/announcements/:id
 // @desc    Delete an announcement (Admin only)
-router.delete('/:id', verifyAdminAccess, async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const announcement = await Announcement.findByIdAndDelete(req.params.id);
 
@@ -188,7 +174,7 @@ router.delete('/:id', verifyAdminAccess, async (req, res) => {
 
 // @route   PATCH /api/announcements/:id/publish
 // @desc    Publish / Unpublish an announcement (Admin only)
-router.patch('/:id/publish', verifyAdminAccess, async (req, res) => {
+router.patch('/:id/publish', requireAdmin, async (req, res) => {
   try {
     const { status } = req.body; // 'published' or 'draft'
     

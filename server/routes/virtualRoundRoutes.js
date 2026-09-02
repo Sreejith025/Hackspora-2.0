@@ -6,6 +6,7 @@ const VirtualSubmission = require('../models/VirtualSubmission');
 const VirtualRoundConfig = require('../models/VirtualRoundConfig');
 const ProblemStatement = require('../models/ProblemStatement');
 const VirtualRoundEvaluatorAssignment = require('../models/VirtualRoundEvaluatorAssignment');
+const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
 
 // Helper URL Validators
 const isValidUrl = (urlStr) => {
@@ -21,21 +22,6 @@ const isValidUrl = (urlStr) => {
 const isValidGithubUrl = (urlStr) => {
   if (!isValidUrl(urlStr)) return false;
   return urlStr.toLowerCase().includes('github.com');
-};
-
-const ADMIN_EMAIL = 'abisri024@gmail.com';
-
-// Middleware to check admin authorization
-const verifyAdminAccess = (req, res, next) => {
-  const adminEmailHeader = req.headers['x-admin-email'] || req.query.adminEmail || req.body?.adminEmail;
-  if (!adminEmailHeader || adminEmailHeader.toLowerCase().trim() !== ADMIN_EMAIL.toLowerCase().trim()) {
-    return res.status(403).json({
-      success: false,
-      message: 'Access Denied: Admin authorization required.',
-    });
-  }
-  req.adminEmail = adminEmailHeader.toLowerCase().trim();
-  next();
 };
 
 // ==========================================
@@ -72,7 +58,7 @@ router.get('/config', async (req, res) => {
 
 // @route   GET /api/virtual-round/my-submission
 // @desc    Get submission details for authenticated user's team
-router.get('/my-submission', async (req, res) => {
+router.get('/my-submission', requireAuth, async (req, res) => {
   try {
     const { email } = req.query;
     if (!email || !email.trim()) {
@@ -148,7 +134,7 @@ router.get('/my-submission', async (req, res) => {
 
 // @route   POST /api/virtual-round/submit
 // @desc    Submit Virtual Round project links (githubLink, videoLink, pptLink)
-router.post('/submit', async (req, res) => {
+router.post('/submit', requireAuth, async (req, res) => {
   try {
     const { userEmail, problemStatementId, problemStatementName, githubLink, videoLink, pptLink } = req.body;
 
@@ -416,8 +402,8 @@ const handleUpdateSubmission = async (req, res) => {
   }
 };
 
-router.put('/update-submission', handleUpdateSubmission);
-router.put('/submit', handleUpdateSubmission);
+router.put('/update-submission', requireAuth, handleUpdateSubmission);
+router.put('/submit', requireAuth, handleUpdateSubmission);
 
 // @route   GET /api/virtual-round/public-results
 // @desc    Get public list of shortlisted teams ONLY (Rejected status is strictly hidden)
@@ -459,7 +445,7 @@ router.get('/public-results', async (req, res) => {
 
 // @route   GET /api/virtual-round/admin/submissions
 // @desc    Get all submissions for Admin review
-router.get('/admin/submissions', verifyAdminAccess, async (req, res) => {
+router.get('/admin/submissions', requireAdmin, async (req, res) => {
   try {
     const { search, status } = req.query;
 
@@ -550,12 +536,12 @@ const handleAssignEvaluator = async (req, res) => {
   }
 };
 
-router.patch('/admin/submissions/:id/evaluator', verifyAdminAccess, handleAssignEvaluator);
-router.put('/admin/submissions/:id/evaluator', verifyAdminAccess, handleAssignEvaluator);
+router.patch('/admin/submissions/:id/evaluator', requireAdmin, handleAssignEvaluator);
+router.put('/admin/submissions/:id/evaluator', requireAdmin, handleAssignEvaluator);
 
 // @route   PUT /api/virtual-round/admin/submissions/:id/status
 // @desc    Admin action: Update submission status (under_review, shortlisted, rejected)
-router.put('/admin/submissions/:id/status', verifyAdminAccess, async (req, res) => {
+router.put('/admin/submissions/:id/status', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status, adminEmail } = req.body;
@@ -593,7 +579,7 @@ router.put('/admin/submissions/:id/status', verifyAdminAccess, async (req, res) 
 
 // @route   PUT /api/virtual-round/submission-status
 // @desc    Admin action: Lock or Open Virtual Round submissions
-router.put('/submission-status', verifyAdminAccess, async (req, res) => {
+router.put('/submission-status', requireAdmin, async (req, res) => {
   try {
     const { submissionOpen, isAcceptingSubmissions } = req.body;
 
@@ -629,7 +615,7 @@ router.put('/submission-status', verifyAdminAccess, async (req, res) => {
 
 // @route   PUT /api/virtual-round/admin/config
 // @desc    Admin control: Release/Start round, Open/Close submissions, update deadline or guidelines
-router.put('/admin/config', verifyAdminAccess, async (req, res) => {
+router.put('/admin/config', requireAdmin, async (req, res) => {
   try {
     const { isRoundActive, isAcceptingSubmissions, submissionOpen, submissionDeadline, roundName, guidelines, allVerifiedEligible } =
       req.body;
@@ -662,7 +648,7 @@ router.put('/admin/config', verifyAdminAccess, async (req, res) => {
 
 // @route   GET /api/virtual-round/admin/stats
 // @desc    Get Virtual Round metrics (Total eligible, Total submissions, Under review, Shortlisted, Rejected)
-router.get('/admin/stats', verifyAdminAccess, async (req, res) => {
+router.get('/admin/stats', requireAdmin, async (req, res) => {
   try {
     const totalEligibleTeams = await TeamRegistration.countDocuments({ status: 'Verified' });
     const totalSubmissions = await VirtualSubmission.countDocuments();
@@ -686,7 +672,7 @@ router.get('/admin/stats', verifyAdminAccess, async (req, res) => {
 });
 // @route   GET /api/virtual-round/admin/teams-evaluators
 // @desc    Get all registered teams with pre-assigned evaluator details from VirtualRoundEvaluatorAssignment
-router.get('/admin/teams-evaluators', verifyAdminAccess, async (req, res) => {
+router.get('/admin/teams-evaluators', requireAdmin, async (req, res) => {
   try {
     const teams = await TeamRegistration.find().sort({ createdAt: -1 }).lean();
     const assignments = await VirtualRoundEvaluatorAssignment.find().lean();
@@ -723,7 +709,7 @@ router.get('/admin/teams-evaluators', verifyAdminAccess, async (req, res) => {
 
 // @route   PATCH /api/virtual-round/admin/teams/:teamId/evaluator
 // @desc    Pre-assign, change, or remove evaluator/mentor link for a team in VirtualRoundEvaluatorAssignment and sync TeamRegistration & VirtualSubmission
-router.patch('/admin/teams/:teamId/evaluator', verifyAdminAccess, async (req, res) => {
+router.patch('/admin/teams/:teamId/evaluator', requireAdmin, async (req, res) => {
   try {
     const { teamId } = req.params;
     const { evaluatorName, mentorLink } = req.body;
