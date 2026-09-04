@@ -4,13 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
 
-// Provide fallback Clerk environment keys if omitted in cloud deployment environment settings
-if (!process.env.CLERK_SECRET_KEY) {
-  process.env.CLERK_SECRET_KEY = 'sk_test_WopRo7Va9gXqukc02OLxEkHSY4BMkGoPrBwVdTqB2t';
-}
-if (!process.env.CLERK_PUBLISHABLE_KEY) {
-  process.env.CLERK_PUBLISHABLE_KEY = 'pk_test_Y2FwaXRhbC10aHJ1c2gtOS5jbGVyay5hY2NvdW50cy5kZXYk';
-}
+
 
 const { clerkMiddleware } = require('@clerk/express');
 
