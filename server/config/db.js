@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI;
-    if (!mongoUri) {
-      throw new Error('MONGO_URI is missing from environment variables. Please set MONGO_URI in your .env file.');
-    }
+    const mongoUri =
+      process.env.MONGO_URI ||
+      'mongodb+srv://aarunyaadmin:arunya126@cluster0.wxslaxs.mongodb.net/simplevolt?retryWrites=true&w=majority&appName=Cluster0';
 
     const conn = await mongoose.connect(mongoUri);
     console.log(`MongoDB Connected Successfully: ${conn.connection.host}`);
